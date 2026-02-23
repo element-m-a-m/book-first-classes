@@ -30,6 +30,15 @@
     .widget-scroll::-webkit-scrollbar-thumb { background: #E0E0DC; border-radius: 10px; }
     .widget-scroll::-webkit-scrollbar-thumb:hover { background: #ccc; }
     .widget-scroll { scrollbar-width: thin; scrollbar-color: #E0E0DC transparent; }
+
+    /* Input Focus Styles */
+    .premium-input {
+      transition: border 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    .premium-input:focus-within {
+      border-color: #1a1a2e !important;
+      box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.15) !important;
+    }
   </style>
 </head>
 <body>
@@ -78,7 +87,7 @@
         { categoryId: "strength", day: "שישי", time: "15:45", timeEnd: "17:00", mins: 75, dayNum: 5 },
       ],
       packages: [
-        { id: "single", label: "שיעור בודד", price: 70, entries: 1 },
+        { id: "single", label: "שיעור בודד", price: 70, entries: 1 }, // Default base price, dynamic logic applied in code
         { id: "trial3", label: "3 שיעורי היכרות", price: 99, entries: 3, validity: "4 שבועות", fullPrice: 210 },
       ],
       studio: { name: "סניף חולון", address: 'רחוב "חזית חמש" 2, שכונת תל גיבורים, חולון' },
@@ -281,7 +290,8 @@
       function go(dir, next, fn) {
         setAnimDir(dir);
         setVis(false);
-        setTimeout(() => { if (fn) fn(); setStep(next); setVis(true); }, 220); 
+        // Snappy 200ms transition - the UX Sweet Spot
+        setTimeout(() => { if (fn) fn(); setStep(next); setVis(true); }, 200); 
       }
       function fw(s, fn) { go("f", s, fn); }
       function bk(s, fn) { go("b", s, fn); }
@@ -452,8 +462,8 @@
       }
 
       const titles = {
-        qual: ["הזמנת שיעור היכרות", "אומנויות לחימה ותנועה"],
-        branch: ["הזמנת שיעור היכרות", "בחרו את התחום שמעניין אתכם"],
+        qual: ["הזמנת שיעור היכרות", "אלמנט - אומנויות לחימה ותנועה | Element - Martial Arts & Movement"],
+        branch: ["הזמנת שיעור היכרות", "אלמנט - אומנויות לחימה ותנועה | Element - Martial Arts & Movement"],
         cat: [branch?.title || "", branch?.subtitle || ""],
         details: [cat?.label || "", "בחרו סניף וחבילת היכרות"],
         dates: ["בחרו מועדים", pkg === "single" ? "בחרו תאריך לשיעור" : "סמנו עד 3 תאריכים"],
@@ -469,7 +479,7 @@
       const inpStyle = { padding: "10px 14px", borderRadius: 9, border: "1.5px solid #E0E0DC", fontSize: 13.5, fontFamily: "inherit", color: "#1a1a2e", background: "#FAFAF8", outline: "none", boxSizing: "border-box", width: "100%" };
 
       return (
-        <div style={{ minHeight: "100%", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Heebo',sans-serif", position: "relative" }}>
+        <div style={{ minHeight: "100vh", padding: "40px 16px", boxSizing: "border-box", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Heebo',sans-serif", position: "relative" }}>
           
           {showExit && (
             <div style={{ position: "fixed", inset: 0, zIndex: 999, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
@@ -495,15 +505,15 @@
               <div style={{ position: "absolute", inset: 0, opacity: 0.035, backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "22px 22px" }} />
               
               <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}>
-                {/* Premium Circular Logo Avatar */}
-                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", overflow: "hidden" }}>
-                  <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" alt="Element Studio" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                {/* Premium Circular Logo Avatar with flawless scaling */}
+                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", overflow: "hidden" }}>
+                  <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" alt="Element Studio" style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.2) translateY(-6%)" }} />
                 </div>
                 
-                {/* Dynamic Title & Subtitle */}
-                <div style={{ flex: 1 }}>
+                {/* Dynamic Title & Subtitle with Single-Line Mobile Clamp */}
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{ht[0]}</div>
-                  {ht[1] && <div style={{ fontSize: 12, opacity: 0.7 }}>{ht[1]}</div>}
+                  {ht[1] && <div style={{ fontSize: "clamp(9px, 3vw, 10.5px)", opacity: 0.7, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ht[1]}</div>}
                 </div>
               </div>
 
@@ -531,14 +541,14 @@
               overflowX: "hidden",
               opacity: vis ? 1 : 0, 
               transform: vis ? "translateX(0) scale(1)" : (animDir === "f" ? "translateX(-20px) scale(0.98)" : "translateX(20px) scale(0.98)"), 
-              transition: "opacity 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)" 
+              transition: "opacity 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)" 
             }}>
 
               {step === "qual" && <div>
                 
-                {/* Concierge Welcome Message */}
+                {/* Clean, Premium Concierge Message */}
                 <div style={{ textAlign: "center", marginBottom: 24, marginTop: 8 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e", marginBottom: 4 }}>ברוכים הבאים! 🐉</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e", marginBottom: 4 }}>ברוכים הבאים לאלמנט</div>
                   <div style={{ fontSize: 13, color: "#666" }}>כדי שנוכל להתאים לכם את האימון המדויק, נשמח להכיר:</div>
                 </div>
 
@@ -565,12 +575,12 @@
                   </div>
                   <div style={{ paddingRight: 36 }}>
                     <div style={{ marginBottom: 10 }}>
-                      <input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="שם מלא" style={{ ...inpStyle, border: leadName ? '1.5px solid #E0E0DC' : '1.5px solid #E0E0DC' }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} />
+                      <input className="premium-input" value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="שם מלא" style={{ ...inpStyle, border: '1.5px solid #E0E0DC' }} />
                     </div>
                     <div style={{ marginBottom: 4 }}>
-                      <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid ' + (isPhoneTouched && !isPhoneValid ? '#C4342D' : '#E0E0DC'), borderRadius: 9, overflow: 'hidden', transition: 'all 0.2s' }}>
+                      <div className="premium-input" style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid ' + (isPhoneTouched && !isPhoneValid ? '#C4342D' : '#E0E0DC'), borderRadius: 9, overflow: 'hidden' }}>
                         <div style={{ padding: '9px 12px', background: '#F0F0EC', color: '#666', borderRight: '1px solid ' + (isPhoneTouched && !isPhoneValid ? '#C4342D' : '#E0E0DC'), fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                        <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => { setIsPhoneTouched(true); e.target.parentElement.style.boxShadow = 'none'; }} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
+                        <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} onBlur={() => setIsPhoneTouched(true)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
                       </div>
                       {isPhoneTouched && !isPhoneValid && <div style={{ fontSize: 10.5, color: "#C4342D", marginTop: 4, fontWeight: 500, direction: "rtl", textAlign: "right" }}>* נא להזין מספר טלפון תקין (10 ספרות)</div>}
                     </div>
@@ -732,7 +742,7 @@
                           
                           const dis = !d.isActive || (!sel && mx) || isFull || tooSoon;
 
-                          return <button key={di} onClick={d.isActive && !dis ? () => togDate(d.date) : undefined} style={{ padding: "6px 2px", borderRadius: 9, minHeight: 48, border: sel ? ("2px solid " + uc) : isFull ? "1.5px solid #F8E8E8" : tooSoon ? "1.5px solid #EEE" : d.isActive ? ("1.5px solid " + uc + "25") : "1.5px solid #F0F0EC", background: sel ? (uc + "12") : isFull ? "#FCF4F4" : tooSoon ? "#F5F5F5" : d.isActive ? "#fff" : "#FAFAF8", cursor: d.isActive && !dis ? "pointer" : "default", opacity: (dis && !sel && !isFull && !tooSoon) ? 0.3 : isFull ? 0.6 : tooSoon ? 0.7 : 1, fontFamily: "inherit", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "all 0.1s" }}>
+                          return <button key={di} onClick={d.isActive && !dis ? () => togDate(d.date) : undefined} style={{ padding: "6px 2px", borderRadius: 9, minHeight: 48, border: sel ? ("2px solid " + uc) : isFull ? "1.5px solid #F8E8E8" : tooSoon ? "1.5px solid #EEE" : d.isActive ? ("1.5px solid " + uc + "25") : "1.5px solid #F0F0EC", background: sel ? (uc + "12") : isFull ? "#FCF4F4" : tooSoon ? "#F5F5F5" : d.isActive ? "#fff" : "#FAFAF8", cursor: d.isActive && !dis ? "pointer" : "default", opacity: (dis && !sel && !isFull && !tooSoon) ? 0.25 : isFull ? 0.4 : tooSoon ? 0.4 : 1, fontFamily: "inherit", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "all 0.1s", transform: (isFull || tooSoon || (dis && !sel)) ? "scale(0.96)" : "scale(1)" }}>
                             {sel && <div style={{ position: "absolute", top: 2, left: 2, width: 13, height: 13, borderRadius: 4, background: uc, display: "flex", alignItems: "center", justifyContent: "center" }}><Ico name="check" color="#fff" size={9} /></div>}
                             <div style={{ fontSize: 15, fontWeight: sel ? 800 : (d.isActive && !isFull && !tooSoon) ? 700 : 400, color: sel ? "#1a1a2e" : (d.isActive && !isFull && !tooSoon) ? "#333" : isFull ? "#A08080" : "#999" }}>{d.day}</div>
                             {isFull ? <div style={{ fontSize: 7.5, color: "#C4342D", fontWeight: 700, opacity: 0.6 }}>אזל המקום</div>
@@ -775,7 +785,7 @@
                       <button key={String(v)} onClick={() => setMedHas(v)} style={{ flex: 1, padding: "11px 10px", borderRadius: 10, border: "2px solid " + (medHas === v ? "#1a1a2e" : "#E0E0DC"), background: medHas === v ? "#1a1a2e" : "#fff", color: medHas === v ? "#fff" : "#555", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, transition: "all 0.2s" }}>{l}</button>
                     )}
                   </div>
-                  {medHas === true && <textarea value={medText} onChange={e => setMedText(e.target.value)} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..." style={{ ...inpStyle, minHeight: 64, marginTop: 8 }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} />}
+                  {medHas === true && <textarea className="premium-input" value={medText} onChange={e => setMedText(e.target.value)} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..." style={{ ...inpStyle, minHeight: 64, marginTop: 8 }} />}
                 </div>
                 <Btn onClick={() => fw("action")} disabled={medHas === null} color={uc}>המשיכו לסיכום ←</Btn>
               </div>}
@@ -827,9 +837,9 @@
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>נציג יחזור אליי (לתיאום והרשמה)</div>
                   </div>
                   <div style={{ display: "flex", gap: 8, paddingRight: 36, flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 150px", display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
+                    <div className="premium-input" style={{ flex: "1 1 150px", display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden' }}>
                       <div style={{ padding: '9px 8px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                      <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.parentElement.style.boxShadow = 'none'} placeholder="50-1234567" style={{ flex: 1, width: '100%', padding: '9px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'inherit' }} />
+                      <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, width: '100%', padding: '9px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'inherit' }} />
                     </div>
                     <button onClick={() => { 
                       deductSpots(); 
@@ -953,16 +963,16 @@
 
               {step === "pform" && <div>
                 <button onClick={() => bk("cat", () => setCat(null))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
-                <div style={{ marginBottom: 11 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>שם מלא</label><input value={leadName} onChange={e => setLeadName(e.target.value)} style={inpStyle} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} /></div>
+                <div style={{ marginBottom: 11 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>שם מלא</label><input className="premium-input" value={leadName} onChange={e => setLeadName(e.target.value)} style={inpStyle} /></div>
                 <div style={{ marginBottom: 11 }}>
                   <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>טלפון</label>
-                  <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
+                  <div className="premium-input" style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden' }}>
                     <div style={{ padding: '9px 12px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                    <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.parentElement.style.boxShadow = 'none'} />
+                    <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
                   </div>
                 </div>
-                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם..." style={{ ...inpStyle, minHeight: 64 }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} /></div>
-                <button onClick={() => { window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }} disabled={getCleanPhone(leadPhone).length < 12} style={{ width: "100%", padding: "12px", borderRadius: 11, background: getCleanPhone(leadPhone).length >= 12 ? ("linear-gradient(135deg," + uc + "," + uc + "DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: getCleanPhone(leadPhone).length >= 12 ? "pointer" : "default", fontFamily: "inherit" }}>שלחו פנייה בוואטסאפ</button>
+                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea className="premium-input" value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם..." style={{ ...inpStyle, minHeight: 64 }} /></div>
+                <button onClick={() => { window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }} disabled={getCleanPhone(leadPhone).length < 12} style={{ width: "100%", padding: "12px", borderRadius: 11, background: getCleanPhone(leadPhone).length >= 12 ? ("linear-gradient(135deg," + uc + "," + uc + "DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: getCleanPhone(leadPhone).length >= 12 ? "pointer" : "default", fontFamily: "inherit", transition: "all 0.2s" }}>שלחו פנייה בוואטסאפ</button>
               </div>}
 
               {step === "pdone" && <div>
