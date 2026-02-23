@@ -9,11 +9,25 @@
   <meta name="description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
   <meta property="og:title" content="Element | אומנויות לחימה ותנועה">
   <meta property="og:description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
-  <meta property="og:image" content="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true">
+  <meta property="og:image" content="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20Color%20Logo%20White%20Text%20Dark%20Background%20-%202500px.png?raw=true">
   <meta property="og:type" content="website">
   
-  <!-- Favicon Placeholder -->
-  <link rel="icon" href="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" type="image/png">
+  <!-- Dynamic Favicon based on OS Light/Dark Mode -->
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png?raw=true">
+  <script>
+    function updateFavicon() {
+      const favicon = document.getElementById('dynamic-favicon');
+      const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // If OS is in Dark Mode, use the Black Background / White Dragon. Otherwise use White Background / Black Dragon.
+      favicon.href = isDark 
+        ? "https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Black%20Background%20-%20White%20Logo%20-%20No%20Text.png?raw=true"
+        : "https://github.com/element-m-a-m/Booking-Widget-1/blob/main/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png?raw=true";
+    }
+    updateFavicon();
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+    }
+  </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -290,7 +304,7 @@
       function go(dir, next, fn) {
         setAnimDir(dir);
         setVis(false);
-        // Snappy 200ms transition - the UX Sweet Spot
+        // Premium snappy transition
         setTimeout(() => { if (fn) fn(); setStep(next); setVis(true); }, 200); 
       }
       function fw(s, fn) { go("f", s, fn); }
@@ -505,9 +519,9 @@
               <div style={{ position: "absolute", inset: 0, opacity: 0.035, backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "22px 22px" }} />
               
               <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}>
-                {/* Premium Circular Logo Avatar with flawless scaling */}
-                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", overflow: "hidden" }}>
-                  <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" alt="Element Studio" style={{ width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.2) translateY(-6%)" }} />
+                {/* Premium Transparent Logo Floating on Header */}
+                <div style={{ width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20Logo%20-%20Transparent%20Background.png?raw=true" alt="Element Studio" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                 </div>
                 
                 {/* Dynamic Title & Subtitle with Single-Line Mobile Clamp */}
