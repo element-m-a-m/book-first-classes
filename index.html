@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Element Booking Widget</title>
+  
+  <!-- OpenGraph / SEO Tags -->
+  <title>Element | אומנויות לחימה ותנועה</title>
+  <meta name="description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
+  <meta property="og:title" content="Element | אומנויות לחימה ותנועה">
+  <meta property="og:description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
+  <meta property="og:image" content="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true">
+  <meta property="og:type" content="website">
+  
+  <!-- Favicon Placeholder -->
+  <link rel="icon" href="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" type="image/png">
+
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -13,39 +24,22 @@
       background-color: #f5f4f0;
     }
     
-    /* Elegant Custom Scrollbar for the Widget Body */
-    .widget-scroll::-webkit-scrollbar {
-      width: 5px;
-    }
-    .widget-scroll::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .widget-scroll::-webkit-scrollbar-thumb {
-      background: #E0E0DC;
-      border-radius: 10px;
-    }
-    .widget-scroll::-webkit-scrollbar-thumb:hover {
-      background: #ccc;
-    }
-    .widget-scroll {
-      scrollbar-width: thin;
-      scrollbar-color: #E0E0DC transparent;
-    }
+    /* Elegant Custom Scrollbar */
+    .widget-scroll::-webkit-scrollbar { width: 5px; }
+    .widget-scroll::-webkit-scrollbar-track { background: transparent; }
+    .widget-scroll::-webkit-scrollbar-thumb { background: #E0E0DC; border-radius: 10px; }
+    .widget-scroll::-webkit-scrollbar-thumb:hover { background: #ccc; }
+    .widget-scroll { scrollbar-width: thin; scrollbar-color: #E0E0DC transparent; }
   </style>
 </head>
 <body>
 
-  <!-- 1. The Container where the widget will appear -->
   <div id="element-booking-widget-container"></div>
 
-  <!-- 2. Load React and ReactDOM -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
-  <!-- 3. Load Babel (translates JSX to regular JavaScript in the browser) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- 4. The Widget Code -->
   <script type="text/babel">
     const { useState, useMemo, useEffect, useRef } = React;
 
@@ -84,7 +78,7 @@
         { categoryId: "strength", day: "שישי", time: "15:45", timeEnd: "17:00", mins: 75, dayNum: 5 },
       ],
       packages: [
-        { id: "single", label: "שיעור בודד", price: 70, entries: 1 }, // Default base price, dynamic logic applied in code
+        { id: "single", label: "שיעור בודד", price: 70, entries: 1 },
         { id: "trial3", label: "3 שיעורי היכרות", price: 99, entries: 3, validity: "4 שבועות", fullPrice: 210 },
       ],
       studio: { name: "סניף חולון", address: 'רחוב "חזית חמש" 2, שכונת תל גיבורים, חולון' },
@@ -205,14 +199,22 @@
       const [leadName, setLeadName] = useState("");
       const [leadPhone, setLeadPhone] = useState("");
       const [pvMsg, setPvMsg] = useState("");
+      const [isPhoneTouched, setIsPhoneTouched] = useState(false);
       
       const [vis, setVis] = useState(true);
       const [animDir, setAnimDir] = useState("f");
       const [showWTB, setShowWTB] = useState(false);
       const [showExit, setShowExit] = useState(false);
       const [hasSeenExit, setHasSeenExit] = useState(false);
-
-      const spotsDb = useRef({});
+      
+      // Admin bypass logic
+      const isBypass = useMemo(() => {
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get('admin') === '1';
+        }
+        return false;
+      }, []);
 
       const isP = branch?.type === "private";
       const bc = branch?.color || "#1a1a2e";
@@ -221,6 +223,7 @@
       const uc = usesBranchColor ? bc : WARM;
       const maxD = pkg === "single" ? 1 : 3;
       const isChild = aud === "child";
+      const isPhoneValid = getCleanPhone(leadPhone).length >= 12;
 
       // Dynamic Price Logic for single classes
       const getPkgPrice = (pId) => {
@@ -314,57 +317,71 @@
       const weeks = useMemo(() => makeWeeks(calStart, 4, calDays), [calStart, calDays]);
       const visMo = useMemo(() => { const ms = new Set(); const n2 = new Date(); n2.setHours(0,0,0,0); weeks.forEach(w => w.forEach(d => { if (d.isActive || (upsellDays.includes(d.dayNum) && d.date > n2)) ms.add(d.month); })); return [...ms]; }, [weeks, upsellDays]);
 
-      useEffect(() => {
-        if (!cat) return;
-        if (!spotsDb.current[cat.id]) {
-          const today = new Date();
-          today.setHours(0,0,0,0);
-          const aDates = [];
-          for(let i=0; i<21; i++) {
-            let d = new Date(today);
-            d.setDate(today.getDate() + i);
-            if (actDays.includes(d.getDay())) aDates.push(d);
-          }
-          const map = {};
-          let hasZero = false;
-          aDates.forEach((d, i) => {
-            const k = d.toISOString().split('T')[0];
-            const seed = hashStr(k + cat.id) % 100;
-            let s = 3;
-            if (seed < 15) s = 0;
-            else if (seed < 45) s = 1;
-            else if (seed < 75) s = 2;
-            if (s === 0 && i > 0 && map[aDates[i-1].toISOString().split('T')[0]] === 0) s = 1;
-            if (s === 0 && i < aDates.length / 2) hasZero = true;
-            map[k] = s;
-          });
-          if (!hasZero && aDates.length > 1) {
-            const forceIdx = (hashStr(cat.id) % Math.min(3, aDates.length - 1)) + 1;
-            map[aDates[forceIdx].toISOString().split('T')[0]] = 0;
-          }
-          spotsDb.current[cat.id] = map;
+      const baseMap = useMemo(() => {
+        if (!cat) return {};
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const aDates = [];
+        for(let i=0; i<21; i++) {
+          let d = new Date(today);
+          d.setDate(today.getDate() + i);
+          if (actDays.includes(d.getDay())) aDates.push(d);
         }
+        const map = {};
+        let hasZero = false;
+        aDates.forEach((d, i) => {
+          const k = d.toISOString().split('T')[0];
+          const seed = hashStr(k + cat.id) % 100;
+          let s = 3;
+          if (seed < 15) s = 0;
+          else if (seed < 45) s = 1;
+          else if (seed < 75) s = 2;
+          
+          if (s === 0 && i > 0) {
+              const prevDate = aDates[i-1];
+              if (prevDate && map[prevDate.toISOString().split('T')[0]] === 0) s = 1;
+          }
+          if (s === 0 && i < aDates.length / 2) hasZero = true;
+          map[k] = s;
+        });
+        if (!hasZero && aDates.length > 1) {
+          const forceIdx = (hashStr(cat.id) % Math.min(3, aDates.length - 1)) + 1;
+          map[aDates[forceIdx].toISOString().split('T')[0]] = 0;
+        }
+        return map;
       }, [cat, actDays]);
 
       const getSpots = (d) => {
-        if (!cat || !spotsDb.current[cat.id]) return null;
+        if (!cat) return null;
         const today = new Date();
         today.setHours(0,0,0,0);
         const diffDays = Math.ceil((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays > 21 || diffDays < 0) return null; 
+        
         const k = d.toISOString().split('T')[0];
-        return spotsDb.current[cat.id][k] ?? null;
+        const baseSpots = baseMap[k];
+        if (baseSpots === undefined) return null;
+
+        try {
+          const ls = JSON.parse(localStorage.getItem('element_deductions') || '{}');
+          const deducted = ls[cat.id]?.[k] || 0;
+          return Math.max(0, baseSpots - deducted);
+        } catch(e) { 
+          return baseSpots; 
+        }
       };
 
       function deductSpots() {
         if (!cat) return;
-        selDates.forEach(d => {
-          const k = d.toISOString().split('T')[0];
-          const currentSpots = spotsDb.current[cat.id]?.[k];
-          if (currentSpots !== undefined && currentSpots > 0) {
-            spotsDb.current[cat.id][k] = currentSpots - 1;
-          }
-        });
+        try {
+          const ls = JSON.parse(localStorage.getItem('element_deductions') || '{}');
+          if (!ls[cat.id]) ls[cat.id] = {};
+          selDates.forEach(d => {
+            const k = d.toISOString().split('T')[0];
+            ls[cat.id][k] = (ls[cat.id][k] || 0) + 1;
+          });
+          localStorage.setItem('element_deductions', JSON.stringify(ls));
+        } catch(e) {}
       }
 
       function togDate(d) {
@@ -435,8 +452,8 @@
       }
 
       const titles = {
-        qual: ["שיעורי היכרות באלמנט", "אומנויות לחימה ותנועה"],
-        branch: ["שיעורי היכרות באלמנט", "בחרו את התחום שמעניין אתכם"],
+        qual: ["הזמנת שיעור היכרות", "אומנויות לחימה ותנועה"],
+        branch: ["הזמנת שיעור היכרות", "בחרו את התחום שמעניין אתכם"],
         cat: [branch?.title || "", branch?.subtitle || ""],
         details: [cat?.label || "", "בחרו סניף וחבילת היכרות"],
         dates: ["בחרו מועדים", pkg === "single" ? "בחרו תאריך לשיעור" : "סמנו עד 3 תאריכים"],
@@ -457,14 +474,14 @@
           {showExit && (
             <div style={{ position: "fixed", inset: 0, zIndex: 999, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
               <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 360, padding: 24, textAlign: "center", direction: "rtl", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-                <div style={{ width: 60, height: 60, borderRadius: 30, background: "#E8F9F0", color: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                  <Ico name="wa" color="#25D366" size={32} />
+                <div style={{ width: 60, height: 60, borderRadius: 30, background: "linear-gradient(135deg, #25D366, #128C7E)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                  <Ico name="wa" color="#fff" size={32} />
                 </div>
                 <h3 style={{ margin: "0 0 8px", color: "#1a1a2e", fontSize: 20, fontWeight: 800 }}>מתלבטים?</h3>
                 <p style={{ margin: "0 0 24px", color: "#666", fontSize: 14, lineHeight: 1.5 }}>
                   יש לכם שאלה לפני שמזמינים? דברו ישירות עם ליאור המאמן בוואטסאפ ונעזור לכם למצוא את המסגרת המתאימה ביותר.
                 </p>
-                <a href={waLink(CFG.waPhone, "היי ליאור, הגעתי מהאתר ויש לי שאלה לגבי האימונים באלמנט...")} target="_blank" rel="noopener noreferrer" onClick={() => setShowExit(false)} style={{ display: "block", background: "#25D366", color: "#fff", textDecoration: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
+                <a href={waLink(CFG.waPhone, "היי ליאור, הגעתי מהאתר ויש לי שאלה לגבי האימונים באלמנט...")} target="_blank" rel="noopener noreferrer" onClick={() => setShowExit(false)} style={{ display: "block", background: "linear-gradient(135deg, #25D366, #128C7E)", color: "#fff", textDecoration: "none", padding: "14px", borderRadius: 12, fontWeight: 700, fontSize: 15, marginBottom: 12 }}>
                   שיחה בוואטסאפ
                 </a>
                 <button onClick={() => setShowExit(false)} style={{ background: "none", border: "none", color: "#999", fontSize: 13, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>לא תודה, אחזור להזמנה</button>
@@ -476,13 +493,23 @@
 
             <div style={{ background: isDone ? "linear-gradient(135deg,#0D7C5F,#1A7A6D 60%,#0B5E4E)" : ("linear-gradient(135deg,#151520,#1C1C32 60%," + uc + "35)"), padding: "20px 20px 16px", color: "#fff", position: "relative" }}>
               <div style={{ position: "absolute", inset: 0, opacity: 0.035, backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "22px 22px" }} />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{ht[0]}</div>
-                {ht[1] && <div style={{ fontSize: 12, opacity: 0.7 }}>{ht[1]}</div>}
-                {step !== "qual" && <div style={{ display: "flex", gap: 4, marginTop: 12 }}>
-                  {Array.from({ length: totalSteps }).map((_, i) => <div key={i} style={{ height: 3, borderRadius: 2, flex: si >= i ? 2 : 1, background: si > i ? (isDone ? "#7DFFCC" : "#00E5A0") : si === i ? "#fff" : "rgba(255,255,255,0.2)", transition: "all 0.4s" }} />)}
-                </div>}
+              
+              <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 14 }}>
+                {/* Premium Circular Logo Avatar */}
+                <div style={{ width: 48, height: 48, borderRadius: "50%", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", overflow: "hidden" }}>
+                  <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20-%20Martial%20Arts%20and%20Movement%20Logo.png?raw=true" alt="Element Studio" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+                
+                {/* Dynamic Title & Subtitle */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{ht[0]}</div>
+                  {ht[1] && <div style={{ fontSize: 12, opacity: 0.7 }}>{ht[1]}</div>}
+                </div>
               </div>
+
+              {step !== "qual" && <div style={{ display: "flex", gap: 4, marginTop: 16 }}>
+                {Array.from({ length: totalSteps }).map((_, i) => <div key={i} style={{ height: 3, borderRadius: 2, flex: si >= i ? 2 : 1, background: si > i ? (isDone ? "#7DFFCC" : "#00E5A0") : si === i ? "#fff" : "rgba(255,255,255,0.2)", transition: "all 0.4s" }} />)}
+              </div>}
             </div>
 
             {stepIdx() > 1 && stepIdx() < 5 && !isP && (
@@ -497,7 +524,9 @@
 
             <div className="widget-scroll" style={{ 
               padding: "14px 18px 20px", 
-              height: 480,
+              height: "65vh",
+              minHeight: 400,
+              maxHeight: 550,
               overflowY: "auto",
               overflowX: "hidden",
               opacity: vis ? 1 : 0, 
@@ -506,6 +535,13 @@
             }}>
 
               {step === "qual" && <div>
+                
+                {/* Concierge Welcome Message */}
+                <div style={{ textAlign: "center", marginBottom: 24, marginTop: 8 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1a2e", marginBottom: 4 }}>ברוכים הבאים! 🐉</div>
+                  <div style={{ fontSize: 13, color: "#666" }}>כדי שנוכל להתאים לכם את האימון המדויק, נשמח להכיר:</div>
+                </div>
+
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                   <div style={{ width: 26, height: 26, borderRadius: 13, background: aud ? "#E8E7E3" : uc, color: aud ? "#888" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, transition: "all 0.3s" }}>
                     {aud ? "✓" : "1"}
@@ -529,25 +565,31 @@
                   </div>
                   <div style={{ paddingRight: 36 }}>
                     <div style={{ marginBottom: 10 }}>
-                      <input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="שם מלא" style={inpStyle} />
+                      <input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="שם מלא" style={{ ...inpStyle, border: leadName ? '1.5px solid #E0E0DC' : '1.5px solid #E0E0DC' }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} />
                     </div>
-                    <div style={{ marginBottom: 14 }}>
-                      <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden' }}>
-                        <div style={{ padding: '9px 12px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                        <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
+                    <div style={{ marginBottom: 4 }}>
+                      <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid ' + (isPhoneTouched && !isPhoneValid ? '#C4342D' : '#E0E0DC'), borderRadius: 9, overflow: 'hidden', transition: 'all 0.2s' }}>
+                        <div style={{ padding: '9px 12px', background: '#F0F0EC', color: '#666', borderRight: '1px solid ' + (isPhoneTouched && !isPhoneValid ? '#C4342D' : '#E0E0DC'), fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
+                        <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => { setIsPhoneTouched(true); e.target.parentElement.style.boxShadow = 'none'; }} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
                       </div>
+                      {isPhoneTouched && !isPhoneValid && <div style={{ fontSize: 10.5, color: "#C4342D", marginTop: 4, fontWeight: 500, direction: "rtl", textAlign: "right" }}>* נא להזין מספר טלפון תקין (10 ספרות)</div>}
                     </div>
-                    <Btn onClick={() => fw("branch")} disabled={!aud || leadName.trim().length < 2 || getCleanPhone(leadPhone).length < 12} color={uc}>המשיכו לבחירת אימון ←</Btn>
+                    
+                    <div style={{ fontSize: 10.5, color: "#999", marginBottom: 14, marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
+                      <Ico name="lock" color="#999" size={10} /> הפרטים שמורים במערכת ולא יועברו לצד שלישי
+                    </div>
+
+                    <Btn onClick={() => { setIsPhoneTouched(true); if(isPhoneValid && leadName.trim().length >= 2) fw("branch"); }} disabled={!aud} color={uc}>המשיכו לבחירת אימון ←</Btn>
                   </div>
                 </div>
               </div>}
 
               {step === "branch" && <div>
-                <button onClick={() => bk("qual", () => setAud(null))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+                <button onClick={() => bk("qual", () => setAud(null))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginTop: 8 }}>
                   {CFG.branches.filter(b => b.type === "group").map(br => {
                     const bc2 = CFG.categories.filter(c => c.branchId === br.id && (aud === "child" ? c.forChild : aud === "self" ? !c.forChild : true));
-                    return <div key={br.id} onClick={() => fw("cat", () => setBranch(br))} style={{ borderRadius: 14, border: "2px solid #EDEDEA", background: "#fff", padding: "14px 12px 10px", cursor: "pointer" }}>
+                    return <div key={br.id} onClick={() => fw("cat", () => setBranch(br))} style={{ borderRadius: 14, border: "2px solid #EDEDEA", background: "#fff", padding: "14px 12px 10px", cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.06)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
                       <div style={{ marginBottom: 6 }}><Ico name={br.icon} color={br.color} size={30} /></div>
                       <div style={{ fontSize: 13, fontWeight: 800, color: "#1a1a2e", marginBottom: 2 }}>{br.title}</div>
                       <div style={{ fontSize: 10, color: "#888", marginBottom: 8 }}>{br.subtitle}</div>
@@ -560,7 +602,7 @@
                     </div>;
                   })}
                 </div>
-                <div onClick={() => fw("cat", () => setBranch(CFG.branches[2]))} style={{ marginTop: 10, borderRadius: 14, cursor: "pointer", border: "1.5px solid #E8E2CF", background: "linear-gradient(135deg,#FDFBF5,#FAF6EC)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div onClick={() => fw("cat", () => setBranch(CFG.branches[2]))} style={{ marginTop: 10, borderRadius: 14, cursor: "pointer", border: "1.5px solid #E8E2CF", background: "linear-gradient(135deg,#FDFBF5,#FAF6EC)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, transition: "transform 0.2s, box-shadow 0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 16px rgba(139,105,20,0.1)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
                   <Ico name="private" color="#8B6914" size={30} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 800, color: "#5C4A1A", marginBottom: 4 }}>אימונים אישיים / זוגיים</div>
@@ -575,9 +617,9 @@
               </div>}
 
               {step === "cat" && <div>
-                <button onClick={() => bk("branch", () => { setBranch(null); setCat(null); })} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1a1a2e", marginBottom: 3 }}>{isP ? "בחרו את השירות הרצוי" : "בחרו את השיעור הרצוי"}</div>
-                {cats2.map(c => <div key={c.id} onClick={() => isP ? fw("pform", () => setCat(c)) : fw("details", () => setCat(c))} style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 12px", borderRadius: 11, border: "1.5px solid #EEEEE9", background: "#fff", cursor: "pointer", marginBottom: 7 }}>
+                <button onClick={() => bk("branch", () => { setBranch(null); setCat(null); })} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>{isP ? "בחרו את השירות הרצוי:" : "בחרו את השיעור הרצוי:"}</div>
+                {cats2.map(c => <div key={c.id} onClick={() => isP ? fw("pform", () => setCat(c)) : fw("details", () => setCat(c))} style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 12px", borderRadius: 11, border: "1.5px solid #EEEEE9", background: "#fff", cursor: "pointer", marginBottom: 7, transition: "border 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.border = `1.5px solid ${bc}80`} onMouseLeave={(e) => e.currentTarget.style.border = "1.5px solid #EEEEE9"}>
                   <div style={{ width: 36, height: 36, borderRadius: 9, background: bc + "10", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Ico name={c.icon} color={bc} size={18} /></div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -591,9 +633,10 @@
               </div>}
 
               {step === "details" && <div>
-                <button onClick={() => bk("cat", () => { setCat(null); setPkg(null); })} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("cat", () => { setCat(null); setPkg(null); })} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 
-                <div style={{ background: "#F8F7F4", borderRadius: 12, padding: "16px", marginBottom: 20 }}>
+                <div style={{ background: "#F8F7F4", borderRadius: 12, padding: "16px", marginBottom: 20, marginTop: 8 }}>
+                   
                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
                      <div style={{ marginTop: 2 }}><Ico name="pin" color={uc} size={16} /></div>
                      <div>
@@ -641,7 +684,7 @@
               </div>}
 
               {step === "dates" && <div>
-                <button onClick={() => bk("details", () => setSelDates([]))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("details", () => setSelDates([]))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 
                 {clsI && <div style={{ fontSize: 12, color: "#666", marginBottom: 10, display: "flex", alignItems: "center", gap: 5, background: uc + "06", padding: "8px 12px", borderRadius: 8, border: "1px solid " + uc + "15", flexWrap: "wrap" }}>
                   <span>משך השיעור:</span>
@@ -673,14 +716,29 @@
                           const mx = selDates.length >= maxD;
                           const spots = d.isActive ? getSpots(d.date) : null;
                           const isFull = spots === 0;
-                          const dis = !d.isActive || (!sel && mx) || isFull;
+                          
+                          // Buffer Time Logic (6 hours)
+                          const classTimeObj = clsFor(d.dayNum);
+                          let tooSoon = false;
+                          if (classTimeObj && d.isActive && !sel) {
+                            const [h, m] = classTimeObj.time.split(':');
+                            const classDateTime = new Date(d.date);
+                            classDateTime.setHours(parseInt(h), parseInt(m), 0, 0);
+                            const hoursDiff = (classDateTime - new Date()) / (1000 * 60 * 60);
+                            if (hoursDiff > 0 && hoursDiff < 6 && !isBypass) {
+                                tooSoon = true;
+                            }
+                          }
+                          
+                          const dis = !d.isActive || (!sel && mx) || isFull || tooSoon;
 
-                          return <button key={di} onClick={d.isActive && !dis ? () => togDate(d.date) : undefined} style={{ padding: "6px 2px", borderRadius: 9, minHeight: 48, border: sel ? ("2px solid " + uc) : isFull ? "1.5px solid #F8E8E8" : d.isActive ? ("1.5px solid " + uc + "25") : "1.5px solid #F0F0EC", background: sel ? (uc + "12") : isFull ? "#FCF4F4" : d.isActive ? "#fff" : "#FAFAF8", cursor: d.isActive && !dis ? "pointer" : "default", opacity: (dis && !sel && !isFull) ? 0.3 : isFull ? 0.6 : 1, fontFamily: "inherit", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "all 0.1s" }}>
+                          return <button key={di} onClick={d.isActive && !dis ? () => togDate(d.date) : undefined} style={{ padding: "6px 2px", borderRadius: 9, minHeight: 48, border: sel ? ("2px solid " + uc) : isFull ? "1.5px solid #F8E8E8" : tooSoon ? "1.5px solid #EEE" : d.isActive ? ("1.5px solid " + uc + "25") : "1.5px solid #F0F0EC", background: sel ? (uc + "12") : isFull ? "#FCF4F4" : tooSoon ? "#F5F5F5" : d.isActive ? "#fff" : "#FAFAF8", cursor: d.isActive && !dis ? "pointer" : "default", opacity: (dis && !sel && !isFull && !tooSoon) ? 0.3 : isFull ? 0.6 : tooSoon ? 0.7 : 1, fontFamily: "inherit", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "all 0.1s" }}>
                             {sel && <div style={{ position: "absolute", top: 2, left: 2, width: 13, height: 13, borderRadius: 4, background: uc, display: "flex", alignItems: "center", justifyContent: "center" }}><Ico name="check" color="#fff" size={9} /></div>}
-                            <div style={{ fontSize: 15, fontWeight: sel ? 800 : (d.isActive && !isFull) ? 700 : 400, color: sel ? "#1a1a2e" : (d.isActive && !isFull) ? "#333" : isFull ? "#A08080" : "#ccc" }}>{d.day}</div>
-                            {isFull ? <div style={{ fontSize: 7.5, color: "#C4342D", fontWeight: 700 }}>אזל המקום</div>
+                            <div style={{ fontSize: 15, fontWeight: sel ? 800 : (d.isActive && !isFull && !tooSoon) ? 700 : 400, color: sel ? "#1a1a2e" : (d.isActive && !isFull && !tooSoon) ? "#333" : isFull ? "#A08080" : "#999" }}>{d.day}</div>
+                            {isFull ? <div style={{ fontSize: 7.5, color: "#C4342D", fontWeight: 700, opacity: 0.6 }}>אזל המקום</div>
+                            : tooSoon ? <div style={{ fontSize: 7.5, color: "#888", fontWeight: 700, opacity: 0.6 }}>נסגר לרישום</div>
                             : (spots !== null && spots > 0 && spots <= 3) ? <div style={{ fontSize: 7.5, color: "#C4342D", fontWeight: 700 }}>{spots === 1 ? 'נותר מקום 1' : `נותרו ${spots} מקומות`}</div>
-                            : (d.isActive) ? <div style={{ fontSize: 8.5, color: sel ? uc : "#999" }}>{clsFor(d.dayNum)?.time}</div> : null}
+                            : (d.isActive) ? <div style={{ fontSize: 8.5, color: sel ? uc : "#999" }}>{classTimeObj?.time}</div> : null}
                           </button>;
                         })}
                       </div>
@@ -705,7 +763,7 @@
               </div>}
 
               {step === "medical" && <div>
-                <button onClick={() => bk("dates")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("dates")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 <div style={{ borderRadius: 12, border: "1.5px solid #E8E7E3", background: "#FAFAF8", padding: "16px 18px", marginBottom: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <Ico name="medical" color={uc} size={18} />
@@ -717,13 +775,13 @@
                       <button key={String(v)} onClick={() => setMedHas(v)} style={{ flex: 1, padding: "11px 10px", borderRadius: 10, border: "2px solid " + (medHas === v ? "#1a1a2e" : "#E0E0DC"), background: medHas === v ? "#1a1a2e" : "#fff", color: medHas === v ? "#fff" : "#555", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, transition: "all 0.2s" }}>{l}</button>
                     )}
                   </div>
-                  {medHas === true && <textarea value={medText} onChange={e => setMedText(e.target.value)} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..." style={{ ...inpStyle, minHeight: 64, marginTop: 8 }} />}
+                  {medHas === true && <textarea value={medText} onChange={e => setMedText(e.target.value)} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..." style={{ ...inpStyle, minHeight: 64, marginTop: 8 }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} />}
                 </div>
                 <Btn onClick={() => fw("action")} disabled={medHas === null} color={uc}>המשיכו לסיכום ←</Btn>
               </div>}
 
               {step === "action" && <div>
-                <button onClick={() => bk("medical")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("medical")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 
                 <div style={{ borderRadius: 14, background: uc + "06", border: "2px solid " + uc + "20", padding: "14px 16px", marginBottom: 18 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
@@ -769,21 +827,21 @@
                     <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e" }}>נציג יחזור אליי (לתיאום והרשמה)</div>
                   </div>
                   <div style={{ display: "flex", gap: 8, paddingRight: 36, flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 1 150px", display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden' }}>
+                    <div style={{ flex: "1 1 150px", display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
                       <div style={{ padding: '9px 8px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                      <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, width: '100%', padding: '9px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'inherit' }} />
+                      <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.parentElement.style.boxShadow = 'none'} placeholder="50-1234567" style={{ flex: 1, width: '100%', padding: '9px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'inherit' }} />
                     </div>
                     <button onClick={() => { 
                       deductSpots(); 
                       window.open(waLink(CFG.waPhone, groupWA()), "_blank"); 
                       fw("done-wa"); 
-                    }} disabled={getCleanPhone(leadPhone).length < 12} style={{ padding: "9px 18px", borderRadius: 9, background: getCleanPhone(leadPhone).length >= 12 ? "#25D366" : "#ddd", color: "#fff", fontWeight: 700, cursor: getCleanPhone(leadPhone).length >= 12 ? "pointer" : "default", fontFamily: "inherit", transition: "all 0.2s" }}>שלחו</button>
+                    }} disabled={getCleanPhone(leadPhone).length < 12} style={{ padding: "9px 18px", borderRadius: 9, background: getCleanPhone(leadPhone).length >= 12 ? "linear-gradient(135deg, #25D366, #128C7E)" : "#ddd", color: "#fff", fontWeight: 700, cursor: getCleanPhone(leadPhone).length >= 12 ? "pointer" : "default", fontFamily: "inherit", transition: "all 0.2s" }}>שלחו</button>
                   </div>
                 </div>
               </div>}
 
               {step === "done" && <div>
-                <button onClick={() => bk("action")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("action")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 <div style={{ textAlign: "center", padding: "8px 0" }}>
                   <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px", boxShadow: "0 5px 16px rgba(26,26,46,0.2)" }}><Ico name="lock" color="#fff" size={22} /></div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e", marginBottom: 6 }}>מעבירים אותך לתשלום מאובטח...</div>
@@ -832,14 +890,14 @@
                   
                   <div style={{ height: 1, background: "#EEEEE9", margin: "16px 0" }} />
                   <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-                    <a href={waLink(CFG.waPhone, "היי, יש לי שאלה לגבי שיעורי ההיכרות באלמנט 😊")} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "8px 16px", borderRadius: 9, background: "#25D366", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}><Ico name="wa" color="#fff" size={13} /> יש לי שאלה</a>
+                    <a href={waLink(CFG.waPhone, "היי, יש לי שאלה לגבי שיעורי ההיכרות באלמנט 😊")} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "8px 16px", borderRadius: 9, background: "linear-gradient(135deg, #25D366, #128C7E)", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}><Ico name="wa" color="#fff" size={13} /> יש לי שאלה</a>
                     <button onClick={reset} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "1px solid #DDD", borderRadius: 9, padding: "8px 16px", color: "#666", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}><Ico name="restart" color="#888" size={13} /> הזמנת שיעור נוסף</button>
                   </div>
                 </div>
               </div>}
 
               {step === "done-wa" && <div>
-                <button onClick={() => bk("action")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("action")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 <div style={{ textAlign: "center", padding: "8px 0" }}>
                   <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#00E5A0", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px", boxShadow: "0 5px 16px rgba(0,229,160,0.3)" }}><Ico name="check" color="#fff" size={22} /></div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e", marginBottom: 6 }}>הפנייה נשלחה בהצלחה!</div>
@@ -887,28 +945,28 @@
                   
                   <div style={{ height: 1, background: "#EEEEE9", margin: "16px 0" }} />
                   <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-                    <a href={waLink(CFG.waPhone, "היי, יש לי שאלה לגבי שיעורי ההיכרות באלמנט 😊")} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "8px 16px", borderRadius: 9, background: "#25D366", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}><Ico name="wa" color="#fff" size={13} /> יש לי שאלה</a>
+                    <a href={waLink(CFG.waPhone, "היי, יש לי שאלה לגבי שיעורי ההיכרות באלמנט 😊")} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "8px 16px", borderRadius: 9, background: "linear-gradient(135deg, #25D366, #128C7E)", color: "#fff", fontSize: 12, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}><Ico name="wa" color="#fff" size={13} /> יש לי שאלה</a>
                     <button onClick={reset} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "1px solid #DDD", borderRadius: 9, padding: "8px 16px", color: "#666", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}><Ico name="restart" color="#888" size={13} /> הזמנת שיעור נוסף</button>
                   </div>
                 </div>
               </div>}
 
               {step === "pform" && <div>
-                <button onClick={() => bk("cat", () => setCat(null))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
-                <div style={{ marginBottom: 11 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>שם מלא</label><input value={leadName} onChange={e => setLeadName(e.target.value)} style={inpStyle} /></div>
+                <button onClick={() => bk("cat", () => setCat(null))} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <div style={{ marginBottom: 11 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>שם מלא</label><input value={leadName} onChange={e => setLeadName(e.target.value)} style={inpStyle} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} /></div>
                 <div style={{ marginBottom: 11 }}>
                   <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>טלפון</label>
-                  <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', direction: 'ltr', background: '#FAFAF8', border: '1.5px solid #E0E0DC', borderRadius: 9, overflow: 'hidden', transition: 'box-shadow 0.2s' }}>
                     <div style={{ padding: '9px 12px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
-                    <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} />
+                    <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, padding: '9px 12px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, fontFamily: 'inherit' }} onFocus={(e) => e.target.parentElement.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.parentElement.style.boxShadow = 'none'} />
                   </div>
                 </div>
-                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם..." style={{ ...inpStyle, minHeight: 64 }} /></div>
+                <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם..." style={{ ...inpStyle, minHeight: 64 }} onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${uc}30`} onBlur={(e) => e.target.style.boxShadow = 'none'} /></div>
                 <button onClick={() => { window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }} disabled={getCleanPhone(leadPhone).length < 12} style={{ width: "100%", padding: "12px", borderRadius: 11, background: getCleanPhone(leadPhone).length >= 12 ? ("linear-gradient(135deg," + uc + "," + uc + "DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: getCleanPhone(leadPhone).length >= 12 ? "pointer" : "default", fontFamily: "inherit" }}>שלחו פנייה בוואטסאפ</button>
               </div>}
 
               {step === "pdone" && <div>
-                <button onClick={() => bk("pform")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
+                <button onClick={() => bk("pform")} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#888", fontSize: 11.5, cursor: "pointer", marginBottom: 12, padding: 8, margin: "-8px", fontFamily: "inherit" }}><Ico name="chevR" color="#aaa" size={12} /> חזרה</button>
                 <div style={{ textAlign: "center", padding: "8px 0" }}>
                   <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#00E5A0", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px" }}><Ico name="check" color="#fff" size={22} /></div>
                   <div style={{ fontSize: 15, fontWeight: 700 }}>הפנייה נשלחה</div>
