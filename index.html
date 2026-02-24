@@ -7,11 +7,11 @@
   <meta name="description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
   <meta property="og:title" content="Element | אומנויות לחימה ותנועה">
   <meta property="og:description" content="הזמינו שיעור היכרות או אימון אישי באלמנט - סטודיו לשילוב אומנויות לחימה, כושר ותנועה - המקפצה שלכם להתפתחות דרך תרגול">
-  <meta property="og:image" content="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20Color%20Logo%20White%20Text%20Dark%20Background%20-%202500px.png?raw=true">
+  <meta property="og:image" content="https://element-m-a-m.github.io/book-first-classes/Element%20Color%20Logo%20White%20Text%20Dark%20Background%20-%202500px.png">
   <meta property="og:type" content="website">
-  <link id="dynamic-favicon" rel="icon" type="image/png" href="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png?raw=true">
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="https://element-m-a-m.github.io/book-first-classes/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png">
   <script>
-    function updateFavicon(){var f=document.getElementById('dynamic-favicon'),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;f.href=d?"https://github.com/element-m-a-m/Booking-Widget-1/blob/main/No%20Background%20White%20Dragon%20Only%20No%20Text.png?raw=true":"https://github.com/element-m-a-m/Booking-Widget-1/blob/main/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png?raw=true"}
+    function updateFavicon(){var f=document.getElementById('dynamic-favicon'),d=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;f.href=d?"https://element-m-a-m.github.io/book-first-classes/No%20Background%20White%20Dragon%20Only%20No%20Text.png":"https://element-m-a-m.github.io/book-first-classes/White%20Background%20-%20Black%20Logo%20-%20No%20Text.png"}
     updateFavicon();if(window.matchMedia)window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',updateFavicon);
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -48,7 +48,7 @@ const CFG = {
     { id: "kids-6-8", branchId: "martial-arts", label: "ילדים גילאי 6-8", icon: "kidsYoung", desc: "בניית ביטחון, משמעת עצמית ותנועה דרך משחק", forChild: true },
     { id: "kids-9-11", branchId: "martial-arts", label: "ילדים גילאי 9-11", icon: "kidsOlder", desc: "פיתוח טכניקה, כוח גופני וחוסן נפשי", forChild: true },
     { id: "youth-12-15", branchId: "martial-arts", label: "נוער צעיר 12-15", icon: "youth", desc: "אתגר, משמעת, ביטחון עצמי וכושר גופני", forChild: true },
-    { id: "adults-16-37", branchId: "martial-arts", label: "בוגרים ונוער 16-37", icon: "adults", desc: "טכניקה, כוח, התמדה ומיינדסט לחימתי", tag: "popular" },
+    { id: "adults-16-37", branchId: "martial-arts", label: "בוגרים ונוער 16-37", icon: "adults", desc: "טכניקה, כוח, התמדה ומיינדסט לחימתי" },
     { id: "adults-38-58", branchId: "martial-arts", label: "מבוגרים צעירים 38-58", icon: "adultsPlus", desc: "שילוב ייחודי של כושר, בריאות ואומנויות לחימה", tag: "special" },
     { id: "movement-class", branchId: "movement", label: "מובמנט", icon: "flow", desc: "גמישות, שליטה וחופש בגוף. בהנחיית ליאור ורדי", tag: "popular" },
     { id: "strength", branchId: "movement", label: "כוח וגמישות", icon: "strength", desc: "חיזוק ושיפור טווחי תנועה" },
@@ -368,7 +368,7 @@ function ElementBookingWidget() {
     return () => { events.forEach(e => window.removeEventListener(e, touch)); clearInterval(interval); };
   }, [si, isDone, hasSeenIdle, showExit]);
 
-  const idleWaMsg = "היי, התחלתי הרשמה באלמנט" + (cat ? ` (${cat.label})` : "") + " ואשמח לעזרה 😊";
+  const idleWaMsg = "היי, התחלתי הרשמה לשיעורי היכרות באפליקציית אלמנט" + (cat ? ` (${cat.label})` : "") + " ואשמח לעזרה 😊";
 
   /* ── Titles ── */
   const titles = {
@@ -776,7 +776,7 @@ function ElementBookingWidget() {
         </div>
         {isPhoneTouched && !isPhoneValid && <div style={{ fontSize: 10.5, color: "#C4342D", marginTop: 4, fontWeight: 500 }}>* נא להזין מספר טלפון תקין</div>}
       </div>
-      <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea className="premium-input" value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם..." style={{ ...inpStyle, minHeight: 64, resize: "vertical" }}/></div>
+      <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea className="premium-input" value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם, וציינו אם יש מגבלות רפואיות שחשוב שנדע עליהן..." style={{ ...inpStyle, minHeight: 64, resize: "vertical" }}/></div>
       <button onClick={() => { setIsNameTouched(true); setIsPhoneTouched(true); if (isNameValid && isPhoneValid) { window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }}} disabled={!isNameValid || !isPhoneValid} style={{ width: "100%", padding: "12px", borderRadius: 11, border: "none", background: (isNameValid && isPhoneValid) ? ("linear-gradient(135deg,"+uc+","+uc+"DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: (isNameValid && isPhoneValid) ? "pointer":"default", fontFamily: "inherit", transition: "all 0.2s", opacity: (isNameValid && isPhoneValid) ? 1 : 0.6 }}>שלחו פנייה בוואטסאפ</button>
     </div>
   );
@@ -841,7 +841,7 @@ function ElementBookingWidget() {
           <div style={{ position: "absolute", inset: 0, opacity: 0.035, backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "22px 22px" }}/>
           <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <img src="https://github.com/element-m-a-m/Booking-Widget-1/blob/main/Element%20Logo%20-%20Transparent%20Background.png?raw=true" alt="Element Studio" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0px 4px 6px rgba(0,0,0,0.4))" }}/>
+              <img src="https://element-m-a-m.github.io/book-first-classes/Element%20Logo%20-%20Transparent%20Background.png" alt="Element Studio" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0px 4px 6px rgba(0,0,0,0.4))" }}/>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{ht[0]}</div>
