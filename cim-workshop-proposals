@@ -1,899 +1,814 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הצעת שיתוף פעולה – CIM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
-const STORAGE_KEY = "cim-proposal-v8";
-const COLORS = [
-  { border:"border-blue-200",   bg:"bg-blue-50/50",   badgeBg:"bg-blue-500",   text:"text-blue-700",   light:"bg-blue-50",   accent:"text-blue-600"   },
-  { border:"border-amber-200",  bg:"bg-amber-50/50",  badgeBg:"bg-amber-500",  text:"text-amber-700",  light:"bg-amber-50",  accent:"text-amber-600"  },
-  { border:"border-emerald-200",bg:"bg-emerald-50/50",badgeBg:"bg-emerald-500",text:"text-emerald-700",light:"bg-emerald-50",accent:"text-emerald-600"},
-  { border:"border-violet-200", bg:"bg-violet-50/50", badgeBg:"bg-violet-500", text:"text-violet-700", light:"bg-violet-50", accent:"text-violet-600" },
-  { border:"border-rose-200",   bg:"bg-rose-50/50",   badgeBg:"bg-rose-500",   text:"text-rose-700",   light:"bg-rose-50",   accent:"text-rose-600"   },
-];
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
-const INITIAL_WORKSHOPS = [
-  { id:"w1", heTitle:"אינטליגנציה תנועתית ללחימה",    enTitle:"Movement Intelligence for Fighting",   points:["יסודות תנועה לביצועי לחימה","ניידות, יציבות וכוח מיקום","שילוב תנועה-לחימה"] },
-  { id:"w2", heTitle:"ניידות, כוח ומניעת פציעות",     enTitle:"Mobility, Strength & Injury-Proofing", points:["עקרונות ניידות פונקציונלית","כוח ויציבות לתמיכה בלחימה","חוסן גופני ומניעת פציעות"] },
-  { id:"w3", heTitle:"נשימה לביצועי לחימה",            enTitle:"Breathing for Combat Performance",     points:["מכניקת נשימה ובקרה","נשימה תחת לחץ ועוררות","שילוב נשימה בתנועה ובלחימה"] },
-  { id:"w4", heTitle:"תנועה – לוקומוציה",              enTitle:"Movement – Locomotion",                points:["דפוסי תנועה בסיסיים","מעברים ותנועה ברצף","יישום לוקומוציה בסביבות שונות"] },
-  { id:"w5", heTitle:"ניידות שחשובה ללוחמים",          enTitle:"Mobility That Matters for Fighters",   points:["הערכת מגבלות ניידות ספציפיות","תרגילי ניידות ממוקדי-לחימה","שילוב ניידות בחימום ובאימון"] },
-  { id:"w6", heTitle:"אנטומיה פונקציונלית וביומכניקה", enTitle:"Functional Anatomy & Biomechanics",    points:["מבנה שריר-שלד רלוונטי ללחימה","ביומכניקה של מהירות וכוח","טיפול ומניעת עומס יתר"] },
-  { id:"w7", heTitle:"תרגול התנועה",                   enTitle:"The Movement Practice",                points:["גישת תרגול ופיתוח מיומנויות","שגרת תרגול עצמאית","כלים לאימון אישי ממוקד"] },
-];
+    // ─── Constants ────────────────────────────────────────────────────────────
+    const STORAGE_KEY = "cim-proposal-v8";
+    const COLORS = [
+      { border:"border-blue-200",   bg:"bg-blue-50/50",   badgeBg:"bg-blue-500",   text:"text-blue-700",   light:"bg-blue-50",   accent:"text-blue-600"   },
+      { border:"border-amber-200",  bg:"bg-amber-50/50",  badgeBg:"bg-amber-500",  text:"text-amber-700",  light:"bg-amber-50",  accent:"text-amber-600"  },
+      { border:"border-emerald-200",bg:"bg-emerald-50/50",badgeBg:"bg-emerald-500",text:"text-emerald-700",light:"bg-emerald-50",accent:"text-emerald-600"},
+      { border:"border-violet-200", bg:"bg-violet-50/50", badgeBg:"bg-violet-500", text:"text-violet-700", light:"bg-violet-50", accent:"text-violet-600" },
+      { border:"border-rose-200",   bg:"bg-rose-50/50",   badgeBg:"bg-rose-500",   text:"text-rose-700",   light:"bg-rose-50",   accent:"text-rose-600"   },
+    ];
 
-const DEFAULT_PRICING   = { membersPrice:600, membersEarlyBird:510, guestsPrice:750, guestsEarlyBird:638, introGuestPrice:100 };
-const DEFAULT_SCENARIOS = { low:10, mid:15, high:20 };
-const DEFAULT_AGREEMENTS= { pricing:null, split:null, kpis:false, dates:false };
-const DEFAULT_COMMENTS  = { general:"", pricing:"", split:"" };
-const makeSlots = n => Array(Math.max(0,n)).fill(null).map(()=>({ date:"", time:"" }));
-const makeWDates= (i,s) => ({ intro:makeSlots(i), sessions:makeSlots(s) });
-const DEFAULT_ACTIVE_IDS= ["w1","w2"];
-const DEFAULT_WS_CONFIG = {
-  w1:{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...DEFAULT_PRICING} },
-  w2:{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...DEFAULT_PRICING} },
-};
-const DEFAULT_DATES = { w1:makeWDates(1,6), w2:makeWDates(1,6) };
-const DEFAULT_CONTENT = {
-  mainTitle:"הצעת שיתוף פעולה", subtitle:"סדנאות תנועה ב-CIM Coaching in Motion",
-  date:"פברואר 2026", proposer:"ליאור ורדי", recipient:"עופר, CIM",
-  overviewTitle:"סקירת הסדנאות", bankTitle:"בנק סדנאות",
-  bankHint:"גרור לסקירה ← או לחץ +", activeHint:"גרור × להחזרה לבנק",
-  activeEmpty:"גרור סדנה מהבנק להפעלה", introLabel:"היכרות",
-  sessionLabel:"מפגש", datesTitle:"תאריכים ושעות",
-  dateHeader:"תאריך", dayHeader:"יום", timeHeader:"שעה", sessionHeader:"מפגש",
-  datesConfirm:"התאריכים אושרו",
-  pricingTitle:"תמחור", globalPriceLabel:"תמחור אחיד לכל הסדנאות",
-  perWSPriceLabel:"תמחור שונה לכל סדנה",
-  audienceHeader:"קהל", fullPriceHeader:"מחיר מלא", earlyBirdHeader:"Early Bird",
-  membersLabel:"חברי CIM", guestsLabel:"אורחים",
-  introFreeLabel:"מפגש היכרות:", introFreeText:"חינם לחברים |", introGuestText:"לאורחים",
-  pricingApprove:"מאשר ✓", pricingDiscuss:"לדיון ?", pricingComment:"הערות לתמחור...",
-  splitTitle:"חלוקת הכנסות", splitLabel:"50/50 – ליאור / CIM",
-  splitDesc:"פיילוט – מחזור ראשון", splitApprove:"מאשר ✓", splitComment:"הערות לחלוקה...",
-  financialTitle:"תחזית כספית",
-  minLabel:"מינימום", targetLabel:"יעד", maxLabel:"מקסימום", totalLabel:"סה\"כ",
-  participantsHeader:"משתתפים", cimHeader:"CIM 50%", liorHeader:"ליאור 50%",
-  financialNote:"* חלוקה 50/50 | בסיס: מחיר מלא חברים",
-  kpisTitle:"מדדי הצלחה",
-  kpi1Label:"המרה", kpi1Value:"40%+", kpi2Label:"השלמה", kpi2Value:"80%+",
-  kpi3Label:"מבחוץ", kpi3Value:"20%+", kpi4Label:"חזרה", kpi4Value:"25%+",
-  kpisCheck:"מסכימים לעקוב ולהעריך בסוף כל מחזור",
-  commentsTitle:"הערות כלליות", commentsPlaceholder:"הערות, שאלות, נקודות לדיון...",
-  signaturesTitle:"אישור",
-  sig1Name:"ליאור ורדי", sig1Ph:"חתימה", sig1Date:"תאריך: _________",
-  sig2Name:"עופר, CIM",  sig2Ph:"חתימה", sig2Date:"תאריך: _________",
-  statusTitle:"סטטוס", statusDates:"תאריכים", statusPricing:"תמחור",
-  statusSplit:"חלוקה", statusParticipants:"משתתפים", statusKpis:"KPIs",
-  footerText:"ליאור ורדי | אומנויות לחימה, תנועה ופיזיותרפיה",
-};
+    const INITIAL_WORKSHOPS = [
+      { id:"w1", heTitle:"אינטליגנציה תנועתית ללחימה",    enTitle:"Movement Intelligence for Fighting",   points:["יסודות תנועה לביצועי לחימה","ניידות, יציבות וכוח מיקום","שילוב תנועה-לחימה"] },
+      { id:"w2", heTitle:"ניידות, כוח ומניעת פציעות",     enTitle:"Mobility, Strength & Injury-Proofing", points:["עקרונות ניידות פונקציונלית","כוח ויציבות לתמיכה בלחימה","חוסן גופני ומניעת פציעות"] },
+      { id:"w3", heTitle:"נשימה לביצועי לחימה",            enTitle:"Breathing for Combat Performance",     points:["מכניקת נשימה ובקרה","נשימה תחת לחץ ועוררות","שילוב נשימה בתנועה ובלחימה"] },
+      { id:"w4", heTitle:"תנועה – לוקומוציה",              enTitle:"Movement – Locomotion",                points:["דפוסי תנועה בסיסיים","מעברים ותנועה ברצף","יישום לוקומוציה בסביבות שונות"] },
+      { id:"w5", heTitle:"ניידות שחשובה ללוחמים",          enTitle:"Mobility That Matters for Fighters",   points:["הערכת מגבלות ניידות ספציפיות","תרגילי ניידות ממוקדי-לחימה","שילוב ניידות בחימום ובאימון"] },
+      { id:"w6", heTitle:"אנטומיה פונקציונלית וביומכניקה", enTitle:"Functional Anatomy & Biomechanics",    points:["מבנה שריר-שלד רלוונטי ללחימה","ביומכניקה של מהירות וכוח","טיפול ומניעת עומס יתר"] },
+      { id:"w7", heTitle:"תרגול התנועה",                   enTitle:"The Movement Practice",                points:["גישת תרגול ופיתוח מיומנויות","שגרת תרגול עצמאית","כלים לאימון אישי ממוקד"] },
+    ];
 
-const Ctx = createContext({ editMode:false, content:DEFAULT_CONTENT, updateContent:()=>{} });
+    const DEFAULT_PRICING   = { membersPrice:600, membersEarlyBird:510, guestsPrice:750, guestsEarlyBird:638, introGuestPrice:100 };
+    const DEFAULT_SCENARIOS = { low:10, mid:15, high:20 };
+    const DEFAULT_AGREEMENTS= { pricing:null, split:null, kpis:false, dates:false };
+    const DEFAULT_COMMENTS  = { general:"", pricing:"", split:"" };
+    const makeSlots = n => Array(Math.max(0,n)).fill(null).map(()=>({ date:"", time:"" }));
+    const makeWDates= (i,s) => ({ intro:makeSlots(i), sessions:makeSlots(s) });
+    const DEFAULT_ACTIVE_IDS= ["w1","w2"];
+    const DEFAULT_WS_CONFIG = {
+      w1:{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...DEFAULT_PRICING} },
+      w2:{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...DEFAULT_PRICING} },
+    };
+    const DEFAULT_DATES = { w1:makeWDates(1,6), w2:makeWDates(1,6) };
+    const DEFAULT_CONTENT = {
+      mainTitle:"הצעת שיתוף פעולה", subtitle:"סדנאות תנועה ב-CIM Coaching in Motion",
+      date:"פברואר 2026", proposer:"ליאור ורדי", recipient:"עופר, CIM",
+      overviewTitle:"סקירת הסדנאות", bankTitle:"בנק סדנאות",
+      bankHint:"גרור לסקירה ← או לחץ +", activeHint:"גרור × להחזרה לבנק",
+      activeEmpty:"גרור סדנה מהבנק להפעלה", introLabel:"היכרות",
+      sessionLabel:"מפגש", datesTitle:"תאריכים ושעות",
+      dateHeader:"תאריך", dayHeader:"יום", timeHeader:"שעה", sessionHeader:"מפגש",
+      datesConfirm:"התאריכים אושרו",
+      pricingTitle:"תמחור", globalPriceLabel:"תמחור אחיד לכל הסדנאות",
+      perWSPriceLabel:"תמחור שונה לכל סדנה",
+      audienceHeader:"קהל", fullPriceHeader:"מחיר מלא", earlyBirdHeader:"Early Bird",
+      membersLabel:"חברי CIM", guestsLabel:"אורחים",
+      introFreeLabel:"מפגש היכרות:", introFreeText:"חינם לחברים |", introGuestText:"לאורחים",
+      pricingApprove:"מאשר ✓", pricingDiscuss:"לדיון ?", pricingComment:"הערות לתמחור...",
+      splitTitle:"חלוקת הכנסות", splitLabel:"50/50 – ליאור / CIM",
+      splitDesc:"פיילוט – מחזור ראשון", splitApprove:"מאשר ✓", splitComment:"הערות לחלוקה...",
+      financialTitle:"תחזית כספית",
+      minLabel:"מינימום", targetLabel:"יעד", maxLabel:"מקסימום", totalLabel:"סה\"כ",
+      participantsHeader:"משתתפים", cimHeader:"CIM 50%", liorHeader:"ליאור 50%",
+      financialNote:"* חלוקה 50/50 | בסיס: מחיר מלא חברים",
+      kpisTitle:"מדדי הצלחה",
+      kpi1Label:"המרה", kpi1Value:"40%+", kpi2Label:"השלמה", kpi2Value:"80%+",
+      kpi3Label:"מבחוץ", kpi3Value:"20%+", kpi4Label:"חזרה", kpi4Value:"25%+",
+      kpisCheck:"מסכימים לעקוב ולהעריך בסוף כל מחזור",
+      commentsTitle:"הערות כלליות", commentsPlaceholder:"הערות, שאלות, נקודות לדיון...",
+      signaturesTitle:"אישור",
+      sig1Name:"ליאור ורדי", sig1Ph:"חתימה", sig1Date:"תאריך: _________",
+      sig2Name:"עופר, CIM",  sig2Ph:"חתימה", sig2Date:"תאריך: _________",
+      statusTitle:"סטטוס", statusDates:"תאריכים", statusPricing:"תמחור",
+      statusSplit:"חלוקה", statusParticipants:"משתתפים", statusKpis:"KPIs",
+      footerText:"ליאור ורדי | אומנויות לחימה, תנועה ופיזיותרפיה",
+    };
 
-const HE_DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-const getDOW  = ds => { if(!ds) return ""; const d=new Date(ds); return isNaN(d.getTime())?"":HE_DAYS[d.getDay()]; };
-const fmt     = n  => `${Math.round(n).toLocaleString()}₪`;
+    const Ctx = createContext({ editMode:false, content:DEFAULT_CONTENT, updateContent:()=>{} });
 
-// ─── Add N days to a YYYY-MM-DD string ────────────────────────────────────────
-const addDays = (dateStr, n) => {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
-};
+    const HE_DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+    const getDOW  = ds => { if(!ds) return ""; const d=new Date(ds); return isNaN(d.getTime())?"":HE_DAYS[d.getDay()]; };
+    const fmt     = n  => `${Math.round(n).toLocaleString()}₪`;
 
-// ─── Normalize typed time string → "HH:MM" or "" ─────────────────────────────
-const normalizeTime = raw => {
-  if (!raw) return "";
-  const s = raw.trim().replace(/[^0-9:]/g,"");
-  // "HH:MM"
-  if (/^\d{1,2}:\d{2}$/.test(s)) {
-    const [h,m] = s.split(":");
-    const hh = Math.min(23, parseInt(h,10));
-    const mm = Math.min(59, parseInt(m,10));
-    return `${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`;
-  }
-  // "HHMM" or "HMM"
-  if (/^\d{3,4}$/.test(s)) {
-    const hh = Math.min(23, parseInt(s.slice(0,-2),10));
-    const mm = Math.min(59, parseInt(s.slice(-2),10));
-    return `${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`;
-  }
-  return "";
-};
+    const addDays = (dateStr, n) => {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + n);
+      return d.toISOString().slice(0,10);
+    };
 
-// ─── Generate quick-pick times (HH:MM) from 06:00–23:00 in 15-min steps ──────
-const QUICK_TIMES = (() => {
-  const ts=[];
-  for (let h=6;h<24;h++) for(let m=0;m<60;m+=15)
-    ts.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
-  return ts;
-})();
-
-// ─── TimeInput: single text box + dropdown ────────────────────────────────────
-const TimeInput = ({ value, onChange, compact=false }) => {
-  const [text,   setText]  = useState(value||"");
-  const [open,   setOpen]  = useState(false);
-  const ref = useRef();
-
-  useEffect(() => { setText(value||""); }, [value]);
-
-  // Close on outside click
-  useEffect(()=>{
-    if (!open) return;
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown",h);
-    return ()=>document.removeEventListener("mousedown",h);
-  },[open]);
-
-  const commit = raw => {
-    const v = normalizeTime(raw);
-    setText(v||raw);
-    if (v) onChange(v);
-  };
-
-  const pick = t => { setText(t); onChange(t); setOpen(false); };
-
-  return (
-    <div ref={ref} className="relative flex">
-      <input
-        type="text"
-        value={text}
-        placeholder="08:00"
-        onChange={e => setText(e.target.value)}
-        onBlur={e => commit(e.target.value)}
-        onKeyDown={e => { if(e.key==="Enter") { commit(e.target.value); e.target.blur(); }}}
-        className={`flex-1 min-w-0 border border-gray-200 rounded-r text-center font-mono focus:outline-none focus:border-blue-400 ${compact?"p-1 text-xs":"p-1.5 text-sm"}`}
-        dir="ltr"
-      />
-      <button
-        onClick={()=>setOpen(o=>!o)}
-        className={`border border-l-0 border-gray-200 rounded-l bg-gray-50 hover:bg-blue-50 hover:border-blue-300 text-gray-400 hover:text-blue-500 transition-colors flex items-center justify-center ${compact?"px-1.5 text-[10px]":"px-2 text-xs"}`}
-      >▾</button>
-
-      {open && (
-        <div className="absolute top-full right-0 z-50 bg-white border border-gray-200 rounded-lg shadow-xl mt-0.5 w-28 max-h-52 overflow-y-auto">
-          <div className="sticky top-0 bg-gray-50 border-b border-gray-100 px-2 py-1 text-[10px] text-gray-400 text-center">בחר שעה</div>
-          {QUICK_TIMES.map(t=>(
-            <div
-              key={t}
-              onClick={()=>pick(t)}
-              className={`px-2 py-1.5 text-sm font-mono cursor-pointer text-center transition-colors
-                ${t===value?"bg-blue-500 text-white":"hover:bg-blue-50 text-gray-700"}
-                ${t.endsWith(":00")?"font-semibold":""}`}
-            >{t}</div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── DateInput: plain text input with calendar icon fallback ─────────────────
-const DateInput = ({ value, onChange }) => (
-  <input
-    type="date"
-    value={value}
-    onChange={e=>onChange(e.target.value)}
-    className="w-full p-1.5 border border-gray-200 rounded text-sm text-center focus:outline-none focus:border-blue-400 cursor-pointer font-mono"
-  />
-);
-
-const DayCell = ({ date, accent }) => {
-  const d = getDOW(date);
-  return <div className={`text-xs text-center font-medium ${d?accent:"text-gray-300"}`}>{d||"—"}</div>;
-};
-
-// ─── BulkFill panel ────────────────────────────────────────────────────────────
-const BulkFill = ({ wid, cfg, onFill }) => {
-  const [open,      setOpen]     = useState(false);
-  const [startDate, setStartDate]= useState("");
-  const [time,      setTime]     = useState("");
-  const [interval,  setInterval] = useState(7); // days between sessions
-
-  if (!open) return (
-    <button
-      onClick={()=>setOpen(true)}
-      className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 hover:border-blue-400 rounded-lg px-2 py-1 flex items-center gap-1 transition-colors bg-blue-50 hover:bg-blue-100"
-    >⚡ מילוי מהיר</button>
-  );
-
-  const introN   = cfg?.introSessions    || 0;
-  const sessionsN= cfg?.workshopSessions || 0;
-
-  const applyDates = () => {
-    if (!startDate) return;
-    const allSlots = introN + sessionsN;
-    // intro slots come first, before startDate (going backwards)
-    const newIntro = Array(introN).fill(null).map((_,i) => ({
-      date: addDays(startDate, -(introN-i)*interval),
-      time: time || "",
-    }));
-    const newSessions = Array(sessionsN).fill(null).map((_,i) => ({
-      date: addDays(startDate, i*interval),
-      time: time || "",
-    }));
-    onFill(wid, { intro:newIntro, sessions:newSessions });
-  };
-
-  const applyTimeOnly = () => {
-    if (!time) return;
-    onFill(wid, null, time); // null = keep dates, just set time
-  };
-
-  return (
-    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-3">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-blue-700 flex items-center gap-1">⚡ מילוי מהיר</span>
-        <button onClick={()=>setOpen(false)} className="text-gray-400 hover:text-gray-600 text-xs">✕ סגור</button>
-      </div>
-
-      {/* Time row */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs text-gray-600 flex-shrink-0">שעה לכל המפגשים:</span>
-        <div className="flex-1 max-w-[120px]">
-          <TimeInput value={time} onChange={setTime} compact />
-        </div>
-        <button
-          onClick={applyTimeOnly}
-          disabled={!time}
-          className="text-xs px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
-        >החל שעה ✓</button>
-      </div>
-
-      {/* Date row */}
-      <div className="bg-white rounded-lg border border-blue-100 p-2">
-        <div className="text-xs text-gray-500 mb-2">תזמון שבועי אוטומטי:</div>
-        <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500 flex-shrink-0">מפגש 1 ב:</span>
-            <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}
-              className="p-1 border border-gray-200 rounded text-xs font-mono focus:outline-none focus:border-blue-400 cursor-pointer" />
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500 flex-shrink-0">כל:</span>
-            <select value={interval} onChange={e=>setInterval(+e.target.value)}
-              className="p-1 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:border-blue-400">
-              <option value={7}>שבוע</option>
-              <option value={14}>שבועיים</option>
-              <option value={21}>3 שבועות</option>
-            </select>
-          </div>
-          <button
-            onClick={applyDates}
-            disabled={!startDate}
-            className="text-xs px-2 py-1 rounded bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >מלא תאריכים 📅</button>
-        </div>
-        <p className="text-[10px] text-gray-400 mt-1.5">
-          * מפגש היכרות ייקבע {interval} ימים לפני מפגש 1 · מפגשי סדנה לאחר מכן
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ─── Other shared components ──────────────────────────────────────────────────
-const E = ({ k, className="", multiline=false }) => {
-  const { editMode, content, updateContent } = useContext(Ctx);
-  const base = `border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm w-full ${className}`;
-  if (editMode) return multiline
-    ? <textarea value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className={`${base} resize-none`} rows={2} dir="rtl" />
-    : <input type="text" value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className={base} dir="rtl" />;
-  return <span className={className}>{content[k]}</span>;
-};
-
-const SectionTitle = ({ k, icon }) => {
-  const { editMode, content, updateContent } = useContext(Ctx);
-  return (
-    <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 mb-3">
-      <span>{icon}</span>
-      {editMode
-        ? <input type="text" value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className="border border-blue-300 bg-blue-50 rounded px-1.5 text-base font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1" dir="rtl" />
-        : <span>{content[k]}</span>}
-    </h2>
-  );
-};
-
-const CheckOption = ({ checked, onClick, label }) => (
-  <div onClick={onClick} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border select-none ${checked?"bg-blue-50 border-blue-500 text-blue-900":"bg-white border-gray-200 hover:border-gray-300"}`}>
-    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${checked?"bg-blue-500 border-blue-500":"border-gray-300"}`}>
-      {checked && <span className="text-white text-xs">✓</span>}
-    </div>
-    <span className="text-sm">{label}</span>
-  </div>
-);
-
-const NumControl = ({ value, onDec, onInc, suffix="" }) => (
-  <div className="flex items-center gap-1 justify-center">
-    <button onClick={onDec} className="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 font-bold text-xs flex items-center justify-center">−</button>
-    <span className="min-w-[3.5rem] text-center font-medium text-sm tabular-nums">{value.toLocaleString()}{suffix}</span>
-    <button onClick={onInc} className="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 font-bold text-xs flex items-center justify-center">+</button>
-  </div>
-);
-
-const PricingTable = ({ p, onChange }) => {
-  const { content } = useContext(Ctx);
-  const adj = (field, delta) => onChange({ ...p, [field]: Math.max(0, p[field]+delta) });
-  return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 mb-2">
-      <table className="w-full text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="p-2 text-right font-medium text-gray-600 text-xs">{content.audienceHeader}</th>
-            <th className="p-2 text-center font-medium text-gray-600 text-xs">{content.fullPriceHeader}</th>
-            <th className="p-2 text-center font-medium text-gray-600 text-xs">{content.earlyBirdHeader}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-t">
-            <td className="p-2 text-right text-sm">{content.membersLabel}</td>
-            <td className="p-2"><NumControl value={p.membersPrice}    suffix="₪" onDec={()=>adj("membersPrice",-50)}    onInc={()=>adj("membersPrice",50)} /></td>
-            <td className="p-2 text-green-600"><NumControl value={p.membersEarlyBird} suffix="₪" onDec={()=>adj("membersEarlyBird",-50)} onInc={()=>adj("membersEarlyBird",50)} /></td>
-          </tr>
-          <tr className="border-t bg-gray-50">
-            <td className="p-2 text-right text-sm">{content.guestsLabel}</td>
-            <td className="p-2"><NumControl value={p.guestsPrice}     suffix="₪" onDec={()=>adj("guestsPrice",-50)}     onInc={()=>adj("guestsPrice",50)} /></td>
-            <td className="p-2 text-green-600"><NumControl value={p.guestsEarlyBird}  suffix="₪" onDec={()=>adj("guestsEarlyBird",-50)}  onInc={()=>adj("guestsEarlyBird",50)} /></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
-export default function CIMProposal() {
-  const [loading,    setLoading]    = useState(true);
-  const [syncStatus, setSyncStatus] = useState("");
-  const [lastSaved,  setLastSaved]  = useState(null);
-  const [editMode,   setEditMode]   = useState(false);
-  const [perWSPrice, setPerWSPrice] = useState(false);
-  const [dragOver,   setDragOver]   = useState(null);
-
-  const [content,    setContent]    = useState(DEFAULT_CONTENT);
-  const [workshops,  setWorkshops]  = useState(INITIAL_WORKSHOPS);
-  const [activeIds,  setActiveIds]  = useState(DEFAULT_ACTIVE_IDS);
-  const [wsConfig,   setWsConfig]   = useState(DEFAULT_WS_CONFIG);
-  const [pricing,    setPricing]    = useState(DEFAULT_PRICING);
-  const [scenarios,  setScenarios]  = useState(DEFAULT_SCENARIOS);
-  const [agreements, setAgreements] = useState(DEFAULT_AGREEMENTS);
-  const [comments,   setComments]   = useState(DEFAULT_COMMENTS);
-  const [dates,      setDates]      = useState(DEFAULT_DATES);
-  const [editingBankId, setEditingBankId] = useState(null);
-
-  const dragItem       = useRef(null);
-  const dragOverActive = useRef(null);
-  const saveTimer      = useRef(null);
-  const latestState    = useRef({});
-  latestState.current  = { content, workshops, activeIds, wsConfig, pricing, scenarios, agreements, comments, dates, perWSPrice };
-
-  // ── Storage ────────────────────────────────────────────────────────────────
-  const load = useCallback(async () => {
-    try {
-      const r = await window.storage.get(STORAGE_KEY, true);
-      if (r?.value) {
-        const s = JSON.parse(r.value);
-        if (s.content)    setContent(c  => ({ ...DEFAULT_CONTENT,   ...s.content }));
-        if (s.workshops)  setWorkshops(s.workshops);
-        if (s.activeIds)  setActiveIds(s.activeIds);
-        if (s.wsConfig)   setWsConfig(c  => ({ ...DEFAULT_WS_CONFIG, ...s.wsConfig }));
-        if (s.pricing)    setPricing(p   => ({ ...DEFAULT_PRICING,   ...s.pricing }));
-        if (s.scenarios)  setScenarios(p => ({ ...DEFAULT_SCENARIOS, ...s.scenarios }));
-        if (s.agreements) setAgreements(p=> ({ ...DEFAULT_AGREEMENTS,...s.agreements }));
-        if (s.comments)   setComments(p  => ({ ...DEFAULT_COMMENTS,  ...s.comments }));
-        if (s.dates)      setDates(s.dates);
-        if (s.perWSPrice !== undefined) setPerWSPrice(s.perWSPrice);
-        if (s.savedAt)    setLastSaved(new Date(s.savedAt));
+    const normalizeTime = raw => {
+      if (!raw) return "";
+      const s = raw.trim().replace(/[^0-9:]/g,"");
+      if (/^\d{1,2}:\d{2}$/.test(s)) {
+        const [h,m] = s.split(":");
+        return `${String(Math.min(23,parseInt(h,10))).padStart(2,"0")}:${String(Math.min(59,parseInt(m,10))).padStart(2,"0")}`;
       }
-    } catch (_) {}
-    setLoading(false);
-  }, []);
-
-  const save = useCallback(() => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    setSyncStatus("saving");
-    saveTimer.current = setTimeout(async () => {
-      try {
-        await window.storage.set(STORAGE_KEY, JSON.stringify({ ...latestState.current, savedAt: new Date().toISOString() }), true);
-        setLastSaved(new Date());
-        setSyncStatus("saved");
-        setTimeout(() => setSyncStatus(""), 2500);
-      } catch (_) { setSyncStatus("error"); }
-    }, 800);
-  }, []);
-
-  useEffect(() => { load(); const i=setInterval(load,30000); return ()=>clearInterval(i); }, [load]);
-  useEffect(() => { if (!loading) save(); }, [content,workshops,activeIds,wsConfig,pricing,scenarios,agreements,comments,dates,perWSPrice,loading]);
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  const updateContent = useCallback((k,v) => setContent(p=>({...p,[k]:v})),[]);
-  const toggleAgree   = (k,v) => setAgreements(p=>({...p,[k]: p[k]===v?null:v}));
-  const getWS         = id  => workshops.find(w=>w.id===id);
-  const bankIds       = workshops.map(w=>w.id).filter(id=>!activeIds.includes(id));
-
-  // ── Workshop management ───────────────────────────────────────────────────
-  const moveToActive = id => {
-    if (activeIds.includes(id)) return;
-    setActiveIds(p=>[...p,id]);
-    setWsConfig(p=>({ ...p, [id]: p[id]||{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...pricing} } }));
-    setDates(p=>({ ...p, [id]: p[id]||makeWDates(1,6) }));
-  };
-  const moveToBank = id => setActiveIds(p=>p.filter(i=>i!==id));
-
-  const adjustSessions = (wid, field, delta) => {
-    const cfg  = wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
-    const newN = Math.max(0,(cfg[field]||0)+delta);
-    setWsConfig(p=>({...p,[wid]:{...p[wid],[field]:newN}}));
-    setDates(p=>{
-      const ex  = p[wid]||makeWDates(1,6);
-      const slot= field==="introSessions"?"intro":"sessions";
-      const cur = ex[slot]||[];
-      const nxt = newN>cur.length ? [...cur,...makeSlots(newN-cur.length)] : cur.slice(0,newN);
-      return { ...p, [wid]:{ ...ex, [slot]:nxt } };
-    });
-  };
-
-  const updateWSField = (wid,field,val) => setWorkshops(p=>p.map(w=>w.id===wid?{...w,[field]:val}:w));
-  const updateWSPoint = (wid,idx,val)   => setWorkshops(p=>p.map(w=>{
-    if(w.id!==wid)return w; const pts=[...w.points]; pts[idx]=val; return{...w,points:pts};
-  }));
-
-  // ── Bulk fill handler ─────────────────────────────────────────────────────
-  const handleBulkFill = (wid, newSlots, timeOnly) => {
-    setDates(p => {
-      const ex = p[wid] || makeWDates(0,0);
-      if (timeOnly) {
-        // apply time to all existing slots
-        return {
-          ...p,
-          [wid]: {
-            intro:    (ex.intro   ||[]).map(s=>({...s, time:timeOnly})),
-            sessions: (ex.sessions||[]).map(s=>({...s, time:timeOnly})),
-          },
-        };
+      if (/^\d{3,4}$/.test(s)) {
+        const hh = Math.min(23, parseInt(s.slice(0,-2),10));
+        const mm = Math.min(59, parseInt(s.slice(-2),10));
+        return `${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`;
       }
-      return { ...p, [wid]: newSlots };
-    });
-  };
+      return "";
+    };
 
-  // ── Date slot updater ─────────────────────────────────────────────────────
-  const updateSlot = (wid, slotType, idx, field, val) => {
-    setDates(p=>{
-      const ex  = p[wid]||makeWDates(0,0);
-      const arr = [...(ex[slotType]||[])];
-      arr[idx]  = { ...arr[idx], [field]:val };
-      return { ...p, [wid]:{ ...ex, [slotType]:arr } };
-    });
-  };
+    const QUICK_TIMES = (() => {
+      const ts=[];
+      for (let h=6;h<24;h++) for(let m=0;m<60;m+=15)
+        ts.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+      return ts;
+    })();
 
-  // ── Drag & drop ───────────────────────────────────────────────────────────
-  const onDragStart    = (e,id,src)  => { dragItem.current={id,src}; e.dataTransfer.effectAllowed="move"; };
-  const onDragEnd      = ()          => { dragItem.current=null; dragOverActive.current=null; setDragOver(null); };
-  const onDragOverZone = (e,zone)    => { e.preventDefault(); setDragOver(zone); };
-  const onDragLeaveZone= ()          => setDragOver(null);
-  const onDropActive   = e           => { e.preventDefault(); setDragOver(null); if(dragItem.current?.src==="bank") moveToActive(dragItem.current.id); dragItem.current=null; };
-  const onDropBank     = e           => { e.preventDefault(); setDragOver(null); if(dragItem.current?.src==="active") moveToBank(dragItem.current.id); dragItem.current=null; };
-  const onDragOverCard = (e,overId)  => { e.preventDefault(); e.stopPropagation(); if(dragItem.current?.src!=="active")return; dragOverActive.current=overId; };
-  const onDropCard     = (e,overId)  => {
-    e.preventDefault(); e.stopPropagation(); setDragOver(null);
-    if (!dragItem.current||dragItem.current.src!=="active") return;
-    const fromId=dragItem.current.id;
-    if (fromId===overId){dragItem.current=null;return;}
-    setActiveIds(prev=>{const a=[...prev];const fi=a.indexOf(fromId),ti=a.indexOf(overId);a.splice(fi,1);a.splice(ti,0,fromId);return a;});
-    dragItem.current=null; dragOverActive.current=null;
-  };
-
-  // ── Financial ─────────────────────────────────────────────────────────────
-  const effectivePricing = wid => perWSPrice&&wsConfig[wid]?.useSeparatePricing?(wsConfig[wid].pricing||pricing):pricing;
-  const gross    = (wid,n) => n*effectivePricing(wid).membersPrice;
-  const halfFmt  = (wid,n) => fmt(Math.round(gross(wid,n)*0.5));
-  const totalHalf= n => activeIds.reduce((s,wid)=>s+Math.round(gross(wid,n)*0.5),0);
-
-  // ── Sync badge ────────────────────────────────────────────────────────────
-  const SyncBadge = () => {
-    const map = { saving:{cl:"bg-amber-100 text-amber-700 border-amber-200",icon:"⏳",t:"שומר..."}, saved:{cl:"bg-green-100 text-green-700 border-green-200",icon:"✓",t:"נשמר"}, error:{cl:"bg-red-100 text-red-700 border-red-200",icon:"⚠",t:"שגיאה"} };
-    const s=map[syncStatus];
-    if (!s&&lastSaved) return <span className="text-xs text-gray-400 border border-gray-200 rounded-full px-2 py-0.5">{lastSaved.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})}</span>;
-    if (!s) return null;
-    return <span className={`text-xs border rounded-full px-2 py-0.5 flex items-center gap-1 ${s.cl}`}><span>{s.icon}</span>{s.t}</span>;
-  };
-
-  if (loading) return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center" dir="rtl">
-      <div className="text-center"><div className="text-3xl mb-3 animate-pulse">📋</div><p className="text-gray-500 text-sm">טוען הצעה...</p></div>
-    </div>
-  );
-
-  return (
-    <Ctx.Provider value={{ editMode, content, updateContent }}>
-    <div dir="rtl" className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 font-sans">
-    <div className="max-w-3xl mx-auto">
-
-      {editMode && (
-        <div className="mb-3 bg-blue-600 text-white rounded-xl px-4 py-2.5 flex items-center justify-between shadow">
-          <div className="flex items-center gap-2"><span>✏️</span><span className="text-sm font-medium">מצב עריכה – שינויים נשמרים אוטומטית</span></div>
-          <button onClick={()=>setEditMode(false)} className="bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-blue-50">סיים ✓</button>
-        </div>
-      )}
-
-      {/* ═══ HEADER ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1 ml-3">
-            <h1 className="text-xl font-bold text-gray-900 mb-1"><E k="mainTitle" /></h1>
-            <p className="text-gray-500 text-sm"><E k="subtitle" /></p>
-          </div>
-          <div className="flex flex-col items-end gap-1.5">
-            <E k="date" className="text-xs text-gray-500" />
-            <div className="flex items-center gap-2">
-              <SyncBadge />
-              <button onClick={()=>setEditMode(e=>!e)} className={`text-sm px-3 py-1 rounded-full border font-medium transition-colors ${editMode?"bg-blue-600 text-white border-blue-600":"bg-white text-gray-500 border-gray-300 hover:border-blue-400 hover:text-blue-600"}`}>
-                {editMode?"✓ סיים":"✏️ ערוך"}
-              </button>
-              <button onClick={load} className="text-sm px-2 py-1 rounded-full border border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-500">🔄</button>
+    // ─── TimeInput ────────────────────────────────────────────────────────────
+    const TimeInput = ({ value, onChange, compact=false }) => {
+      const [text, setText]  = useState(value||"");
+      const [open, setOpen]  = useState(false);
+      const ref = useRef();
+      useEffect(() => { setText(value||""); }, [value]);
+      useEffect(()=>{
+        if (!open) return;
+        const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown",h);
+        return ()=>document.removeEventListener("mousedown",h);
+      },[open]);
+      const commit = raw => { const v=normalizeTime(raw); setText(v||raw); if(v) onChange(v); };
+      const pick   = t   => { setText(t); onChange(t); setOpen(false); };
+      return (
+        <div ref={ref} className="relative flex">
+          <input type="text" value={text} placeholder="08:00"
+            onChange={e=>setText(e.target.value)} onBlur={e=>commit(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"){commit(e.target.value);e.target.blur();}}}
+            className={`flex-1 min-w-0 border border-gray-200 rounded-r text-center font-mono focus:outline-none focus:border-blue-400 ${compact?"p-1 text-xs":"p-1.5 text-sm"}`} dir="ltr" />
+          <button onClick={()=>setOpen(o=>!o)}
+            className={`border border-l-0 border-gray-200 rounded-l bg-gray-50 hover:bg-blue-50 hover:border-blue-300 text-gray-400 hover:text-blue-500 transition-colors flex items-center justify-center ${compact?"px-1.5 text-[10px]":"px-2 text-xs"}`}>▾</button>
+          {open && (
+            <div className="absolute top-full right-0 z-50 bg-white border border-gray-200 rounded-lg shadow-xl mt-0.5 w-28 max-h-52 overflow-y-auto">
+              <div className="sticky top-0 bg-gray-50 border-b border-gray-100 px-2 py-1 text-[10px] text-gray-400 text-center">בחר שעה</div>
+              {QUICK_TIMES.map(t=>(
+                <div key={t} onClick={()=>pick(t)}
+                  className={`px-2 py-1.5 text-sm font-mono cursor-pointer text-center transition-colors ${t===value?"bg-blue-500 text-white":"hover:bg-blue-50 text-gray-700"} ${t.endsWith(":00")?"font-semibold":""}`}>{t}</div>
+              ))}
             </div>
+          )}
+        </div>
+      );
+    };
+
+    const DateInput = ({ value, onChange }) => (
+      <input type="date" value={value} onChange={e=>onChange(e.target.value)}
+        className="w-full p-1.5 border border-gray-200 rounded text-sm text-center focus:outline-none focus:border-blue-400 cursor-pointer font-mono" />
+    );
+
+    const DayCell = ({ date, accent }) => {
+      const d = getDOW(date);
+      return <div className={`text-xs text-center font-medium ${d?accent:"text-gray-300"}`}>{d||"—"}</div>;
+    };
+
+    // ─── BulkFill ─────────────────────────────────────────────────────────────
+    const BulkFill = ({ wid, cfg, onFill }) => {
+      const [open,      setOpen]     = useState(false);
+      const [startDate, setStartDate]= useState("");
+      const [time,      setTime]     = useState("");
+      const [interval,  setInterval] = useState(7);
+      if (!open) return (
+        <button onClick={()=>setOpen(true)}
+          className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 hover:border-blue-400 rounded-lg px-2 py-1 flex items-center gap-1 transition-colors bg-blue-50 hover:bg-blue-100">⚡ מילוי מהיר</button>
+      );
+      const introN    = cfg?.introSessions    || 0;
+      const sessionsN = cfg?.workshopSessions || 0;
+      const applyDates = () => {
+        if (!startDate) return;
+        const newIntro    = Array(introN).fill(null).map((_,i)=>({ date:addDays(startDate,-(introN-i)*interval), time:time||"" }));
+        const newSessions = Array(sessionsN).fill(null).map((_,i)=>({ date:addDays(startDate,i*interval), time:time||"" }));
+        onFill(wid, { intro:newIntro, sessions:newSessions });
+      };
+      const applyTimeOnly = () => { if (!time) return; onFill(wid, null, time); };
+      return (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-blue-700">⚡ מילוי מהיר</span>
+            <button onClick={()=>setOpen(false)} className="text-gray-400 hover:text-gray-600 text-xs">✕ סגור</button>
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs text-gray-600 flex-shrink-0">שעה לכל המפגשים:</span>
+            <div className="flex-1 max-w-[120px]"><TimeInput value={time} onChange={setTime} compact /></div>
+            <button onClick={applyTimeOnly} disabled={!time}
+              className="text-xs px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0">החל שעה ✓</button>
+          </div>
+          <div className="bg-white rounded-lg border border-blue-100 p-2">
+            <div className="text-xs text-gray-500 mb-2">תזמון שבועי אוטומטי:</div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-gray-500 flex-shrink-0">מפגש 1 ב:</span>
+                <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}
+                  className="p-1 border border-gray-200 rounded text-xs font-mono focus:outline-none focus:border-blue-400 cursor-pointer" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-gray-500 flex-shrink-0">כל:</span>
+                <select value={interval} onChange={e=>setInterval(+e.target.value)}
+                  className="p-1 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:border-blue-400">
+                  <option value={7}>שבוע</option>
+                  <option value={14}>שבועיים</option>
+                  <option value={21}>3 שבועות</option>
+                </select>
+              </div>
+              <button onClick={applyDates} disabled={!startDate}
+                className="text-xs px-2 py-1 rounded bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">מלא תאריכים 📅</button>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1.5">* מפגש היכרות ייקבע {interval} ימים לפני מפגש 1</p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-6 text-sm border-t pt-3">
-          <div className="flex items-center gap-1"><span className="text-gray-500">מציע:</span><E k="proposer" className="font-medium" /></div>
-          <div className="flex items-center gap-1"><span className="text-gray-500">נמען:</span><E k="recipient" className="font-medium" /></div>
+      );
+    };
+
+    // ─── Editable text ────────────────────────────────────────────────────────
+    const E = ({ k, className="", multiline=false }) => {
+      const { editMode, content, updateContent } = useContext(Ctx);
+      const base = `border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 text-sm w-full ${className}`;
+      if (editMode) return multiline
+        ? <textarea value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className={`${base} resize-none`} rows={2} dir="rtl" />
+        : <input type="text" value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className={base} dir="rtl" />;
+      return <span className={className}>{content[k]}</span>;
+    };
+
+    const SectionTitle = ({ k, icon }) => {
+      const { editMode, content, updateContent } = useContext(Ctx);
+      return (
+        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 mb-3">
+          <span>{icon}</span>
+          {editMode
+            ? <input type="text" value={content[k]||""} onChange={e=>updateContent(k,e.target.value)} className="border border-blue-300 bg-blue-50 rounded px-1.5 text-base font-bold focus:outline-none focus:ring-1 focus:ring-blue-400 flex-1" dir="rtl" />
+            : <span>{content[k]}</span>}
+        </h2>
+      );
+    };
+
+    const CheckOption = ({ checked, onClick, label }) => (
+      <div onClick={onClick} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border select-none ${checked?"bg-blue-50 border-blue-500 text-blue-900":"bg-white border-gray-200 hover:border-gray-300"}`}>
+        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${checked?"bg-blue-500 border-blue-500":"border-gray-300"}`}>
+          {checked && <span className="text-white text-xs">✓</span>}
         </div>
+        <span className="text-sm">{label}</span>
       </div>
+    );
 
-      {/* ═══ OVERVIEW ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="overviewTitle" icon="📋" />
+    const NumControl = ({ value, onDec, onInc, suffix="" }) => (
+      <div className="flex items-center gap-1 justify-center">
+        <button onClick={onDec} className="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 font-bold text-xs flex items-center justify-center">−</button>
+        <span className="min-w-[3.5rem] text-center font-medium text-sm tabular-nums">{value.toLocaleString()}{suffix}</span>
+        <button onClick={onInc} className="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-600 font-bold text-xs flex items-center justify-center">+</button>
+      </div>
+    );
 
-        <div
-          onDragOver={e=>onDragOverZone(e,"active")} onDragLeave={onDragLeaveZone} onDrop={onDropActive}
-          className={`grid md:grid-cols-2 gap-3 mb-4 min-h-[80px] rounded-xl p-1 transition-all duration-150 ${dragOver==="active"?"bg-blue-100 border-2 border-blue-400 border-dashed":"border-2 border-transparent"}`}
-        >
-          {activeIds.length===0&&(
-            <div className="col-span-2 flex items-center justify-center h-20 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-xl">
-              {content.activeEmpty}
+    const PricingTable = ({ p, onChange }) => {
+      const { content } = useContext(Ctx);
+      const adj = (field, delta) => onChange({ ...p, [field]: Math.max(0, p[field]+delta) });
+      return (
+        <div className="overflow-hidden rounded-lg border border-gray-200 mb-2">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="p-2 text-right font-medium text-gray-600 text-xs">{content.audienceHeader}</th>
+                <th className="p-2 text-center font-medium text-gray-600 text-xs">{content.fullPriceHeader}</th>
+                <th className="p-2 text-center font-medium text-gray-600 text-xs">{content.earlyBirdHeader}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-t">
+                <td className="p-2 text-right text-sm">{content.membersLabel}</td>
+                <td className="p-2"><NumControl value={p.membersPrice}    suffix="₪" onDec={()=>adj("membersPrice",-50)}    onInc={()=>adj("membersPrice",50)} /></td>
+                <td className="p-2 text-green-600"><NumControl value={p.membersEarlyBird} suffix="₪" onDec={()=>adj("membersEarlyBird",-50)} onInc={()=>adj("membersEarlyBird",50)} /></td>
+              </tr>
+              <tr className="border-t bg-gray-50">
+                <td className="p-2 text-right text-sm">{content.guestsLabel}</td>
+                <td className="p-2"><NumControl value={p.guestsPrice}     suffix="₪" onDec={()=>adj("guestsPrice",-50)}     onInc={()=>adj("guestsPrice",50)} /></td>
+                <td className="p-2 text-green-600"><NumControl value={p.guestsEarlyBird}  suffix="₪" onDec={()=>adj("guestsEarlyBird",-50)}  onInc={()=>adj("guestsEarlyBird",50)} /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    function CIMProposal() {
+      const [loading,    setLoading]    = useState(true);
+      const [syncStatus, setSyncStatus] = useState("");
+      const [lastSaved,  setLastSaved]  = useState(null);
+      const [editMode,   setEditMode]   = useState(false);
+      const [perWSPrice, setPerWSPrice] = useState(false);
+      const [dragOver,   setDragOver]   = useState(null);
+
+      const [content,    setContent]    = useState(DEFAULT_CONTENT);
+      const [workshops,  setWorkshops]  = useState(INITIAL_WORKSHOPS);
+      const [activeIds,  setActiveIds]  = useState(DEFAULT_ACTIVE_IDS);
+      const [wsConfig,   setWsConfig]   = useState(DEFAULT_WS_CONFIG);
+      const [pricing,    setPricing]    = useState(DEFAULT_PRICING);
+      const [scenarios,  setScenarios]  = useState(DEFAULT_SCENARIOS);
+      const [agreements, setAgreements] = useState(DEFAULT_AGREEMENTS);
+      const [comments,   setComments]   = useState(DEFAULT_COMMENTS);
+      const [dates,      setDates]      = useState(DEFAULT_DATES);
+      const [editingBankId, setEditingBankId] = useState(null);
+
+      const dragItem       = useRef(null);
+      const dragOverActive = useRef(null);
+      const saveTimer      = useRef(null);
+      const latestState    = useRef({});
+      latestState.current  = { content, workshops, activeIds, wsConfig, pricing, scenarios, agreements, comments, dates, perWSPrice };
+
+      // ── localStorage load/save (replaces window.storage) ──────────────────
+      const load = useCallback(() => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const s = JSON.parse(raw);
+            if (s.content)    setContent(c  => ({ ...DEFAULT_CONTENT,   ...s.content }));
+            if (s.workshops)  setWorkshops(s.workshops);
+            if (s.activeIds)  setActiveIds(s.activeIds);
+            if (s.wsConfig)   setWsConfig(c  => ({ ...DEFAULT_WS_CONFIG, ...s.wsConfig }));
+            if (s.pricing)    setPricing(p   => ({ ...DEFAULT_PRICING,   ...s.pricing }));
+            if (s.scenarios)  setScenarios(p => ({ ...DEFAULT_SCENARIOS, ...s.scenarios }));
+            if (s.agreements) setAgreements(p=> ({ ...DEFAULT_AGREEMENTS,...s.agreements }));
+            if (s.comments)   setComments(p  => ({ ...DEFAULT_COMMENTS,  ...s.comments }));
+            if (s.dates)      setDates(s.dates);
+            if (s.perWSPrice !== undefined) setPerWSPrice(s.perWSPrice);
+            if (s.savedAt)    setLastSaved(new Date(s.savedAt));
+          }
+        } catch (_) {}
+        setLoading(false);
+      }, []);
+
+      const save = useCallback(() => {
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        setSyncStatus("saving");
+        saveTimer.current = setTimeout(() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...latestState.current, savedAt: new Date().toISOString() }));
+            setLastSaved(new Date());
+            setSyncStatus("saved");
+            setTimeout(() => setSyncStatus(""), 2500);
+          } catch (_) { setSyncStatus("error"); }
+        }, 800);
+      }, []);
+
+      useEffect(() => { load(); }, [load]);
+      useEffect(() => { if (!loading) save(); }, [content,workshops,activeIds,wsConfig,pricing,scenarios,agreements,comments,dates,perWSPrice,loading]);
+
+      // ── Helpers ──────────────────────────────────────────────────────────────
+      const updateContent = useCallback((k,v) => setContent(p=>({...p,[k]:v})),[]);
+      const toggleAgree   = (k,v) => setAgreements(p=>({...p,[k]: p[k]===v?null:v}));
+      const getWS         = id  => workshops.find(w=>w.id===id);
+      const bankIds       = workshops.map(w=>w.id).filter(id=>!activeIds.includes(id));
+
+      const moveToActive = id => {
+        if (activeIds.includes(id)) return;
+        setActiveIds(p=>[...p,id]);
+        setWsConfig(p=>({ ...p, [id]: p[id]||{ introSessions:1, workshopSessions:6, useSeparatePricing:false, pricing:{...pricing} } }));
+        setDates(p=>({ ...p, [id]: p[id]||makeWDates(1,6) }));
+      };
+      const moveToBank = id => setActiveIds(p=>p.filter(i=>i!==id));
+
+      const adjustSessions = (wid, field, delta) => {
+        const cfg  = wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
+        const newN = Math.max(0,(cfg[field]||0)+delta);
+        setWsConfig(p=>({...p,[wid]:{...p[wid],[field]:newN}}));
+        setDates(p=>{
+          const ex  = p[wid]||makeWDates(1,6);
+          const slot= field==="introSessions"?"intro":"sessions";
+          const cur = ex[slot]||[];
+          const nxt = newN>cur.length ? [...cur,...makeSlots(newN-cur.length)] : cur.slice(0,newN);
+          return { ...p, [wid]:{ ...ex, [slot]:nxt } };
+        });
+      };
+
+      const updateWSField = (wid,field,val) => setWorkshops(p=>p.map(w=>w.id===wid?{...w,[field]:val}:w));
+      const updateWSPoint = (wid,idx,val)   => setWorkshops(p=>p.map(w=>{
+        if(w.id!==wid)return w; const pts=[...w.points]; pts[idx]=val; return{...w,points:pts};
+      }));
+
+      const handleBulkFill = (wid, newSlots, timeOnly) => {
+        setDates(p => {
+          const ex = p[wid] || makeWDates(0,0);
+          if (timeOnly) {
+            return { ...p, [wid]: {
+              intro:    (ex.intro   ||[]).map(s=>({...s, time:timeOnly})),
+              sessions: (ex.sessions||[]).map(s=>({...s, time:timeOnly})),
+            }};
+          }
+          return { ...p, [wid]: newSlots };
+        });
+      };
+
+      const updateSlot = (wid, slotType, idx, field, val) => {
+        setDates(p=>{
+          const ex  = p[wid]||makeWDates(0,0);
+          const arr = [...(ex[slotType]||[])];
+          arr[idx]  = { ...arr[idx], [field]:val };
+          return { ...p, [wid]:{ ...ex, [slotType]:arr } };
+        });
+      };
+
+      // ── Drag & drop ──────────────────────────────────────────────────────────
+      const onDragStart    = (e,id,src)  => { dragItem.current={id,src}; e.dataTransfer.effectAllowed="move"; };
+      const onDragEnd      = ()          => { dragItem.current=null; dragOverActive.current=null; setDragOver(null); };
+      const onDragOverZone = (e,zone)    => { e.preventDefault(); setDragOver(zone); };
+      const onDragLeaveZone= ()          => setDragOver(null);
+      const onDropActive   = e           => { e.preventDefault(); setDragOver(null); if(dragItem.current?.src==="bank") moveToActive(dragItem.current.id); dragItem.current=null; };
+      const onDropBank     = e           => { e.preventDefault(); setDragOver(null); if(dragItem.current?.src==="active") moveToBank(dragItem.current.id); dragItem.current=null; };
+      const onDragOverCard = (e,overId)  => { e.preventDefault(); e.stopPropagation(); if(dragItem.current?.src!=="active")return; dragOverActive.current=overId; };
+      const onDropCard     = (e,overId)  => {
+        e.preventDefault(); e.stopPropagation(); setDragOver(null);
+        if (!dragItem.current||dragItem.current.src!=="active") return;
+        const fromId=dragItem.current.id;
+        if (fromId===overId){dragItem.current=null;return;}
+        setActiveIds(prev=>{const a=[...prev];const fi=a.indexOf(fromId),ti=a.indexOf(overId);a.splice(fi,1);a.splice(ti,0,fromId);return a;});
+        dragItem.current=null; dragOverActive.current=null;
+      };
+
+      // ── Financial ────────────────────────────────────────────────────────────
+      const effectivePricing = wid => perWSPrice&&wsConfig[wid]?.useSeparatePricing?(wsConfig[wid].pricing||pricing):pricing;
+      const gross    = (wid,n) => n*effectivePricing(wid).membersPrice;
+      const halfFmt  = (wid,n) => fmt(Math.round(gross(wid,n)*0.5));
+      const totalHalf= n => activeIds.reduce((s,wid)=>s+Math.round(gross(wid,n)*0.5),0);
+
+      const SyncBadge = () => {
+        const map = {
+          saving:{cl:"bg-amber-100 text-amber-700 border-amber-200",icon:"⏳",t:"שומר..."},
+          saved:{cl:"bg-green-100 text-green-700 border-green-200",icon:"✓",t:"נשמר"},
+          error:{cl:"bg-red-100 text-red-700 border-red-200",icon:"⚠",t:"שגיאה"}
+        };
+        const s=map[syncStatus];
+        if (!s&&lastSaved) return <span className="text-xs text-gray-400 border border-gray-200 rounded-full px-2 py-0.5">{lastSaved.toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})}</span>;
+        if (!s) return null;
+        return <span className={`text-xs border rounded-full px-2 py-0.5 flex items-center gap-1 ${s.cl}`}><span>{s.icon}</span>{s.t}</span>;
+      };
+
+      if (loading) return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center" dir="rtl">
+          <div className="text-center"><div className="text-3xl mb-3">📋</div><p className="text-gray-500 text-sm">טוען הצעה...</p></div>
+        </div>
+      );
+
+      return (
+        <Ctx.Provider value={{ editMode, content, updateContent }}>
+        <div dir="rtl" className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 font-sans">
+        <div className="max-w-3xl mx-auto">
+
+          {editMode && (
+            <div className="mb-3 bg-blue-600 text-white rounded-xl px-4 py-2.5 flex items-center justify-between shadow">
+              <div className="flex items-center gap-2"><span>✏️</span><span className="text-sm font-medium">מצב עריכה – שינויים נשמרים אוטומטית</span></div>
+              <button onClick={()=>setEditMode(false)} className="bg-white text-blue-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-blue-50">סיים ✓</button>
             </div>
           )}
 
-          {activeIds.map((wid,idx)=>{
-            const w=getWS(wid); if(!w)return null;
-            const cfg=wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
-            const c=COLORS[idx%COLORS.length];
-            return (
-              <div key={wid} draggable onDragStart={e=>onDragStart(e,wid,"active")} onDragOver={e=>onDragOverCard(e,wid)} onDrop={e=>onDropCard(e,wid)} onDragEnd={onDragEnd}
-                className={`border-2 ${c.border} rounded-xl p-3 ${c.bg} cursor-grab active:cursor-grabbing relative transition-transform`}>
-                <button onClick={()=>moveToBank(wid)} className="absolute top-2 left-2 w-5 h-5 rounded-full bg-white/80 hover:bg-red-100 text-gray-400 hover:text-red-500 text-xs flex items-center justify-center shadow-sm transition-colors" title="החזר לבנק">×</button>
-                <div className="flex items-center gap-2 mb-2 pr-1">
-                  <span className={`${c.badgeBg} text-white text-xs px-2 py-0.5 rounded-full`}>סדנה {idx+1}</span>
-                  <span className="text-gray-300 text-xs mr-auto">⋮⋮</span>
-                </div>
-                {editMode
-                  ? <input type="text" value={w.heTitle} onChange={e=>updateWSField(wid,"heTitle",e.target.value)} className="font-bold text-gray-900 text-sm mb-1 w-full border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none" dir="rtl" />
-                  : <div className="font-bold text-gray-900 text-sm mb-0.5">{w.heTitle}</div>}
-                {editMode
-                  ? <input type="text" value={w.enTitle} onChange={e=>updateWSField(wid,"enTitle",e.target.value)} className={`text-xs font-medium mb-2 w-full border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none ${c.text}`} dir="ltr" />
-                  : <div className={`text-xs font-medium mb-2 ${c.text}`}>{w.enTitle}</div>}
-                <ul className="text-xs text-gray-600 space-y-1 mb-3">
-                  {w.points.map((pt,pi)=>(
-                    <li key={pi} className="flex items-start gap-1">
-                      <span className={`${c.accent} mt-0.5 flex-shrink-0`}>•</span>
-                      {editMode
-                        ? <input type="text" value={pt} onChange={e=>updateWSPoint(wid,pi,e.target.value)} className="w-full border border-blue-300 bg-blue-50 rounded px-1 text-xs focus:outline-none" dir="rtl" />
-                        : <span>{pt}</span>}
-                    </li>
-                  ))}
-                </ul>
-                <div className={`${c.light} rounded-lg p-2`}>
-                  <div className="flex items-center gap-2 justify-center flex-wrap">
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 mb-1">היכרות</div>
-                      <NumControl value={cfg.introSessions} suffix=" מפגש" onDec={()=>adjustSessions(wid,"introSessions",-1)} onInc={()=>adjustSessions(wid,"introSessions",+1)} />
-                    </div>
-                    <span className="text-gray-300 text-xl">→</span>
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 mb-1">מפגשי סדנה</div>
-                      <NumControl value={cfg.workshopSessions} suffix=" מפגשים" onDec={()=>adjustSessions(wid,"workshopSessions",-1)} onInc={()=>adjustSessions(wid,"workshopSessions",+1)} />
-                    </div>
-                  </div>
+          {/* HEADER */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1 ml-3">
+                <h1 className="text-xl font-bold text-gray-900 mb-1"><E k="mainTitle" /></h1>
+                <p className="text-gray-500 text-sm"><E k="subtitle" /></p>
+              </div>
+              <div className="flex flex-col items-end gap-1.5">
+                <E k="date" className="text-xs text-gray-500" />
+                <div className="flex items-center gap-2">
+                  <SyncBadge />
+                  <button onClick={()=>setEditMode(e=>!e)} className={`text-sm px-3 py-1 rounded-full border font-medium transition-colors ${editMode?"bg-blue-600 text-white border-blue-600":"bg-white text-gray-500 border-gray-300 hover:border-blue-400 hover:text-blue-600"}`}>
+                    {editMode?"✓ סיים":"✏️ ערוך"}
+                  </button>
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Bank */}
-        <div onDragOver={e=>onDragOverZone(e,"bank")} onDragLeave={onDragLeaveZone} onDrop={onDropBank}
-          className={`rounded-xl border-2 p-3 transition-all duration-150 ${dragOver==="bank"?"bg-gray-100 border-gray-400 border-dashed":"border-gray-200 bg-gray-50"}`}>
-          <div className="flex items-center justify-between mb-2.5">
-            <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-1.5"><span>🏦</span><E k="bankTitle" /></h3>
-            <span className="text-xs text-gray-400"><E k="bankHint" /></span>
+            </div>
+            <div className="flex flex-wrap gap-6 text-sm border-t pt-3">
+              <div className="flex items-center gap-1"><span className="text-gray-500">מציע:</span><E k="proposer" className="font-medium" /></div>
+              <div className="flex items-center gap-1"><span className="text-gray-500">נמען:</span><E k="recipient" className="font-medium" /></div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {bankIds.length===0&&<p className="text-xs text-gray-400 italic">כל הסדנאות פעילות בסקירה</p>}
-            {bankIds.map(wid=>{
-              const w=getWS(wid); if(!w)return null;
-              const isEd=editingBankId===wid;
+
+          {/* OVERVIEW */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="overviewTitle" icon="📋" />
+            <div
+              onDragOver={e=>onDragOverZone(e,"active")} onDragLeave={onDragLeaveZone} onDrop={onDropActive}
+              className={`grid md:grid-cols-2 gap-3 mb-4 min-h-[80px] rounded-xl p-1 transition-all duration-150 ${dragOver==="active"?"bg-blue-100 border-2 border-blue-400 border-dashed":"border-2 border-transparent"}`}
+            >
+              {activeIds.length===0&&(
+                <div className="col-span-2 flex items-center justify-center h-20 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-xl">{content.activeEmpty}</div>
+              )}
+              {activeIds.map((wid,idx)=>{
+                const w=getWS(wid); if(!w)return null;
+                const cfg=wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
+                const c=COLORS[idx%COLORS.length];
+                return (
+                  <div key={wid} draggable onDragStart={e=>onDragStart(e,wid,"active")} onDragOver={e=>onDragOverCard(e,wid)} onDrop={e=>onDropCard(e,wid)} onDragEnd={onDragEnd}
+                    className={`border-2 ${c.border} rounded-xl p-3 ${c.bg} cursor-grab active:cursor-grabbing relative transition-transform`}>
+                    <button onClick={()=>moveToBank(wid)} className="absolute top-2 left-2 w-5 h-5 rounded-full bg-white/80 hover:bg-red-100 text-gray-400 hover:text-red-500 text-xs flex items-center justify-center shadow-sm transition-colors" title="החזר לבנק">×</button>
+                    <div className="flex items-center gap-2 mb-2 pr-1">
+                      <span className={`${c.badgeBg} text-white text-xs px-2 py-0.5 rounded-full`}>סדנה {idx+1}</span>
+                      <span className="text-gray-300 text-xs mr-auto">⋮⋮</span>
+                    </div>
+                    {editMode
+                      ? <input type="text" value={w.heTitle} onChange={e=>updateWSField(wid,"heTitle",e.target.value)} className="font-bold text-gray-900 text-sm mb-1 w-full border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none" dir="rtl" />
+                      : <div className="font-bold text-gray-900 text-sm mb-0.5">{w.heTitle}</div>}
+                    {editMode
+                      ? <input type="text" value={w.enTitle} onChange={e=>updateWSField(wid,"enTitle",e.target.value)} className={`text-xs font-medium mb-2 w-full border border-blue-300 bg-blue-50 rounded px-1.5 focus:outline-none ${c.text}`} dir="ltr" />
+                      : <div className={`text-xs font-medium mb-2 ${c.text}`}>{w.enTitle}</div>}
+                    <ul className="text-xs text-gray-600 space-y-1 mb-3">
+                      {w.points.map((pt,pi)=>(
+                        <li key={pi} className="flex items-start gap-1">
+                          <span className={`${c.accent} mt-0.5 flex-shrink-0`}>•</span>
+                          {editMode
+                            ? <input type="text" value={pt} onChange={e=>updateWSPoint(wid,pi,e.target.value)} className="w-full border border-blue-300 bg-blue-50 rounded px-1 text-xs focus:outline-none" dir="rtl" />
+                            : <span>{pt}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className={`${c.light} rounded-lg p-2`}>
+                      <div className="flex items-center gap-2 justify-center flex-wrap">
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500 mb-1">היכרות</div>
+                          <NumControl value={cfg.introSessions} suffix=" מפגש" onDec={()=>adjustSessions(wid,"introSessions",-1)} onInc={()=>adjustSessions(wid,"introSessions",+1)} />
+                        </div>
+                        <span className="text-gray-300 text-xl">→</span>
+                        <div className="text-center">
+                          <div className="text-xs text-gray-500 mb-1">מפגשי סדנה</div>
+                          <NumControl value={cfg.workshopSessions} suffix=" מפגשים" onDec={()=>adjustSessions(wid,"workshopSessions",-1)} onInc={()=>adjustSessions(wid,"workshopSessions",+1)} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bank */}
+            <div onDragOver={e=>onDragOverZone(e,"bank")} onDragLeave={onDragLeaveZone} onDrop={onDropBank}
+              className={`rounded-xl border-2 p-3 transition-all duration-150 ${dragOver==="bank"?"bg-gray-100 border-gray-400 border-dashed":"border-gray-200 bg-gray-50"}`}>
+              <div className="flex items-center justify-between mb-2.5">
+                <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-1.5"><span>🏦</span><E k="bankTitle" /></h3>
+                <span className="text-xs text-gray-400"><E k="bankHint" /></span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {bankIds.length===0&&<p className="text-xs text-gray-400 italic">כל הסדנאות פעילות בסקירה</p>}
+                {bankIds.map(wid=>{
+                  const w=getWS(wid); if(!w)return null;
+                  const isEd=editingBankId===wid;
+                  return (
+                    <div key={wid} draggable={!isEd} onDragStart={e=>!isEd&&onDragStart(e,wid,"bank")} onDragEnd={onDragEnd}
+                      className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 hover:border-blue-400 hover:text-blue-700 transition-colors group shadow-sm">
+                      {!isEd&&<span className="text-gray-300 text-xs cursor-grab">⋮⋮</span>}
+                      {isEd
+                        ? <input autoFocus type="text" value={w.heTitle} onChange={e=>updateWSField(wid,"heTitle",e.target.value)} onBlur={()=>setEditingBankId(null)} onKeyDown={e=>{if(e.key==="Enter"||e.key==="Escape")setEditingBankId(null);}} className="text-sm border-b border-blue-400 bg-transparent focus:outline-none min-w-[8rem]" dir="rtl" />
+                        : <span>{w.heTitle}</span>}
+                      {!isEd&&<button onClick={()=>setEditingBankId(wid)} className="w-4 h-4 rounded-full bg-gray-100 group-hover:bg-gray-200 text-gray-400 group-hover:text-gray-600 text-xs flex items-center justify-center transition-colors" title="ערוך שם">✎</button>}
+                      {!isEd&&<button onClick={()=>moveToActive(wid)} className="w-4 h-4 rounded-full bg-gray-100 group-hover:bg-blue-100 text-gray-400 group-hover:text-blue-600 text-xs flex items-center justify-center transition-colors" title="הוסף לסקירה">+</button>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* DATES */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="datesTitle" icon="📅" />
+            {activeIds.length===0&&<p className="text-sm text-gray-400 text-center py-6">אין סדנאות פעילות</p>}
+            {activeIds.map((wid,idx)=>{
+              const w   = getWS(wid); if(!w)return null;
+              const cfg = wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
+              const wd  = dates[wid]   ||makeWDates(cfg.introSessions,cfg.workshopSessions);
+              const c   = COLORS[idx%COLORS.length];
+              const intros   = wd.intro   ||[];
+              const sessions = wd.sessions||[];
               return (
-                <div key={wid} draggable={!isEd} onDragStart={e=>!isEd&&onDragStart(e,wid,"bank")} onDragEnd={onDragEnd}
-                  className="flex items-center gap-1.5 bg-white border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 hover:border-blue-400 hover:text-blue-700 transition-colors group shadow-sm">
-                  {!isEd&&<span className="text-gray-300 text-xs cursor-grab">⋮⋮</span>}
-                  {isEd
-                    ? <input autoFocus type="text" value={w.heTitle} onChange={e=>updateWSField(wid,"heTitle",e.target.value)} onBlur={()=>setEditingBankId(null)} onKeyDown={e=>{if(e.key==="Enter"||e.key==="Escape")setEditingBankId(null);}} className="text-sm border-b border-blue-400 bg-transparent focus:outline-none min-w-[8rem]" dir="rtl" />
-                    : <span>{w.heTitle}</span>}
-                  {!isEd&&<button onClick={()=>setEditingBankId(wid)} className="w-4 h-4 rounded-full bg-gray-100 group-hover:bg-gray-200 text-gray-400 group-hover:text-gray-600 text-xs flex items-center justify-center transition-colors" title="ערוך שם">✎</button>}
-                  {!isEd&&<button onClick={()=>moveToActive(wid)} className="w-4 h-4 rounded-full bg-gray-100 group-hover:bg-blue-100 text-gray-400 group-hover:text-blue-600 text-xs flex items-center justify-center transition-colors" title="הוסף לסקירה">+</button>}
+                <div key={wid} className={`mb-5 ${idx<activeIds.length-1?"pb-5 border-b border-gray-100":""}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className={`text-sm font-semibold ${c.text} flex items-center gap-1.5`}>
+                      <span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded`}>{idx+1}</span>
+                      {w.heTitle}
+                      <span className="text-gray-400 font-normal text-xs">{cfg.introSessions} היכרות · {cfg.workshopSessions} מפגשים</span>
+                    </h4>
+                    <BulkFill wid={wid} cfg={cfg} onFill={handleBulkFill} />
+                  </div>
+                  <div className={`${c.light} rounded-lg p-3`}>
+                    <div className="grid grid-cols-12 gap-1.5 mb-2 text-xs text-gray-500 text-center">
+                      <div className="col-span-2">{content.sessionHeader}</div>
+                      <div className="col-span-4">{content.dateHeader}</div>
+                      <div className="col-span-2">{content.dayHeader}</div>
+                      <div className="col-span-4">{content.timeHeader}</div>
+                    </div>
+                    {intros.map((slot,si)=>(
+                      <div key={`i${si}`} className="grid grid-cols-12 gap-1.5 items-center mb-2">
+                        <div className={`col-span-2 text-xs text-center font-medium ${c.accent}`}>{cfg.introSessions===1?content.introLabel:`היכרות ${si+1}`}</div>
+                        <div className="col-span-4"><DateInput value={slot.date} onChange={v=>updateSlot(wid,"intro",si,"date",v)} /></div>
+                        <div className="col-span-2"><DayCell date={slot.date} accent={c.accent} /></div>
+                        <div className="col-span-4"><TimeInput value={slot.time} onChange={v=>updateSlot(wid,"intro",si,"time",v)} /></div>
+                      </div>
+                    ))}
+                    {intros.length>0&&sessions.length>0&&<div className="border-t border-dashed border-gray-200 my-2" />}
+                    {sessions.map((slot,si)=>(
+                      <div key={`s${si}`} className="grid grid-cols-12 gap-1.5 items-center mb-1.5">
+                        <div className="col-span-2 text-xs text-center text-gray-500 font-medium">{si+1}</div>
+                        <div className="col-span-4"><DateInput value={slot.date} onChange={v=>updateSlot(wid,"sessions",si,"date",v)} /></div>
+                        <div className="col-span-2"><DayCell date={slot.date} accent={c.accent} /></div>
+                        <div className="col-span-4"><TimeInput value={slot.time} onChange={v=>updateSlot(wid,"sessions",si,"time",v)} /></div>
+                      </div>
+                    ))}
+                    {intros.length===0&&sessions.length===0&&<p className="text-xs text-gray-400 text-center py-2">0 מפגשים</p>}
+                  </div>
                 </div>
               );
             })}
+            {activeIds.length>0&&(
+              <div className="mt-2"><CheckOption checked={agreements.dates} onClick={()=>toggleAgree("dates",true)} label={content.datesConfirm} /></div>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* ═══ DATES ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="datesTitle" icon="📅" />
-
-        {activeIds.length===0&&(
-          <p className="text-sm text-gray-400 text-center py-6">אין סדנאות פעילות — הוסף סדנה מהבנק כדי לקבוע תאריכים</p>
-        )}
-
-        {activeIds.map((wid,idx)=>{
-          const w   = getWS(wid); if(!w)return null;
-          const cfg = wsConfig[wid]||{ introSessions:1, workshopSessions:6 };
-          const wd  = dates[wid]   ||makeWDates(cfg.introSessions,cfg.workshopSessions);
-          const c   = COLORS[idx%COLORS.length];
-          const intros   = wd.intro   ||[];
-          const sessions = wd.sessions||[];
-
-          return (
-            <div key={wid} className={`mb-5 ${idx<activeIds.length-1?"pb-5 border-b border-gray-100":""}`}>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className={`text-sm font-semibold ${c.text} flex items-center gap-1.5`}>
-                  <span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded`}>{idx+1}</span>
-                  {w.heTitle}
-                  <span className="text-gray-400 font-normal text-xs">
-                    {cfg.introSessions} היכרות · {cfg.workshopSessions} מפגשים
-                  </span>
-                </h4>
-                <BulkFill wid={wid} cfg={cfg} onFill={handleBulkFill} />
-              </div>
-
-              <div className={`${c.light} rounded-lg p-3`}>
-                {/* Column headers */}
-                <div className="grid grid-cols-12 gap-1.5 mb-2 text-xs text-gray-500 text-center">
-                  <div className="col-span-2">{content.sessionHeader}</div>
-                  <div className="col-span-4">{content.dateHeader}</div>
-                  <div className="col-span-2">{content.dayHeader}</div>
-                  <div className="col-span-4">{content.timeHeader}</div>
+          {/* PRICING */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="pricingTitle" icon="💰" />
+            <div className="flex gap-2 mb-4">
+              <CheckOption checked={!perWSPrice} onClick={()=>setPerWSPrice(false)} label={content.globalPriceLabel} />
+              <CheckOption checked={perWSPrice}  onClick={()=>setPerWSPrice(true)}  label={content.perWSPriceLabel} />
+            </div>
+            {!perWSPrice&&(
+              <>
+                <PricingTable p={pricing} onChange={setPricing} />
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-3 text-sm flex flex-wrap items-center gap-2">
+                  <strong>{content.introFreeLabel}</strong>
+                  <span className="text-gray-600">{content.introFreeText}</span>
+                  <NumControl value={pricing.introGuestPrice} suffix="₪" onDec={()=>setPricing(p=>({...p,introGuestPrice:Math.max(0,p.introGuestPrice-10)}))} onInc={()=>setPricing(p=>({...p,introGuestPrice:p.introGuestPrice+10}))} />
+                  <span className="text-gray-600">{content.introGuestText}</span>
                 </div>
-
-                {/* Intro slots */}
-                {intros.map((slot,si)=>(
-                  <div key={`i${si}`} className="grid grid-cols-12 gap-1.5 items-center mb-2">
-                    <div className={`col-span-2 text-xs text-center font-medium ${c.accent}`}>
-                      {cfg.introSessions===1?content.introLabel:`היכרות ${si+1}`}
-                    </div>
-                    <div className="col-span-4">
-                      <DateInput value={slot.date} onChange={v=>updateSlot(wid,"intro",si,"date",v)} />
-                    </div>
-                    <div className="col-span-2"><DayCell date={slot.date} accent={c.accent} /></div>
-                    <div className="col-span-4">
-                      <TimeInput value={slot.time} onChange={v=>updateSlot(wid,"intro",si,"time",v)} />
-                    </div>
+              </>
+            )}
+            {perWSPrice&&activeIds.map((wid,idx)=>{
+              const w=getWS(wid); if(!w)return null;
+              const cfg=wsConfig[wid]||{};
+              const c=COLORS[idx%COLORS.length];
+              const sep=cfg.useSeparatePricing;
+              const ep=sep?(cfg.pricing||pricing):pricing;
+              return (
+                <div key={wid} className={`mb-4 pb-4 ${idx<activeIds.length-1?"border-b border-gray-100":""}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className={`text-sm font-medium ${c.text} flex items-center gap-1`}>
+                      <span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded`}>{idx+1}</span>
+                      {w.heTitle}
+                    </h4>
+                    <button onClick={()=>setWsConfig(p=>({...p,[wid]:{...p[wid],useSeparatePricing:!p[wid]?.useSeparatePricing}}))}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors font-medium ${sep?"bg-blue-500 text-white border-blue-500":"bg-white text-gray-500 border-gray-300 hover:border-blue-400"}`}>
+                      {sep?"תמחור נפרד ✓":"השתמש בתמחור הכללי"}
+                    </button>
                   </div>
-                ))}
-
-                {/* Separator */}
-                {intros.length>0&&sessions.length>0&&(
-                  <div className="border-t border-dashed border-gray-200 my-2" />
-                )}
-
-                {/* Session slots */}
-                {sessions.map((slot,si)=>(
-                  <div key={`s${si}`} className="grid grid-cols-12 gap-1.5 items-center mb-1.5">
-                    <div className="col-span-2 text-xs text-center text-gray-500 font-medium">{si+1}</div>
-                    <div className="col-span-4">
-                      <DateInput value={slot.date} onChange={v=>updateSlot(wid,"sessions",si,"date",v)} />
-                    </div>
-                    <div className="col-span-2"><DayCell date={slot.date} accent={c.accent} /></div>
-                    <div className="col-span-4">
-                      <TimeInput value={slot.time} onChange={v=>updateSlot(wid,"sessions",si,"time",v)} />
-                    </div>
-                  </div>
-                ))}
-
-                {intros.length===0&&sessions.length===0&&(
-                  <p className="text-xs text-gray-400 text-center py-2">0 מפגשים — הגדר מספר מפגשים בסדנה</p>
-                )}
-              </div>
+                  <PricingTable p={ep} onChange={np=>sep?setWsConfig(p=>({...p,[wid]:{...p[wid],pricing:np}})):setPricing(np)} />
+                </div>
+              );
+            })}
+            <div className="flex gap-2 mb-3 mt-2">
+              <CheckOption checked={agreements.pricing==="approved"} onClick={()=>toggleAgree("pricing","approved")} label={content.pricingApprove} />
+              <CheckOption checked={agreements.pricing==="discuss"}  onClick={()=>toggleAgree("pricing","discuss")}  label={content.pricingDiscuss} />
             </div>
-          );
-        })}
-
-        {activeIds.length>0&&(
-          <div className="mt-2">
-            <CheckOption checked={agreements.dates} onClick={()=>toggleAgree("dates",true)} label={content.datesConfirm} />
+            <textarea value={comments.pricing} onChange={e=>setComments(p=>({...p,pricing:e.target.value}))} placeholder={content.pricingComment} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-14 focus:outline-none focus:border-blue-400" dir="rtl" />
           </div>
-        )}
-      </div>
 
-      {/* ═══ PRICING ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="pricingTitle" icon="💰" />
-        <div className="flex gap-2 mb-4">
-          <CheckOption checked={!perWSPrice} onClick={()=>setPerWSPrice(false)} label={content.globalPriceLabel} />
-          <CheckOption checked={perWSPrice}  onClick={()=>setPerWSPrice(true)}  label={content.perWSPriceLabel} />
-        </div>
-        {!perWSPrice&&(
-          <>
-            <PricingTable p={pricing} onChange={setPricing} />
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 mb-3 text-sm flex flex-wrap items-center gap-2">
-              <strong>{content.introFreeLabel}</strong>
-              <span className="text-gray-600">{content.introFreeText}</span>
-              <NumControl value={pricing.introGuestPrice} suffix="₪" onDec={()=>setPricing(p=>({...p,introGuestPrice:Math.max(0,p.introGuestPrice-10)}))} onInc={()=>setPricing(p=>({...p,introGuestPrice:p.introGuestPrice+10}))} />
-              <span className="text-gray-600">{content.introGuestText}</span>
-            </div>
-          </>
-        )}
-        {perWSPrice&&activeIds.map((wid,idx)=>{
-          const w=getWS(wid); if(!w)return null;
-          const cfg=wsConfig[wid]||{};
-          const c=COLORS[idx%COLORS.length];
-          const sep=cfg.useSeparatePricing;
-          const ep=sep?(cfg.pricing||pricing):pricing;
-          return (
-            <div key={wid} className={`mb-4 pb-4 ${idx<activeIds.length-1?"border-b border-gray-100":""}`}>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className={`text-sm font-medium ${c.text} flex items-center gap-1`}>
-                  <span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded`}>{idx+1}</span>
-                  {w.heTitle}
-                </h4>
-                <button onClick={()=>setWsConfig(p=>({...p,[wid]:{...p[wid],useSeparatePricing:!p[wid]?.useSeparatePricing}}))}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors font-medium ${sep?"bg-blue-500 text-white border-blue-500":"bg-white text-gray-500 border-gray-300 hover:border-blue-400"}`}>
-                  {sep?"תמחור נפרד ✓":"השתמש בתמחור הכללי"}
-                </button>
+          {/* SPLIT */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="splitTitle" icon="🤝" />
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-3 flex items-center justify-between">
+              <div>
+                <p className="font-bold text-blue-900 text-base"><E k="splitLabel" /></p>
+                <p className="text-blue-600 text-xs mt-0.5"><E k="splitDesc" /></p>
               </div>
-              <PricingTable p={ep} onChange={np=>sep?setWsConfig(p=>({...p,[wid]:{...p[wid],pricing:np}})):setPricing(np)} />
+              <div className="text-3xl font-black text-blue-300">50/50</div>
             </div>
-          );
-        })}
-        <div className="flex gap-2 mb-3 mt-2">
-          <CheckOption checked={agreements.pricing==="approved"} onClick={()=>toggleAgree("pricing","approved")} label={content.pricingApprove} />
-          <CheckOption checked={agreements.pricing==="discuss"}  onClick={()=>toggleAgree("pricing","discuss")}  label={content.pricingDiscuss} />
-        </div>
-        <textarea value={comments.pricing} onChange={e=>setComments(p=>({...p,pricing:e.target.value}))} placeholder={content.pricingComment} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-14 focus:outline-none focus:border-blue-400" dir="rtl" />
-      </div>
-
-      {/* ═══ SPLIT ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="splitTitle" icon="🤝" />
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-3 flex items-center justify-between">
-          <div>
-            <p className="font-bold text-blue-900 text-base"><E k="splitLabel" /></p>
-            <p className="text-blue-600 text-xs mt-0.5"><E k="splitDesc" /></p>
+            <div className="mb-3"><CheckOption checked={agreements.split==="approved"} onClick={()=>toggleAgree("split","approved")} label={content.splitApprove} /></div>
+            <textarea value={comments.split} onChange={e=>setComments(p=>({...p,split:e.target.value}))} placeholder={content.splitComment} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-14 focus:outline-none focus:border-blue-400" dir="rtl" />
           </div>
-          <div className="text-3xl font-black text-blue-300">50/50</div>
-        </div>
-        <div className="mb-3"><CheckOption checked={agreements.split==="approved"} onClick={()=>toggleAgree("split","approved")} label={content.splitApprove} /></div>
-        <textarea value={comments.split} onChange={e=>setComments(p=>({...p,split:e.target.value}))} placeholder={content.splitComment} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-14 focus:outline-none focus:border-blue-400" dir="rtl" />
-      </div>
 
-      {/* ═══ FINANCIAL ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="financialTitle" icon="📊" />
-        {activeIds.length===0&&<p className="text-sm text-gray-400 text-center py-4">הוסף סדנאות לתחזית הכספית</p>}
-        {activeIds.length>0&&(
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="p-2 text-right font-medium text-gray-600 text-xs" rowSpan={2}>סדנה</th>
-                  <th className="p-2 text-center text-xs border-r border-gray-200" colSpan={2}><span className="font-medium text-gray-500">{content.minLabel}</span></th>
-                  <th className="p-2 text-center text-xs" colSpan={2}><span className="font-semibold text-blue-600">{content.targetLabel}</span></th>
-                </tr>
-                <tr className="bg-gray-50 border-t border-gray-100">
-                  <th className="p-1 text-center font-semibold text-amber-600 text-xs">CIM</th>
-                  <th className="p-1 text-center font-semibold text-blue-600 text-xs border-r border-gray-200">ליאור</th>
-                  <th className="p-1 text-center font-semibold text-amber-600 text-xs">CIM</th>
-                  <th className="p-1 text-center font-semibold text-blue-600 text-xs">ליאור</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeIds.map((wid,idx)=>{
-                  const w=getWS(wid); if(!w)return null;
-                  const c=COLORS[idx%COLORS.length];
-                  return (
-                    <tr key={wid} className={`border-t ${idx%2===1?"bg-gray-50":""}`}>
-                      <td className="p-2 text-right"><div className="flex items-center gap-1.5"><span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full flex-shrink-0`}>{idx+1}</span><span className="text-gray-700 leading-tight">{w.heTitle}</span></div></td>
-                      <td className="p-1.5 text-center font-medium text-amber-600">{halfFmt(wid,scenarios.low)}</td>
-                      <td className="p-1.5 text-center font-medium text-blue-600 border-r border-gray-200">{halfFmt(wid,scenarios.low)}</td>
-                      <td className="p-1.5 text-center font-bold text-amber-600">{halfFmt(wid,scenarios.mid)}</td>
-                      <td className="p-1.5 text-center font-bold text-blue-600">{halfFmt(wid,scenarios.mid)}</td>
+          {/* FINANCIAL */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="financialTitle" icon="📊" />
+            {activeIds.length===0&&<p className="text-sm text-gray-400 text-center py-4">הוסף סדנאות לתחזית הכספית</p>}
+            {activeIds.length>0&&(
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="p-2 text-right font-medium text-gray-600 text-xs" rowSpan={2}>סדנה</th>
+                      <th className="p-2 text-center text-xs border-r border-gray-200" colSpan={2}><span className="font-medium text-gray-500">{content.minLabel}</span></th>
+                      <th className="p-2 text-center text-xs" colSpan={2}><span className="font-semibold text-blue-600">{content.targetLabel}</span></th>
                     </tr>
-                  );
-                })}
-                <tr className="border-t bg-slate-50">
-                  <td className="p-2 text-right font-semibold text-gray-600 text-xs">{content.participantsHeader}</td>
-                  <td className="p-1" colSpan={2}><NumControl value={scenarios.low} onDec={()=>setScenarios(p=>({...p,low:Math.max(1,p.low-1)}))} onInc={()=>setScenarios(p=>({...p,low:p.low+1}))} /></td>
-                  <td className="p-1" colSpan={2}><NumControl value={scenarios.mid} onDec={()=>setScenarios(p=>({...p,mid:Math.max(1,p.mid-1)}))} onInc={()=>setScenarios(p=>({...p,mid:p.mid+1}))} /></td>
-                </tr>
-                {activeIds.length>1&&(
-                  <tr className="border-t font-bold">
-                    <td className="p-2 text-right text-gray-700">{content.totalLabel}</td>
-                    <td className="p-1.5 text-center text-amber-700 bg-amber-50">{fmt(totalHalf(scenarios.low))}</td>
-                    <td className="p-1.5 text-center text-blue-700 bg-blue-50 border-r border-gray-200">{fmt(totalHalf(scenarios.low))}</td>
-                    <td className="p-1.5 text-center text-amber-700 bg-amber-50">{fmt(totalHalf(scenarios.mid))}</td>
-                    <td className="p-1.5 text-center text-blue-700 bg-blue-50">{fmt(totalHalf(scenarios.mid))}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <div className="bg-gray-50 p-1.5 text-xs text-gray-400 text-center border-t border-gray-100"><E k="financialNote" /></div>
+                    <tr className="bg-gray-50 border-t border-gray-100">
+                      <th className="p-1 text-center font-semibold text-amber-600 text-xs">CIM</th>
+                      <th className="p-1 text-center font-semibold text-blue-600 text-xs border-r border-gray-200">ליאור</th>
+                      <th className="p-1 text-center font-semibold text-amber-600 text-xs">CIM</th>
+                      <th className="p-1 text-center font-semibold text-blue-600 text-xs">ליאור</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeIds.map((wid,idx)=>{
+                      const w=getWS(wid); if(!w)return null;
+                      const c=COLORS[idx%COLORS.length];
+                      return (
+                        <tr key={wid} className={`border-t ${idx%2===1?"bg-gray-50":""}`}>
+                          <td className="p-2 text-right"><div className="flex items-center gap-1.5"><span className={`${c.badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full flex-shrink-0`}>{idx+1}</span><span className="text-gray-700 leading-tight">{w.heTitle}</span></div></td>
+                          <td className="p-1.5 text-center font-medium text-amber-600">{halfFmt(wid,scenarios.low)}</td>
+                          <td className="p-1.5 text-center font-medium text-blue-600 border-r border-gray-200">{halfFmt(wid,scenarios.low)}</td>
+                          <td className="p-1.5 text-center font-bold text-amber-600">{halfFmt(wid,scenarios.mid)}</td>
+                          <td className="p-1.5 text-center font-bold text-blue-600">{halfFmt(wid,scenarios.mid)}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t bg-slate-50">
+                      <td className="p-2 text-right font-semibold text-gray-600 text-xs">{content.participantsHeader}</td>
+                      <td className="p-1" colSpan={2}><NumControl value={scenarios.low} onDec={()=>setScenarios(p=>({...p,low:Math.max(1,p.low-1)}))} onInc={()=>setScenarios(p=>({...p,low:p.low+1}))} /></td>
+                      <td className="p-1" colSpan={2}><NumControl value={scenarios.mid} onDec={()=>setScenarios(p=>({...p,mid:Math.max(1,p.mid-1)}))} onInc={()=>setScenarios(p=>({...p,mid:p.mid+1}))} /></td>
+                    </tr>
+                    {activeIds.length>1&&(
+                      <tr className="border-t font-bold">
+                        <td className="p-2 text-right text-gray-700">{content.totalLabel}</td>
+                        <td className="p-1.5 text-center text-amber-700 bg-amber-50">{fmt(totalHalf(scenarios.low))}</td>
+                        <td className="p-1.5 text-center text-blue-700 bg-blue-50 border-r border-gray-200">{fmt(totalHalf(scenarios.low))}</td>
+                        <td className="p-1.5 text-center text-amber-700 bg-amber-50">{fmt(totalHalf(scenarios.mid))}</td>
+                        <td className="p-1.5 text-center text-blue-700 bg-blue-50">{fmt(totalHalf(scenarios.mid))}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="bg-gray-50 p-1.5 text-xs text-gray-400 text-center border-t border-gray-100"><E k="financialNote" /></div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* ═══ KPIs ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="kpisTitle" icon="🎯" />
-        <div className="grid grid-cols-2 gap-2 mb-3 sm:grid-cols-4">
-          {[{lk:"kpi1Label",vk:"kpi1Value",sub:"ממפגש היכרות ← הרשמה"},{lk:"kpi2Label",vk:"kpi2Value",sub:"משלימים את הסדנה"},{lk:"kpi3Label",vk:"kpi3Value",sub:"שאינם חברי CIM"},{lk:"kpi4Label",vk:"kpi4Value",sub:"חוזרים למחזור הבא"}].map(({lk,vk,sub})=>(
-            <div key={lk} className="bg-gray-50 rounded-xl p-3 text-center flex flex-col gap-1">
-              <div className="font-bold text-lg text-gray-900"><E k={vk} /></div>
-              <div className="text-xs font-semibold text-gray-700"><E k={lk} /></div>
-              <div className="text-xs text-gray-400 leading-tight">{sub}</div>
+          {/* KPIs */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="kpisTitle" icon="🎯" />
+            <div className="grid grid-cols-2 gap-2 mb-3 sm:grid-cols-4">
+              {[{lk:"kpi1Label",vk:"kpi1Value",sub:"ממפגש היכרות ← הרשמה"},{lk:"kpi2Label",vk:"kpi2Value",sub:"משלימים את הסדנה"},{lk:"kpi3Label",vk:"kpi3Value",sub:"שאינם חברי CIM"},{lk:"kpi4Label",vk:"kpi4Value",sub:"חוזרים למחזור הבא"}].map(({lk,vk,sub})=>(
+                <div key={lk} className="bg-gray-50 rounded-xl p-3 text-center flex flex-col gap-1">
+                  <div className="font-bold text-lg text-gray-900"><E k={vk} /></div>
+                  <div className="text-xs font-semibold text-gray-700"><E k={lk} /></div>
+                  <div className="text-xs text-gray-400 leading-tight">{sub}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <CheckOption checked={agreements.kpis} onClick={()=>setAgreements(p=>({...p,kpis:!p.kpis}))} label={content.kpisCheck} />
-      </div>
+            <CheckOption checked={agreements.kpis} onClick={()=>setAgreements(p=>({...p,kpis:!p.kpis}))} label={content.kpisCheck} />
+          </div>
 
-      {/* ═══ COMMENTS ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="commentsTitle" icon="💬" />
-        <textarea value={comments.general} onChange={e=>setComments(p=>({...p,general:e.target.value}))} placeholder={content.commentsPlaceholder} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-16 focus:outline-none focus:border-blue-400" dir="rtl" />
-      </div>
+          {/* COMMENTS */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="commentsTitle" icon="💬" />
+            <textarea value={comments.general} onChange={e=>setComments(p=>({...p,general:e.target.value}))} placeholder={content.commentsPlaceholder} className="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none h-16 focus:outline-none focus:border-blue-400" dir="rtl" />
+          </div>
 
-      {/* ═══ SIGNATURES ═══ */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-        <SectionTitle k="signaturesTitle" icon="✍️" />
-        <div className="grid grid-cols-2 gap-4">
-          {[{n:"sig1Name",ph:"sig1Ph",d:"sig1Date"},{n:"sig2Name",ph:"sig2Ph",d:"sig2Date"}].map(({n,ph,d})=>(
-            <div key={n} className="border-2 border-dashed border-gray-300 rounded-lg p-3">
-              <p className="text-sm font-medium text-gray-700 mb-2"><E k={n} /></p>
-              <div className="h-12 bg-gray-50 rounded mb-1 flex items-center justify-center text-gray-400 text-xs"><E k={ph} /></div>
-              <p className="text-xs text-gray-500"><E k={d} /></p>
+          {/* SIGNATURES */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <SectionTitle k="signaturesTitle" icon="✍️" />
+            <div className="grid grid-cols-2 gap-4">
+              {[{n:"sig1Name",ph:"sig1Ph",d:"sig1Date"},{n:"sig2Name",ph:"sig2Ph",d:"sig2Date"}].map(({n,ph,d})=>(
+                <div key={n} className="border-2 border-dashed border-gray-300 rounded-lg p-3">
+                  <p className="text-sm font-medium text-gray-700 mb-2"><E k={n} /></p>
+                  <div className="h-12 bg-gray-50 rounded mb-1 flex items-center justify-center text-gray-400 text-xs"><E k={ph} /></div>
+                  <p className="text-xs text-gray-500"><E k={d} /></p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* ═══ STATUS ═══ */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-4 text-white">
-        <h3 className="font-bold text-sm mb-2"><E k="statusTitle" /></h3>
-        <div className="grid grid-cols-5 gap-1.5 text-xs">
-          {[
-            { k:"statusDates",        active:agreements.dates,                   warn:false,                           d:agreements.dates?"✓":"—" },
-            { k:"statusPricing",      active:agreements.pricing==="approved",    warn:agreements.pricing==="discuss",  d:agreements.pricing==="approved"?"✓":agreements.pricing==="discuss"?"?":"—" },
-            { k:"statusSplit",        active:agreements.split==="approved",      warn:false,                           d:agreements.split==="approved"?"✓":"—" },
-            { k:"statusParticipants", active:false,                              warn:false,                           d:`${scenarios.low}/${scenarios.mid}` },
-            { k:"statusKpis",         active:agreements.kpis,                   warn:false,                           d:agreements.kpis?"✓":"—" },
-          ].map(({k,active,warn,d})=>(
-            <div key={k} className={`rounded p-1.5 text-center ${active?"bg-green-500":warn?"bg-amber-500":"bg-white/20"}`}>
-              <div className="opacity-80 text-xs"><E k={k} /></div>
-              <div className="font-bold">{d}</div>
+          {/* STATUS */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-4 text-white">
+            <h3 className="font-bold text-sm mb-2"><E k="statusTitle" /></h3>
+            <div className="grid grid-cols-5 gap-1.5 text-xs">
+              {[
+                { k:"statusDates",        active:agreements.dates,              d:agreements.dates?"✓":"—" },
+                { k:"statusPricing",      active:agreements.pricing==="approved",d:agreements.pricing==="approved"?"✓":agreements.pricing==="discuss"?"?":"—" },
+                { k:"statusSplit",        active:agreements.split==="approved", d:agreements.split==="approved"?"✓":"—" },
+                { k:"statusParticipants", active:false,                         d:`${scenarios.low}/${scenarios.mid}` },
+                { k:"statusKpis",         active:agreements.kpis,              d:agreements.kpis?"✓":"—" },
+              ].map(({k,active,d})=>(
+                <div key={k} className={`rounded p-1.5 text-center ${active?"bg-green-500":"bg-white/20"}`}>
+                  <div className="opacity-80 text-xs"><E k={k} /></div>
+                  <div className="font-bold">{d}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-2 flex flex-wrap gap-1">
-          {activeIds.map((wid,idx)=>{
-            const w=getWS(wid); if(!w)return null;
-            const c=COLORS[idx%COLORS.length];
-            return <span key={wid} className={`text-xs px-2 py-0.5 rounded-full ${c.badgeBg} text-white opacity-90`}>{idx+1}. {w.heTitle.length>12?w.heTitle.slice(0,12)+"…":w.heTitle}</span>;
-          })}
-        </div>
-      </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {activeIds.map((wid,idx)=>{
+                const w=getWS(wid); if(!w)return null;
+                const c=COLORS[idx%COLORS.length];
+                return <span key={wid} className={`text-xs px-2 py-0.5 rounded-full ${c.badgeBg} text-white opacity-90`}>{idx+1}. {w.heTitle.length>12?w.heTitle.slice(0,12)+"…":w.heTitle}</span>;
+              })}
+            </div>
+          </div>
 
-      <div className="text-center text-xs text-gray-400 mt-4 pb-6"><E k="footerText" /></div>
-    </div>
-    </div>
-    </Ctx.Provider>
-  );
-}
+          <div className="text-center text-xs text-gray-400 mt-4 pb-6"><E k="footerText" /></div>
+        </div>
+        </div>
+        </Ctx.Provider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<CIMProposal />);
+  </script>
+</body>
+</html>
