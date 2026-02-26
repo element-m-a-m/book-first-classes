@@ -79,6 +79,7 @@ const CFG = {
   studio: { name: "סניף חולון", address: 'רחוב "חזית חמש" 2, שכונת תל גיבורים, חולון' },
   bookingUrl: "https://app.boostapp.co.il/lessons.php?GetUrl=660cf18a7e302",
   waPhone: "972512826106",
+  webhookUrl: "https://script.google.com/macros/s/AKfycbyJ0CjKQq8jM0i_Mg1qgCkwbLeY2Gb9f5iX2kF6CC-4PQz8keR9O7CWNW3os8ch2bt00A/exec",
   whatToBring: ["👕 בגדי ספורט נוחים (בשיעורי הלחימה - מכנס ארוך)", "💧 בקבוק מים", "⏰ להגיע 15 דקות לפני", "👟 נעלי ספורט"],
 };
 
@@ -109,6 +110,13 @@ function makeWeeks(start, n, active) {
 
 function fmt(d) { return String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear(); }
 function waLink(phone, text) { return "https://wa.me/" + phone + "?text=" + encodeURIComponent(text); }
+
+/* ── Backend webhook ── */
+function sendEvent(eventName, data) {
+  if (!CFG.webhookUrl) return;
+  const payload = { event: eventName, ...data, device: /Mobi/i.test(navigator.userAgent) ? "mobile" : "desktop", utm: new URLSearchParams(window.location.search).get("utm_source") || "" };
+  fetch(CFG.webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(function(e) { console.warn("Webhook error:", e); });
+}
 
 function getCleanPhone(p) {
   let c = p.replace(/\D/g, '');
@@ -356,6 +364,29 @@ function ElementBookingWidget() {
 
   /* ── Idle Timeout (#9 — 60s inactivity, works on mobile + desktop) ── */
   const lastActivity = useRef(Date.now());
+  const sentEvents = useRef({});
+  const abandonRef = useRef(null);
+
+  /* ── Send event (deduplicated) ── */
+  const fireEvent = (eventName, extra) => {
+    const key = eventName + ":" + (cleanPhone || leadPhone);
+    if (sentEvents.current[key]) return;
+    sentEvents.current[key] = true;
+    const base = { name: leadName.trim(), phone: leadPhone, audience: aud || "" };
+    sendEvent(eventName, { ...base, ...extra });
+  };
+
+  /* ── Abandoned checkout detection ── */
+  useEffect(() => {
+    if (step === "action") {
+      abandonRef.current = setTimeout(() => {
+        fireEvent("abandoned_checkout", { categoryId: cat?.id, categoryLabel: cat?.label, branchTitle: branch?.label, packageLabel: pkg === "single" ? "שיעור בודד" : "3 שיעורי היכרות", price: currentPrice });
+      }, 90000);
+    } else {
+      if (abandonRef.current) clearTimeout(abandonRef.current);
+    }
+    return () => { if (abandonRef.current) clearTimeout(abandonRef.current); };
+  }, [step]);
   useEffect(() => {
     const touch = () => { lastActivity.current = Date.now(); };
     const events = ['click', 'touchstart', 'scroll', 'keydown', 'mousemove'];
@@ -435,7 +466,7 @@ function ElementBookingWidget() {
             <Ico name="lock" color="#999" size={10}/> הפרטים שמורים במערכת ולא יועברו לצד שלישי
           </div>
           {/* FIX #1: Button properly disabled until all 3 conditions met */}
-          <Btn onClick={() => { setIsNameTouched(true); setIsPhoneTouched(true); if (isNameValid && isPhoneValid) fw("branch"); }} disabled={!aud || !isNameValid || !isPhoneValid} color={uc}>המשיכו לבחירת אימון ←</Btn>
+          <Btn onClick={() => { setIsNameTouched(true); setIsPhoneTouched(true); if (isNameValid && isPhoneValid) { fireEvent("lead_started"); fw("branch"); }}} disabled={!aud || !isNameValid || !isPhoneValid} color={uc}>המשיכו לבחירת אימון ←</Btn>
         </div>
       </div>
     </div>
@@ -638,7 +669,7 @@ function ElementBookingWidget() {
         {/* FIX #15a: resize vertical only */}
         {medHas === true && <textarea className="premium-input" value={medText} onChange={e => setMedText(e.target.value)} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..." style={{ ...inpStyle, minHeight: 64, marginTop: 8, resize: "vertical" }}/>}
       </div>
-      <Btn onClick={() => fw("action")} disabled={medHas === null} color={uc}>המשיכו לסיכום ←</Btn>
+      <Btn onClick={() => { fireEvent("checkout_reached", { categoryId: cat?.id, categoryLabel: cat?.label, branchTitle: branch?.label, packageLabel: pkg === "single" ? "שיעור בודד" : "3 שיעורי היכרות", price: currentPrice, dates: selDates.map(d => d.toISOString()), classTime: cat ? (CFG.classes.find(c => c.categoryId === cat.id)?.time || "") : "", medical: medHas ? (medText || "כן, לא פורט") : "הכל תקין" }); fw("action"); }} disabled={medHas === null} color={uc}>המשיכו לסיכום ←</Btn>
     </div>
   );
 
@@ -703,7 +734,7 @@ function ElementBookingWidget() {
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14, paddingRight: 36 }}>
           <Ico name="lock" color="#0D7C5F" size={13}/><span style={{ fontSize: 11.5, fontWeight: 700, color: "#0D7C5F" }}>תשלום מאובטח ומוצפן</span>
         </div>
-        <button onClick={() => { fw("done"); setTimeout(() => window.open(finalUrl,"_blank"), 1200); }} style={{ width: "100%", padding: "14px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,"+uc+","+uc+"DD)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px "+uc+"30", transition: "all 0.2s" }}>מעבר למערכת ההזמנה ←</button>
+        <button onClick={() => { fireEvent("booking_selfbook", { categoryId: cat?.id, categoryLabel: cat?.label }); fw("done"); setTimeout(() => window.open(finalUrl,"_blank"), 1200); }} style={{ width: "100%", padding: "14px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,"+uc+","+uc+"DD)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px "+uc+"30", transition: "all 0.2s" }}>מעבר למערכת ההזמנה ←</button>
       </div>
       {/* Option 2: Callback */}
       <div style={{ borderRadius: 14, border: "1.5px solid #E8E7E3", background: "#fff", padding: "16px" }}>
@@ -716,7 +747,7 @@ function ElementBookingWidget() {
             <div style={{ padding: '9px 8px', background: '#F0F0EC', color: '#666', borderRight: '1px solid #E0E0DC', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}>+972</div>
             <input type="tel" value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="50-1234567" style={{ flex: 1, width: '100%', padding: '9px 8px', border: 'none', background: 'transparent', outline: 'none', fontSize: 13, fontFamily: 'inherit' }}/>
           </div>
-          <button onClick={() => { window.open(waLink(CFG.waPhone, groupWA()), "_blank"); fw("done-wa"); }} disabled={!isPhoneValid} style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: isPhoneValid ? "linear-gradient(135deg,#25D366,#128C7E)" : "#ddd", color: "#fff", fontWeight: 700, cursor: isPhoneValid ? "pointer":"default", fontFamily: "inherit", transition: "all 0.2s" }}>שלחו</button>
+          <button onClick={() => { fireEvent("booking_callback", { categoryId: cat?.id, categoryLabel: cat?.label }); window.open(waLink(CFG.waPhone, groupWA()), "_blank"); fw("done-wa"); }} disabled={!isPhoneValid} style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: isPhoneValid ? "linear-gradient(135deg,#25D366,#128C7E)" : "#ddd", color: "#fff", fontWeight: 700, cursor: isPhoneValid ? "pointer":"default", fontFamily: "inherit", transition: "all 0.2s" }}>שלחו</button>
         </div>
       </div>
     </div>
@@ -777,7 +808,7 @@ function ElementBookingWidget() {
         {isPhoneTouched && !isPhoneValid && <div style={{ fontSize: 10.5, color: "#C4342D", marginTop: 4, fontWeight: 500 }}>* נא להזין מספר טלפון תקין</div>}
       </div>
       <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}>הערות</label><textarea className="premium-input" value={pvMsg} onChange={e => setPvMsg(e.target.value)} placeholder="ספרו לנו על המטרה שלכם, וציינו אם יש מגבלות רפואיות שחשוב שנדע עליהן..." style={{ ...inpStyle, minHeight: 64, resize: "vertical" }}/></div>
-      <button onClick={() => { setIsNameTouched(true); setIsPhoneTouched(true); if (isNameValid && isPhoneValid) { window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }}} disabled={!isNameValid || !isPhoneValid} style={{ width: "100%", padding: "12px", borderRadius: 11, border: "none", background: (isNameValid && isPhoneValid) ? ("linear-gradient(135deg,"+uc+","+uc+"DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: (isNameValid && isPhoneValid) ? "pointer":"default", fontFamily: "inherit", transition: "all 0.2s", opacity: (isNameValid && isPhoneValid) ? 1 : 0.6 }}>שלחו פנייה בוואטסאפ</button>
+      <button onClick={() => { setIsNameTouched(true); setIsPhoneTouched(true); if (isNameValid && isPhoneValid) { fireEvent("private_inquiry", { categoryId: cat?.id, categoryLabel: cat?.label, branchTitle: "אימון אישי", pvMsg: pvMsg }); window.open(waLink(CFG.waPhone, privWA()), "_blank"); fw("pdone"); }}} disabled={!isNameValid || !isPhoneValid} style={{ width: "100%", padding: "12px", borderRadius: 11, border: "none", background: (isNameValid && isPhoneValid) ? ("linear-gradient(135deg,"+uc+","+uc+"DD)") : "#ccc", color: "#fff", fontWeight: 700, cursor: (isNameValid && isPhoneValid) ? "pointer":"default", fontFamily: "inherit", transition: "all 0.2s", opacity: (isNameValid && isPhoneValid) ? 1 : 0.6 }}>שלחו פנייה בוואטסאפ</button>
     </div>
   );
 
