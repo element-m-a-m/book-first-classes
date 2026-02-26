@@ -114,8 +114,8 @@ function waLink(phone, text) { return "https://wa.me/" + phone + "?text=" + enco
 /* ── Backend webhook ── */
 function sendEvent(eventName, data) {
   if (!CFG.webhookUrl) return;
-  const payload = { event: eventName, ...data, device: /Mobi/i.test(navigator.userAgent) ? "mobile" : "desktop", utm: new URLSearchParams(window.location.search).get("utm_source") || "" };
-  fetch(CFG.webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(function(e) { console.warn("Webhook error:", e); });
+  var payload = JSON.stringify({ event: eventName, ...data, device: /Mobi/i.test(navigator.userAgent) ? "mobile" : "desktop", utm: new URLSearchParams(window.location.search).get("utm_source") || "" });
+  fetch(CFG.webhookUrl, { method: "POST", mode: "no-cors", cache: "no-cache", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload }).catch(function(e) { console.warn("Webhook error:", e); });
 }
 
 function getCleanPhone(p) {
