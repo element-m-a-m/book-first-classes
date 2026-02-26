@@ -211,6 +211,8 @@ function ElementBookingWidget() {
   const [showExit, setShowExit] = useState(false);
   const [hasSeenExit, setHasSeenExit] = useState(false);
   const [showIdle, setShowIdle] = useState(false);
+  const [redirectPct, setRedirectPct] = useState(0);
+  const redirectFired = useRef(false);
   const [hasSeenIdle, setHasSeenIdle] = useState(false);
 
   /* ── Stable "today" reference (fixes #14 — no midnight drift) ── */
@@ -387,6 +389,26 @@ function ElementBookingWidget() {
     }
     return () => { if (abandonRef.current) clearTimeout(abandonRef.current); };
   }, [step]);
+
+  /* ── Redirect countdown for "done" screen ── */
+  useEffect(() => {
+    if (step !== "done") { setRedirectPct(0); redirectFired.current = false; return; }
+    const DURATION = 12000;
+    const INTERVAL = 50;
+    const start = Date.now();
+    const id = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / DURATION) * 100);
+      setRedirectPct(pct);
+      if (pct >= 100 && !redirectFired.current) {
+        redirectFired.current = true;
+        clearInterval(id);
+        window.open(finalUrl, "_blank");
+      }
+    }, INTERVAL);
+    return () => clearInterval(id);
+  }, [step]);
+
   useEffect(() => {
     const touch = () => { lastActivity.current = Date.now(); };
     const events = ['click', 'touchstart', 'scroll', 'keydown', 'mousemove'];
@@ -734,7 +756,7 @@ function ElementBookingWidget() {
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14, paddingRight: 36 }}>
           <Ico name="lock" color="#0D7C5F" size={13}/><span style={{ fontSize: 11.5, fontWeight: 700, color: "#0D7C5F" }}>תשלום מאובטח ומוצפן</span>
         </div>
-        <button onClick={() => { fireEvent("booking_selfbook", { categoryId: cat?.id, categoryLabel: cat?.label }); fw("done"); setTimeout(() => window.open(finalUrl,"_blank"), 1200); }} style={{ width: "100%", padding: "14px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,"+uc+","+uc+"DD)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px "+uc+"30", transition: "all 0.2s" }}>מעבר למערכת ההזמנה ←</button>
+        <button onClick={() => { fireEvent("booking_selfbook", { categoryId: cat?.id, categoryLabel: cat?.label }); fw("done"); }} style={{ width: "100%", padding: "14px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,"+uc+","+uc+"DD)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px "+uc+"30", transition: "all 0.2s" }}>מעבר למערכת ההזמנה ←</button>
       </div>
       {/* Option 2: Callback */}
       <div style={{ borderRadius: 14, border: "1.5px solid #E8E7E3", background: "#fff", padding: "16px" }}>
@@ -755,19 +777,33 @@ function ElementBookingWidget() {
 
   const renderDone = () => (
     <div>
-      <BackBtn onClick={() => bk("action")}/>
       <div style={{ textAlign: "center", padding: "8px 0" }}>
-        <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px", boxShadow: "0 5px 16px rgba(26,26,46,0.2)" }}><Ico name="lock" color="#fff" size={22}/></div>
-        <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e", marginBottom: 6 }}>מעבירים אותך לתשלום מאובטח...</div>
-        <div style={{ fontSize: 12.5, color: "#666", marginBottom: 16, lineHeight: 1.5 }}>כדי להבטיח את מקומך, אנא השלם/י את התשלום בעמוד שנפתח.<br/><span style={{ fontSize: 11, opacity: 0.8 }}>* השיבוץ יאושר סופית ע"י הצוות (במקרה של שינויים נעדכן).</span></div>
+        <div style={{ width: 50, height: 50, borderRadius: "50%", background: "#00E5A0", display: "flex", alignItems: "center", justifyContent: "center", margin: "4px auto 14px", boxShadow: "0 5px 16px rgba(0,229,160,0.3)" }}><Ico name="check" color="#fff" size={22}/></div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a2e", marginBottom: 4 }}>ההזמנה שלכם מוכנה!</div>
+        <div style={{ fontSize: 12.5, color: "#666", marginBottom: 16, lineHeight: 1.5 }}>הפרטים נשמרו. כדי להבטיח את מקומכם, אנא השלימו את התשלום בעמוד שייפתח.<br/><span style={{ fontSize: 11, opacity: 0.8 }}>* השיבוץ יאושר סופית ע"י הצוות (במקרה של שינויים נעדכן).</span></div>
         {renderSummaryCard()}
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 14, flexWrap: "wrap" }}>
-          <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "44px", padding: "0 16px", borderRadius: 10, background: "#1a1a2e", color: "#fff", fontSize: 12.5, fontWeight: 600, textDecoration: "none", fontFamily: "inherit", boxSizing: "border-box" }}>מעבר לעמוד התשלום</a>
-          {selDates.length > 0 && <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <button onClick={handleAddCalendar} style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "44px", gap: 6, padding: "0 16px", borderRadius: 10, background: "#F0FAF8", border: "1.5px solid #1A7A6D", color: "#1A7A6D", fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxSizing: "border-box" }}><Ico name="calendar" color="#1A7A6D" size={14}/> הוספה ליומן</button>
-            <div style={{ fontSize: 10, color: "#999", marginTop: 4 }}>* באנדרואיד: יש לפתוח את הקובץ לאחר ההורדה</div>
-          </div>}
+
+        {/* Progress bar + redirect */}
+        <div style={{ background: "#F8F7F4", borderRadius: 12, padding: "14px 16px", marginBottom: 14, border: "1px solid #E8E7E3" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{redirectPct < 100 ? "⏳ מעבירים אתכם לעמוד התשלום..." : "✅ עמוד התשלום נפתח!"}</div>
+            <div style={{ fontSize: 11, color: "#999", fontWeight: 600 }}>{Math.round(redirectPct)}%</div>
+          </div>
+          <div style={{ height: 6, borderRadius: 3, background: "#E8E7E3", overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 3, background: redirectPct < 100 ? "linear-gradient(90deg,#D4A843,#E8C547)" : "#00E5A0", width: redirectPct + "%", transition: "width 0.05s linear, background 0.3s" }}/>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 10 }}>
+            {redirectPct < 100 && <button onClick={() => { redirectFired.current = true; setRedirectPct(100); window.open(finalUrl, "_blank"); }} style={{ padding: "7px 16px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>מעבר מיידי לתשלום →</button>}
+            {redirectPct >= 100 && <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "7px 16px", borderRadius: 8, background: "#1a1a2e", color: "#fff", fontSize: 11.5, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}>פתחו שוב את עמוד התשלום</a>}
+          </div>
         </div>
+
+        {selDates.length > 0 && <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <button onClick={handleAddCalendar} style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40px", gap: 6, padding: "0 16px", borderRadius: 10, background: "#F0FAF8", border: "1.5px solid #1A7A6D", color: "#1A7A6D", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxSizing: "border-box" }}><Ico name="calendar" color="#1A7A6D" size={14}/> הוספה ליומן</button>
+            <div style={{ fontSize: 10, color: "#999", marginTop: 4 }}>* באנדרואיד: יש לפתוח את הקובץ לאחר ההורדה</div>
+          </div>
+        </div>}
         {renderWTBAccordion()}
         {renderDoneFooter()}
       </div>
@@ -871,8 +907,8 @@ function ElementBookingWidget() {
         <div style={{ background: headerBg, borderBottom: step !== "qual" ? `2px solid ${uc}` : "2px solid #1a1c29", padding: "24px 20px 20px", color: "#fff", position: "relative", transition: "background 0.4s ease,border-bottom 0.3s" }}>
           <div style={{ position: "absolute", inset: 0, opacity: 0.035, backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "22px 22px" }}/>
           <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <img src="https://element-m-a-m.github.io/book-first-classes/Element%20Logo%20-%20Transparent%20Background.png" alt="Element Studio" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0px 4px 6px rgba(0,0,0,0.4))" }}/>
+            <div style={{ width: 60, height: 60, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, borderRadius: "50%", overflow: "hidden", boxShadow: "0 0 0 1.5px rgba(212,168,67,0.4), 0 3px 10px rgba(0,0,0,0.3)" }}>
+              <img src="https://element-m-a-m.github.io/book-first-classes/element-logo-circle.png" alt="Element Studio" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{ht[0]}</div>
