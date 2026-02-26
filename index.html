@@ -25,6 +25,7 @@
     .premium-input{transition:border 0.2s ease,box-shadow 0.2s ease!important}
     .premium-input:focus-within{border-color:#1a1a2e!important;box-shadow:0 0 0 3px rgba(26,26,46,0.15)!important}
     @keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulse-btn{0%,100%{transform:scale(1);box-shadow:0 4px 16px rgba(0,0,0,0.15)}50%{transform:scale(1.03);box-shadow:0 6px 24px rgba(0,0,0,0.25)}}
   </style>
 </head>
 <body>
@@ -400,11 +401,7 @@ function ElementBookingWidget() {
       const elapsed = Date.now() - start;
       const pct = Math.min(100, (elapsed / DURATION) * 100);
       setRedirectPct(pct);
-      if (pct >= 100 && !redirectFired.current) {
-        redirectFired.current = true;
-        clearInterval(id);
-        window.open(finalUrl, "_blank");
-      }
+      if (pct >= 100) { clearInterval(id); }
     }, INTERVAL);
     return () => clearInterval(id);
   }, [step]);
@@ -786,15 +783,15 @@ function ElementBookingWidget() {
         {/* Progress bar + redirect */}
         <div style={{ background: "#F8F7F4", borderRadius: 12, padding: "14px 16px", marginBottom: 14, border: "1px solid #E8E7E3" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{redirectPct < 100 ? "⏳ מעבירים אתכם לעמוד התשלום..." : "✅ עמוד התשלום נפתח!"}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{redirectPct < 100 ? "⏳ מכינים את עמוד התשלום..." : "✅ עמוד התשלום מוכן!"}</div>
             <div style={{ fontSize: 11, color: "#999", fontWeight: 600 }}>{Math.round(redirectPct)}%</div>
           </div>
           <div style={{ height: 6, borderRadius: 3, background: "#E8E7E3", overflow: "hidden" }}>
             <div style={{ height: "100%", borderRadius: 3, background: redirectPct < 100 ? "linear-gradient(90deg,#D4A843,#E8C547)" : "#00E5A0", width: redirectPct + "%", transition: "width 0.05s linear, background 0.3s" }}/>
           </div>
           <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 10 }}>
-            {redirectPct < 100 && <button onClick={() => { redirectFired.current = true; setRedirectPct(100); window.open(finalUrl, "_blank"); }} style={{ padding: "7px 16px", borderRadius: 8, border: "none", background: "#1a1a2e", color: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>מעבר מיידי לתשלום →</button>}
-            {redirectPct >= 100 && <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "7px 16px", borderRadius: 8, background: "#1a1a2e", color: "#fff", fontSize: 11.5, fontWeight: 600, textDecoration: "none", fontFamily: "inherit" }}>פתחו שוב את עמוד התשלום</a>}
+            {redirectPct < 100 && <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "7px 16px", borderRadius: 8, background: "#1a1a2e", color: "#fff", fontSize: 11.5, fontWeight: 600, fontFamily: "inherit", textDecoration: "none" }}>מעבר מיידי לתשלום →</a>}
+            {redirectPct >= 100 && <a href={finalUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", padding: "12px 28px", borderRadius: 10, background: "linear-gradient(135deg,"+uc+","+uc+"DD)", color: "#fff", fontSize: 15, fontWeight: 800, textDecoration: "none", fontFamily: "inherit", boxShadow: "0 4px 16px "+uc+"40", animation: "pulse-btn 1.5s ease-in-out infinite" }}>לחצו כאן לתשלום מאובטח →</a>}
           </div>
         </div>
 
