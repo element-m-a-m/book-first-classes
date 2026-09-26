@@ -39,9 +39,6 @@ bdi { unicode-bidi: isolate; }
 .eb-stepper__bar li.is-done { background: var(--gold-deep); }
 .eb-stepper__bar li.is-current { background: var(--gold); }
 
-.eb-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; margin-block-end: 14px;
-  background: var(--paper-deep); border-radius: var(--radius); font-size: .875rem; }
-.eb-bar__end { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; }
 
 /* type */
 .eb-step { display: grid; gap: 14px; }

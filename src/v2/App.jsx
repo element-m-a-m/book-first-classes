@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { WEBHOOK_URL } from './config/site.js';
 import { groupById } from './config/groups.js';
 import { slotOn } from './config/timetable.js';
-import { OFFERS, priceFor } from './config/offers.js';
+import { OFFERS } from './config/offers.js';
 import { dowOf } from './lib/civil-date.js';
 import { buildPayload, createSender, newSubmissionId, selectionHash } from './lib/events.js';
 import { createEmbed } from './lib/embed.js';
@@ -10,7 +10,7 @@ import { resolveGroup } from './lib/params.js';
 import { waLink, groupWA } from './lib/messages.js';
 import { toE164 } from './lib/phone.js';
 import { reducer, initialState, withContext, stepsOf, pathOf, STEP_NAMES, DONE_STEPS } from './state/flow.js';
-import { Stepper, T, Price } from './ui/primitives.jsx';
+import { Stepper } from './ui/primitives.jsx';
 import { ExitIntent, IdleNudge } from './ui/Popups.jsx';
 import { Offer } from './steps/Offer.jsx';
 import { Group, Location } from './steps/Group.jsx';
@@ -175,7 +175,6 @@ export function App({ params, embedded }) {
     default: body = null;
   }
 
-  const showBar = path === 'group' && group && ['dates', 'contact'].includes(state.step);
   return (
     <div className={`eb ${embedded ? 'eb--embed' : 'eb--standalone'}`} ref={rootRef} lang="he" dir="rtl">
       {!embedded && (
@@ -196,13 +195,6 @@ export function App({ params, embedded }) {
       )}
       <main className="eb-main">
         {!isDone && <Stepper steps={steps} names={STEP_NAMES} current={state.step} />}
-        {showBar && (
-          <div className="eb-bar">
-            <span><T>{group.label}</T> · {OFFERS[state.offer].title}</span>
-            <span className="eb-bar__end"><Price value={priceFor(state.offer, group.id)} />
-              <button type="button" className="eb-link" onClick={() => go('offer')}>שינוי</button></span>
-          </div>
-        )}
         {exitOpen && embedded && <ExitIntent inline onClose={() => setExitOpen(false)} />}
         <div className="eb-transition" key={state.step}>{body}</div>
       </main>

@@ -54,3 +54,7 @@ Validation completion: 42 of 43 widget behavior/journey checks passed initially;
 
 ### Payment-first completion page — 26 September 2026
 Removed the repeated final-placement confirmation note from Done only; it remains on Summary. Moved the payment preparation/progress/link panel above OrderCard. Link destination, readiness timer, event handlers, calendar and callback completion unchanged. Verified actual website iframe at 383/1280px with mocked submissions, immediate and ready payment links both present, payment panel above dates, no horizontal overflow. Both checks passed and screenshots inspected. Local draft only; no published-release, backend or deployment changes.
+
+
+### Remove intermediate selection ribbon — 26 September 2026
+Removed eb-bar from the date and contact steps at owner request, including the redundant selection/price/change ribbon and unused CSS/imports. Back navigation and final summary remain. Isolated preview rebuilt on :8853; five v2 iframe/flow contract tests passed with mocked requests. No canonical release, backend or deployment changes.

@@ -70,7 +70,8 @@ test('v2: parent setContext applies before interaction, is ignored after it', as
   await expect.poll(async () => v2(await msgs(page), 'contextIgnored').length).toBe(1);
   await expect(frame.getByRole('radio', { name: 'מובמנט', exact: true })).toBeChecked();
   await frame.getByRole('button', { name: 'המשך לבחירת מועדים' }).click();
-  await expect(frame.locator('.eb-bar')).toContainText('70');
+  await expect(frame.locator('.eb-bar')).toHaveCount(0);
+  await expect(frame.locator('h2')).toHaveText('בחרו מועדים');
 });
 
 test('v2: exitIntent from the parent shows the WhatsApp prompt inline, once', async ({ page }) => {
