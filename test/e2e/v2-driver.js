@@ -16,7 +16,10 @@ export const GROUPS_V2 = [
 
 export const heading = (page) => page.locator('h2.eb-h2');
 // Pick a card by its radio's accessible name (the card title), exactly - the way a screen reader user would.
-export const choose = (page, text) => page.locator('label.eb-choice', { has: page.getByRole('radio', { name: text, exact: true }) }).click();
+export const choose = async (page, text) => {
+  const radio = page.getByRole('radio', { name: text, exact: true });
+  if (!await radio.isChecked()) await page.locator('label.eb-choice', { has: radio }).click();
+};
 export const press = (page, name) => page.getByRole('button', { name, exact: true }).click();
 
 export async function openDays(page) {

@@ -102,7 +102,8 @@ bdi { unicode-bidi: isolate; }
 .eb-offer__price { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
 .eb-offer__compare { font-size: .875rem; color: var(--muted); }
 .eb-offer__compare del, .eb-price__was del { color: var(--muted); }
-.eb-offer__rates { display: grid; gap: 2px; }
+.eb-offer__rates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-block: 4px; }
+.eb-offer__rates > span { display: grid; grid-template-rows: auto 1fr; align-content: start; gap: 8px; }
 .eb-offer__rates bdi { font-weight: 800; }
 .eb-offer__meta { color: var(--muted); font-size: .875rem; }
 .eb-badge { font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--gold); color: var(--ink); }
@@ -238,7 +239,10 @@ button.eb-cal__day { cursor: pointer; }
 @keyframes eb-choice-select { from { background-color: #f0dfb8; } to { background-color: #fff; } }
 .eb-cal__day.is-selected { animation: eb-date-select 420ms ease-out; }
 @keyframes eb-date-select { from { transform: scale(.9); } to { transform: scale(1); } }
-.eb-date-location svg { vertical-align: -2px; }
 .eb-pop--help { position: fixed; z-index: 60; inset-inline: 12px; inline-size: auto; max-inline-size: 30rem; margin-inline: auto; overflow: auto; overscroll-behavior: contain; box-shadow: 0 12px 36px rgba(18,22,20,.22); border-color: var(--line-strong); padding: 20px 16px 16px; visibility: hidden; animation: eb-step-enter 420ms ease-out; }
 .eb-pop--help .eb-pop__title { padding-inline: 32px; }
 .eb-pop__close { position: absolute; inset-inline-end: 2px; inset-block-start: 2px; inline-size: 40px; block-size: 40px; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+
+.eb-standalone-location{display:grid;gap:8px;padding-block:0 14px;margin-block-end:18px;border-block-end:1px solid var(--line)}
+.eb-location-title{margin:0;font-size:1.375rem;line-height:1.3;font-weight:800}
+.eb-standalone-location .eb-link{justify-self:start;font-size:.875rem}

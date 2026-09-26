@@ -20,8 +20,8 @@ export function Offer({ state, dispatch, next, Heading }) {
         </Choice>
         <Choice name="offer" value="single" checked={state.offer === 'single'} onChange={choose} className="eb-offer" title={s.title}>
           <span className="eb-offer__rates">
-            <span><Price value={s.price.kids} /> לקבוצות הילדים</span>
-            <span><Price value={s.price.other} /> לנוער ובוגרים</span>
+            <span><span className="eb-offer__price"><Price value={s.price.kids} /></span><span className="eb-offer__meta">לקבוצות הילדים</span></span>
+            <span><span className="eb-offer__price"><Price value={s.price.other} /></span><span className="eb-offer__meta">לנוער ובוגרים</span></span>
           </span>
         </Choice>
         <Choice name="offer" value="private" checked={state.offer === 'private'} onChange={choose} className="eb-offer" title={OFFERS.private.title}>
@@ -29,7 +29,7 @@ export function Offer({ state, dispatch, next, Heading }) {
         </Choice>
       </fieldset>
       <Button onClick={next} disabled={!state.offer}>המשך</Button>
-      {!state.offer && <p className="eb-hint">בחירת מסלול פותחת את השלב הבא.</p>}
+
     </section>
   );
 }

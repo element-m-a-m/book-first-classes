@@ -7,7 +7,7 @@ import { Button, LinkButton, BackButton, Choice, Field, Price, Icon, T } from '.
 import { NameField, PhoneField, Privacy, contactErrors } from './Contact.jsx';
 
 export function PrivateGoal({ state, dispatch, next, back, Heading }) {
-  const p = state.goal ? pricesFor(state.goal, state.format) : null;
+  const p = state.goal && state.format ? pricesFor(state.goal, state.format) : null;
   return (
     <section className="eb-step">
       <BackButton onClick={back} />
@@ -41,7 +41,7 @@ export function PrivateGoal({ state, dispatch, next, back, Heading }) {
           <p className="eb-meta">{state.format === 'duo' ? 'המחיר הוא למפגש זוגי, לשני המתאמנים יחד. ' : ''}{FIRST_NOTE} {SERIES_NOTE}</p>
         </div>
       )}
-      <Button onClick={next} disabled={!state.goal}>המשך</Button>
+      <Button onClick={next} disabled={!state.goal || !state.format}>המשך</Button>
       {!state.goal && <p className="eb-hint">בחרו תחום כדי לראות את המחיר והמשך התיאום.</p>}
     </section>
   );

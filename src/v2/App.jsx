@@ -13,7 +13,7 @@ import { reducer, initialState, withContext, stepsOf, pathOf, STEP_NAMES, DONE_S
 import { Stepper, T, Price } from './ui/primitives.jsx';
 import { ExitIntent, IdleNudge } from './ui/Popups.jsx';
 import { Offer } from './steps/Offer.jsx';
-import { Group } from './steps/Group.jsx';
+import { Group, Location } from './steps/Group.jsx';
 import { Dates } from './steps/Dates.jsx';
 import { Contact, contactErrors } from './steps/Contact.jsx';
 import { Summary } from './steps/Summary.jsx';
@@ -186,6 +186,13 @@ export function App({ params, embedded }) {
             <p className="eb-brand__line">הרשמה לשיעורי היכרות ולאימונים אישיים</p>
           </div>
         </header>
+      )}
+      {!embedded && (
+        <section className="eb-standalone-location" aria-labelledby="eb-location-title">
+          <h2 id="eb-location-title" className="eb-location-title">כתובת — כאן מתאמנים</h2>
+          <Location compact />
+          <a className="eb-link" href="https://element-m-a-m.co.il/contact.html#arrival" target="_blank" rel="noopener noreferrer">מפה ופרטי הגעה ↗</a>
+        </section>
       )}
       <main className="eb-main">
         {!isDone && <Stepper steps={steps} names={STEP_NAMES} current={state.step} />}

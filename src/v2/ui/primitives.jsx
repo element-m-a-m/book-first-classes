@@ -64,7 +64,9 @@ export function Choice({ name, value, checked, onChange, title, aside, children,
   return (
     <label htmlFor={id} className={`eb-choice ${checked ? 'is-checked' : ''} ${className}`} data-accent={accent}>
       <input id={id} type="radio" className="eb-choice__input" name={name} value={value} checked={checked}
-        aria-labelledby={tid} aria-describedby={children ? did : undefined} onChange={() => onChange(value)} />
+        aria-labelledby={tid} aria-describedby={children ? did : undefined} onClick={() => { if (checked) onChange(null); }}
+        onKeyDown={(e) => { if (e.key === ' ') { e.preventDefault(); if (!e.repeat) onChange(checked ? null : value); } }}
+        onChange={() => { if (!checked) onChange(value); }} />
       <span className="eb-choice__mark" aria-hidden="true"><Icon name="check" size={14} /></span>
       <span className="eb-choice__body">
         <span className="eb-choice__head"><span id={tid} className="eb-choice__title">{title}</span>{aside}</span>
@@ -102,7 +104,7 @@ export function Stepper({ steps, names, current }) {
   const idx = Math.max(0, steps.indexOf(current));
   return (
     <div className="eb-stepper">
-      <p className="eb-stepper__label">שלב <T>{`${idx + 1}`}</T> מתוך <T>{`${steps.length}`}</T> · {names[steps[idx]]}</p>
+      <p className="eb-stepper__label">שלב <T>{`${idx + 1}`}</T> מתוך <T>{`${steps.length}`}</T>{current !== 'offer' && <> · {names[steps[idx]]}</>}</p>
       <ol className="eb-stepper__bar" aria-hidden="true">
         {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
       </ol>
