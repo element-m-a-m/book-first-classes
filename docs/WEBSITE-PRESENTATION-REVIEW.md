@@ -58,3 +58,8 @@ Removed the repeated final-placement confirmation note from Done only; it remain
 
 ### Remove intermediate selection ribbon — 26 September 2026
 Removed eb-bar from the date and contact steps at owner request, including the redundant selection/price/change ribbon and unused CSS/imports. Back navigation and final summary remain. Isolated preview rebuilt on :8853; five v2 iframe/flow contract tests passed with mocked requests. No canonical release, backend or deployment changes.
+
+
+### Compact navigation and calendar actions — 26 September 2026
+Moved Back to the right of the shared stepper row and centered the numeric step counter. Removed visible step-name suffixes; meaningful step headings and screen-reader announcements remain. Back uses the existing ordered group/private steps and preserves selections; callback completion keeps its existing separate Back control because it has no stepper. Removed the redundant instruction above the calendar; selection-count guidance below remains. Coordinate-later now uses a transparent neutral outlined button, smaller/lighter than primary Continue, with its original skipDates handler and wording.
+Validation: three group/private/back/double-submit regression checks passed; skip-dates payload check passed. Actual :8853 iframe checked at 320/383/1280px for centered label, non-overlapping Back, 44px target, keyboard activation and selection preservation. Screenshots inspected at mobile/desktop. Local isolated worktree only; no release, backend, push or deployment.

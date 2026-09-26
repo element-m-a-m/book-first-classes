@@ -100,11 +100,14 @@ export function Notice({ children, onDismiss }) {
   );
 }
 
-export function Stepper({ steps, names, current }) {
+export function Stepper({ steps, current, back }) {
   const idx = Math.max(0, steps.indexOf(current));
   return (
     <div className="eb-stepper">
-      <p className="eb-stepper__label">שלב <T>{`${idx + 1}`}</T> מתוך <T>{`${steps.length}`}</T>{current !== 'offer' && <> · {names[steps[idx]]}</>}</p>
+      <div className="eb-stepper__nav">
+        {back && <BackButton onClick={back} />}
+        <p className="eb-stepper__label">שלב <T>{String(idx + 1)}</T> מתוך <T>{String(steps.length)}</T></p>
+      </div>
       <ol className="eb-stepper__bar" aria-hidden="true">
         {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
       </ol>

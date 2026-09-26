@@ -3,7 +3,7 @@ import { OFFERS } from '../config/offers.js';
 import { WHAT_TO_BRING } from '../config/site.js';
 import { HDAYS, dowOf, fmtDots } from '../lib/civil-date.js';
 import { waLink, QUESTION_WA } from '../lib/messages.js';
-import { Button, BackButton, Time, T, Icon, Notice } from '../ui/primitives.jsx';
+import { Button, Time, T, Icon, Notice } from '../ui/primitives.jsx';
 import { PriceLine, Location } from './Group.jsx';
 
 export function SlotList({ slots }) {
@@ -51,10 +51,9 @@ export function WhatToBring() {
   );
 }
 
-export function Summary({ state, group, slots, back, pay, callback, Heading, failed, retry }) {
+export function Summary({ state, group, slots, pay, callback, Heading, failed, retry }) {
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>סיכום והרשמה</Heading>
       <p className="eb-lead">בדקו את הפרטים והבטיחו מקום</p>
       {failed > 0 && (

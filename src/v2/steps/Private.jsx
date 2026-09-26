@@ -3,14 +3,13 @@
 import { GOALS, FORMATS, pricesFor, goalById, SERIES_NOTE, FIRST_NOTE } from '../config/private.js';
 import { waLink, privateWA } from '../lib/messages.js';
 import { toE164 } from '../lib/phone.js';
-import { Button, LinkButton, BackButton, Choice, Field, Price, Icon, T } from '../ui/primitives.jsx';
+import { Button, LinkButton, Choice, Field, Price, Icon, T } from '../ui/primitives.jsx';
 import { NameField, PhoneField, Privacy, contactErrors } from './Contact.jsx';
 
-export function PrivateGoal({ state, dispatch, next, back, Heading }) {
+export function PrivateGoal({ state, dispatch, next, Heading }) {
   const p = state.goal && state.format ? pricesFor(state.goal, state.format) : null;
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>איזה אימון מתאים לכם?</Heading>
       <p className="eb-lead">מתחילים בהיכרות ובהערכה, ומגדירים יחד את הכיוון.</p>
       <fieldset className="eb-segment eb-private-formats">
@@ -54,7 +53,6 @@ export function PrivateContact({ state, dispatch, submit, back, Heading }) {
   const show = (k) => state.touched.submit && err[k];
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>פרטים ליצירת קשר</Heading>
       <p className="eb-lead">נחזור אליכם לתיאום המפגש הראשון.</p>
       <form className="eb-form" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }}>

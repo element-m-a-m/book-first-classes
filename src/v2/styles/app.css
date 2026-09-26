@@ -33,7 +33,9 @@ bdi { unicode-bidi: isolate; }
 
 /* stepper */
 .eb-stepper { margin-block-end: 14px; }
-.eb-stepper__label { margin: 0 0 6px; font-size: .8125rem; color: var(--muted); font-weight: 500; }
+.eb-stepper__nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-block-size: 44px; margin-block-end: 6px; }
+.eb-stepper__nav .eb-back { grid-column: 1; grid-row: 1; margin: 0; }
+.eb-stepper__label { grid-column: 2; grid-row: 1; text-align: center; margin: 0; font-size: .8125rem; color: var(--muted); font-weight: 500; }
 .eb-stepper__bar { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .eb-stepper__bar li { flex: 1; block-size: 4px; border-radius: 2px; background: var(--line); }
 .eb-stepper__bar li.is-done { background: var(--gold-deep); }
@@ -57,6 +59,8 @@ bdi { unicode-bidi: isolate; }
 .eb-btn--primary:hover { background: #e2b660; }
 .eb-btn--secondary { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
 .eb-btn--secondary:hover { border-color: var(--ink); }
+.eb-btn--outline { background: transparent; color: var(--muted); border-color: var(--line-strong); font-size: .875rem; font-weight: 500; }
+.eb-btn--outline:hover { color: var(--ink); border-color: var(--ink); }
 .eb-btn--wa { background: var(--wa); color: #fff; }
 .eb-btn--wa-outline { background: transparent; color: var(--wa); border-color: var(--wa); }
 .eb-btn--wa-outline:hover { background: #edf4ee; }

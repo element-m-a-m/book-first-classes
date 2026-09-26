@@ -1,6 +1,6 @@
 import { PRIVACY_LINE, PRIVACY_URL } from '../config/site.js';
 import { isValidName, isValidPhone } from '../lib/phone.js';
-import { Button, BackButton, Choice, Field, Icon } from '../ui/primitives.jsx';
+import { Button, Choice, Field, Icon } from '../ui/primitives.jsx';
 
 export const ERR_NAME = '* נא להזין שם מלא';
 export const ERR_PHONE = '* נא להזין מספר טלפון תקין';
@@ -56,7 +56,6 @@ export function Contact({ state, dispatch, submit, back, Heading }) {
   const show = (k) => state.touched.submit && err[k];
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>פרטי קשר לשמירת מקום</Heading>
       <form className="eb-form" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }}>
         <NameField state={state} dispatch={dispatch} error={show('name')} />

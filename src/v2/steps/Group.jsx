@@ -3,7 +3,7 @@ import { slotsOf } from '../config/timetable.js';
 import { OFFERS, priceFor, comparePriceFor } from '../config/offers.js';
 import { ADDRESS_ROWS } from '../config/site.js';
 import { HDAYS } from '../lib/civil-date.js';
-import { Choice, Button, BackButton, Price, Time, T, Icon, Notice } from '../ui/primitives.jsx';
+import { Choice, Button, Price, Time, T, Icon, Notice } from '../ui/primitives.jsx';
 
 /** "ראשון ורביעי · 17:00-17:45", or one line per day when the times differ. */
 export function scheduleLines(groupId) {
@@ -33,11 +33,10 @@ export function Location({ compact = false }) {
   );
 }
 
-export function Group({ state, dispatch, next, back, Heading }) {
+export function Group({ state, dispatch, next, Heading }) {
   const list = GROUPS.filter((g) => !state.audience || g.audience === state.audience);
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>עבור מי השיעור?</Heading>
       <fieldset className="eb-segment">
         <legend className="eb-sr">עבור מי השיעור?</legend>

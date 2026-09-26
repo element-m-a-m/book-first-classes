@@ -160,17 +160,20 @@ export function App({ params, embedded }) {
   const Heading = useCallback(({ children }) => <h2 className="eb-h2" tabIndex={-1} ref={headingRef}>{children}</h2>, []);
   const common = { state, dispatch, Heading };
 
+  const stepIndex = steps.indexOf(state.step);
+  const backStep = stepIndex > 0 ? steps[stepIndex - 1] : null;
+
   let body;
   switch (state.step) {
     case 'offer': body = <Offer {...common} next={() => go(state.offer === 'private' ? 'pgoal' : 'group')} />; break;
-    case 'group': body = <Group {...common} back={() => go('offer')} next={() => go('dates')} />; break;
-    case 'dates': body = <Dates {...common} nowMs={Date.now()} back={() => go('group')} next={() => go('contact')} />; break;
-    case 'contact': body = <Contact {...common} back={() => go(state.datesSkipped ? 'dates' : 'dates')} submit={submitContact} />; break;
-    case 'summary': body = <Summary {...common} group={group} slots={slots} back={() => go('contact')} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
+    case 'group': body = <Group {...common} next={() => go('dates')} />; break;
+    case 'dates': body = <Dates {...common} nowMs={Date.now()} next={() => go('contact')} />; break;
+    case 'contact': body = <Contact {...common} submit={submitContact} />; break;
+    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
     case 'done': body = <Done {...common} group={group} slots={slots} restart={restart} />; break;
     case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} />; break;
-    case 'pgoal': body = <PrivateGoal {...common} back={() => go('offer')} next={() => go('pcontact')} />; break;
-    case 'pcontact': body = <PrivateContact {...common} back={() => go('pgoal')} submit={submitPrivate} />; break;
+    case 'pgoal': body = <PrivateGoal {...common} next={() => go('pcontact')} />; break;
+    case 'pcontact': body = <PrivateContact {...common} submit={submitPrivate} />; break;
     case 'pdone': body = <PrivateDone {...common} restart={restart} />; break;
     default: body = null;
   }
@@ -194,7 +197,7 @@ export function App({ params, embedded }) {
         </section>
       )}
       <main className="eb-main">
-        {!isDone && <Stepper steps={steps} names={STEP_NAMES} current={state.step} />}
+        {!isDone && <Stepper steps={steps} current={state.step} back={backStep ? () => go(backStep) : undefined} />}
         {exitOpen && embedded && <ExitIntent inline onClose={() => setExitOpen(false)} />}
         <div className="eb-transition" key={state.step}>{body}</div>
       </main>
