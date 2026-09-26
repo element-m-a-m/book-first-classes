@@ -50,3 +50,7 @@ Final accessibility pass: all 7 viewport/embedded audits passed, covering every 
 - Actual :8853 website summary visually checked at 383/1280px. All three date columns remain on one line at 383px. Local only, no release, push, deployment, backend edits or real leads.
 
 Validation completion: 42 of 43 widget behavior/journey checks passed initially; shorter summary exposed a double-click fall-through into booking. Summary actions now ignore the second click of a double-click (keyboard activation remains supported). The failing deduplication/resubmit check passes after that guard. Two actual website iframe layout checks pass at 383/1280px, and website gates all pass. Initial default-port test run hit another checkout; discarded those results and used isolated review config on :4185. No changes to the other checkout/server.
+
+
+### Payment-first completion page — 26 September 2026
+Removed the repeated final-placement confirmation note from Done only; it remains on Summary. Moved the payment preparation/progress/link panel above OrderCard. Link destination, readiness timer, event handlers, calendar and callback completion unchanged. Verified actual website iframe at 383/1280px with mocked submissions, immediate and ready payment links both present, payment panel above dates, no horizontal overflow. Both checks passed and screenshots inspected. Local draft only; no published-release, backend or deployment changes.

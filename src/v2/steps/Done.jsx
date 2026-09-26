@@ -54,8 +54,6 @@ export function Done({ state, group, slots, restart, Heading }) {
       <span className="eb-done__icon" aria-hidden="true"><Icon name="check" size={26} /></span>
       <Heading>ההזמנה שלכם מוכנה!</Heading>
       <p className="eb-lead">הפרטים נשמרו. כדי להבטיח את מקומכם, אנא השלימו את התשלום בעמוד שייפתח.</p>
-      <p className="eb-meta">* השיבוץ יאושר סופית ע"י הצוות (במקרה של שינויים נעדכן).</p>
-      <OrderCard group={group} offer={state.offer} slots={slots} />
       <div className="eb-progress">
         <p className="eb-progress__label">{ready ? '✅ עמוד התשלום מוכן!' : '⏳ מכינים את עמוד התשלום...'}</p>
         <div className="eb-progress__track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label="הכנת עמוד התשלום">
@@ -63,6 +61,7 @@ export function Done({ state, group, slots, restart, Heading }) {
         </div>
         <LinkButton variant={ready ? 'primary' : 'secondary'} href={url}>{ready ? 'לחצו כאן לתשלום מאובטח' : 'מעבר מיידי לתשלום'}</LinkButton>
       </div>
+      <OrderCard group={group} offer={state.offer} slots={slots} />
       <CalendarButton slots={slots} label={group.label} />
       <WhatToBring />
       <Footer restart={restart} />
