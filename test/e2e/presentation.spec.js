@@ -4,7 +4,7 @@ import { V2_URL, choose, press } from './v2-driver.js';
 
 test('group address stays anchored and class cards do not repeat package prices', async ({page}) => {
   await openWidget(page, V2_URL);
-  await expect(page.locator('.eb-offer__discount')).toHaveText('כ־49% הנחה בממוצע');
+  await expect(page.locator('.eb-offer .eb-badge')).toHaveText('49% הנחה!');
   await expect(page.locator('.eb-offer__compare')).toHaveCount(0);
   await choose(page,'3 שיעורי היכרות'); await press(page,'המשך');
   const y = (await page.locator('.eb-location-section').boundingBox()).y;

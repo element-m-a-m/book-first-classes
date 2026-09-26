@@ -13,10 +13,9 @@ export function Offer({ state, dispatch, next, Heading }) {
       <fieldset className="eb-choices">
         <legend className="eb-sr">מסלול היכרות</legend>
         <Choice name="offer" value="trial3" checked={state.offer === 'trial3'} onChange={choose} className="eb-offer"
-          title={t.title} aside={<span className="eb-badge">{t.saleLabel}</span>}>
+          title={t.title} aside={<span className="eb-badge">{averageDiscount}% הנחה!</span>}>
           <span className="eb-offer__pricing">
             <span className="eb-offer__price"><Price value={t.price} /></span>
-            <span className="eb-offer__discount">כ־{averageDiscount}% הנחה בממוצע</span>
           </span>
           <span className="eb-offer__meta">{t.perk}</span>
         </Choice>

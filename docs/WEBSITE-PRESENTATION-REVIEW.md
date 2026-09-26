@@ -15,3 +15,6 @@ Tests: 17 unit checks; 51 browser tests across journeys, payloads, iframe contra
 Review build: node scripts/build.mjs v2. Version remains 2.0.1 during local development; this is NOT a new published release. Before release, coordinate latest main/other sessions, bump version through normal release process, generate and commit exact release bytes, verify manifest, then sync website. Do not overwrite releases/v2.0.1 or website site/booking with a draft.
 
 Backend handoff is separate: v14 b6e5659 reported LIVE and exact source inspected, contact_inquiry response compatible. Website function deployment and approved Auth=server live verification remain pending. Keep auth log mode; ask owner before deployment/live tests/enforce.
+
+## Owner follow-up
+Replaced the sale badge with the exact requested `49% הנחה!` and removed the separate red average-discount line. Private format cards share a compact grid, descriptions span the full width, text unchanged. Equal heights verified at 320/390/475/1280px, no overflow. At 390px: 114.16 to 86.69px. Both presentation checks pass. Local draft only.

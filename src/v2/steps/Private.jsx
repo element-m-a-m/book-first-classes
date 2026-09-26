@@ -13,7 +13,7 @@ export function PrivateGoal({ state, dispatch, next, back, Heading }) {
       <BackButton onClick={back} />
       <Heading>איזה אימון מתאים לכם?</Heading>
       <p className="eb-lead">מתחילים בהיכרות ובהערכה, ומגדירים יחד את הכיוון.</p>
-      <fieldset className="eb-segment">
+      <fieldset className="eb-segment eb-private-formats">
         <legend className="eb-subhead">באיזה הרכב תרצו להתאמן?</legend>
         {FORMATS.map((f) => (
           <Choice key={f.id} name="format" value={f.id} checked={state.format === f.id} onChange={(format) => dispatch({ type: 'format', format })} className="eb-segment__item" title={f.label}>
