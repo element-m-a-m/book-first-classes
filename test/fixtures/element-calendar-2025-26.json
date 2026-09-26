@@ -1,0 +1,15 @@
+{
+ "source": "Element Calendar (read-only), recurring class instances 01-Sep-2025..31-Aug-2026, read 26-Sep-2026. Dates only; no event titles or attendees kept.",
+ "observedClosed": ["2025-09-22", "2025-10-02", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-20", "2026-04-21", "2026-04-22", "2026-05-21", "2026-05-22"],
+ "lastClassBeforeAugustBreak2026": "2026-08-21",
+ "anomalies": [
+  { "date": "2025-09-24", "note": "Rosh Hashana day 2: only the Sun/Wed 19:00 series instance remains (kids instances deleted) - leftover instance" },
+  { "date": "2025-10-01", "note": "Erev Yom Kippur: only the 19:00 instance remains - leftover instance (anticipated in the plan)" },
+  { "date": "2025-10-06", "note": "Erev Sukkot (Mon): the Mon 18:15 instance remains; the calendar cannot tell leftover from a class that ran" },
+  { "date": "2025-10-13", "note": "Hoshana Raba / erev Shemini Atzeret (Mon): same as 2025-10-06" }
+ ],
+ "notClosures": [
+  { "date": "2025-09-15", "note": "one-off (non-recurring) class event at 18:15 - class ran" },
+  { "date": "2025-09-19", "note": "one-off (non-recurring) class event at 14:30 - class ran" }
+ ]
+}

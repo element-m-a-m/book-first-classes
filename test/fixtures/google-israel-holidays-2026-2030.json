@@ -1,0 +1,255 @@
+{
+ "source": "Google Calendar public calendar en.jewish#holiday@group.v.calendar.google.com (Holidays in Israel), read 26-Sep-2026",
+ "rows": [
+  {
+   "date": "2026-04-02",
+   "holiday": "pesach",
+   "source": "Passover (Day 1)"
+  },
+  {
+   "date": "2026-04-08",
+   "holiday": "pesach-7",
+   "source": "Passover (Day 7)"
+  },
+  {
+   "date": "2026-04-21",
+   "holiday": "yom-hazikaron",
+   "source": "Yom HaZikaron"
+  },
+  {
+   "date": "2026-04-22",
+   "holiday": "yom-haatzmaut",
+   "source": "Yom HaAtzmaut"
+  },
+  {
+   "date": "2026-05-22",
+   "holiday": "shavuot",
+   "source": "Shavuot"
+  },
+  {
+   "date": "2026-09-12",
+   "holiday": "rosh-hashana-1",
+   "source": "Rosh Hashana"
+  },
+  {
+   "date": "2026-09-13",
+   "holiday": "rosh-hashana-2",
+   "source": "Rosh Hashana (Day 2)"
+  },
+  {
+   "date": "2026-09-21",
+   "holiday": "yom-kippur",
+   "source": "Yom Kippur"
+  },
+  {
+   "date": "2026-09-26",
+   "holiday": "sukkot",
+   "source": "Sukkot (Day 1)"
+  },
+  {
+   "date": "2026-10-03",
+   "holiday": "shemini-atzeret",
+   "source": "Shemini Atzeret / Simchat Torah"
+  },
+  {
+   "date": "2027-04-22",
+   "holiday": "pesach",
+   "source": "Passover (Day 1)"
+  },
+  {
+   "date": "2027-04-28",
+   "holiday": "pesach-7",
+   "source": "Passover (Day 7)"
+  },
+  {
+   "date": "2027-05-11",
+   "holiday": "yom-hazikaron",
+   "source": "Yom HaZikaron"
+  },
+  {
+   "date": "2027-05-12",
+   "holiday": "yom-haatzmaut",
+   "source": "Yom HaAtzmaut"
+  },
+  {
+   "date": "2027-06-11",
+   "holiday": "shavuot",
+   "source": "Shavuot"
+  },
+  {
+   "date": "2027-10-02",
+   "holiday": "rosh-hashana-1",
+   "source": "Rosh Hashana"
+  },
+  {
+   "date": "2027-10-03",
+   "holiday": "rosh-hashana-2",
+   "source": "Rosh Hashana (Day 2)"
+  },
+  {
+   "date": "2027-10-11",
+   "holiday": "yom-kippur",
+   "source": "Yom Kippur"
+  },
+  {
+   "date": "2027-10-16",
+   "holiday": "sukkot",
+   "source": "Sukkot (Day 1)"
+  },
+  {
+   "date": "2027-10-23",
+   "holiday": "shemini-atzeret",
+   "source": "Shemini Atzeret / Simchat Torah"
+  },
+  {
+   "date": "2028-04-11",
+   "holiday": "pesach",
+   "source": "Passover (Day 1)"
+  },
+  {
+   "date": "2028-04-17",
+   "holiday": "pesach-7",
+   "source": "Passover (Day 7)"
+  },
+  {
+   "date": "2028-05-01",
+   "holiday": "yom-hazikaron",
+   "source": "Yom HaZikaron"
+  },
+  {
+   "date": "2028-05-02",
+   "holiday": "yom-haatzmaut",
+   "source": "Yom HaAtzmaut"
+  },
+  {
+   "date": "2028-05-31",
+   "holiday": "shavuot",
+   "source": "Shavuot"
+  },
+  {
+   "date": "2028-09-21",
+   "holiday": "rosh-hashana-1",
+   "source": "Rosh Hashana"
+  },
+  {
+   "date": "2028-09-22",
+   "holiday": "rosh-hashana-2",
+   "source": "Rosh Hashana (Day 2)"
+  },
+  {
+   "date": "2028-09-30",
+   "holiday": "yom-kippur",
+   "source": "Yom Kippur"
+  },
+  {
+   "date": "2028-10-05",
+   "holiday": "sukkot",
+   "source": "Sukkot (Day 1)"
+  },
+  {
+   "date": "2028-10-12",
+   "holiday": "shemini-atzeret",
+   "source": "Shemini Atzeret / Simchat Torah"
+  },
+  {
+   "date": "2029-03-31",
+   "holiday": "pesach",
+   "source": "Passover (Day 1)"
+  },
+  {
+   "date": "2029-04-06",
+   "holiday": "pesach-7",
+   "source": "Passover (Day 7)"
+  },
+  {
+   "date": "2029-04-18",
+   "holiday": "yom-hazikaron",
+   "source": "Yom HaZikaron"
+  },
+  {
+   "date": "2029-04-19",
+   "holiday": "yom-haatzmaut",
+   "source": "Yom HaAtzmaut"
+  },
+  {
+   "date": "2029-05-20",
+   "holiday": "shavuot",
+   "source": "Shavuot"
+  },
+  {
+   "date": "2029-09-10",
+   "holiday": "rosh-hashana-1",
+   "source": "Rosh Hashana"
+  },
+  {
+   "date": "2029-09-11",
+   "holiday": "rosh-hashana-2",
+   "source": "Rosh Hashana (Day 2)"
+  },
+  {
+   "date": "2029-09-19",
+   "holiday": "yom-kippur",
+   "source": "Yom Kippur"
+  },
+  {
+   "date": "2029-09-24",
+   "holiday": "sukkot",
+   "source": "Sukkot (Day 1)"
+  },
+  {
+   "date": "2029-10-01",
+   "holiday": "shemini-atzeret",
+   "source": "Shemini Atzeret / Simchat Torah"
+  },
+  {
+   "date": "2030-04-18",
+   "holiday": "pesach",
+   "source": "Passover (Day 1)"
+  },
+  {
+   "date": "2030-04-24",
+   "holiday": "pesach-7",
+   "source": "Passover (Day 7)"
+  },
+  {
+   "date": "2030-05-07",
+   "holiday": "yom-hazikaron",
+   "source": "Yom HaZikaron"
+  },
+  {
+   "date": "2030-05-08",
+   "holiday": "yom-haatzmaut",
+   "source": "Yom HaAtzmaut"
+  },
+  {
+   "date": "2030-06-07",
+   "holiday": "shavuot",
+   "source": "Shavuot"
+  },
+  {
+   "date": "2030-09-28",
+   "holiday": "rosh-hashana-1",
+   "source": "Rosh Hashana"
+  },
+  {
+   "date": "2030-09-29",
+   "holiday": "rosh-hashana-2",
+   "source": "Rosh Hashana (Day 2)"
+  },
+  {
+   "date": "2030-10-07",
+   "holiday": "yom-kippur",
+   "source": "Yom Kippur"
+  },
+  {
+   "date": "2030-10-12",
+   "holiday": "sukkot",
+   "source": "Sukkot (Day 1)"
+  },
+  {
+   "date": "2030-10-19",
+   "holiday": "shemini-atzeret",
+   "source": "Shemini Atzeret / Simchat Torah"
+  }
+ ]
+}
