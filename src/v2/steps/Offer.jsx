@@ -9,7 +9,6 @@ export function Offer({ state, dispatch, next, Heading }) {
   return (
     <section className="eb-step">
       <Heading>איך תרצו להתחיל?</Heading>
-      <p className="eb-lead">בוחרים מסלול, ובשלב הבא את הקבוצה והמועדים.</p>
       <fieldset className="eb-choices">
         <legend className="eb-sr">מסלול היכרות</legend>
         <Choice name="offer" value="trial3" checked={state.offer === 'trial3'} onChange={choose} className="eb-offer"

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { groupById } from '../config/groups.js';
 import { slotOn, slotsOf, durationOf } from '../config/timetable.js';
+import { ADDRESS_ROWS } from '../config/site.js';
 import { OFFERS } from '../config/offers.js';
 import { civilOf, addDays, dowOf, parts, weekStart, instantOf, HDAYS, HDAYS_S, HMONTHS, fmtLong } from '../lib/civil-date.js';
 import { closureFor } from '../lib/closures.js';
@@ -54,6 +55,7 @@ export function Dates({ state, dispatch, next, back, Heading, nowMs }) {
       <Heading>בחרו מועדים</Heading>
       <p className="eb-lead">{state.offer === 'single' ? 'בחרו תאריך לשיעור' : 'סמנו עד 3 תאריכים'}</p>
       <p className="eb-meta"><Icon name="clock" size={14} /> משך השיעור: <T>{minutes.join('/')}</T> דק׳</p>
+      <p className="eb-meta eb-date-location"><Icon name="pin" size={14} /> {ADDRESS_ROWS[1]}, {ADDRESS_ROWS[3]}</p>
       <Notice onDismiss={() => dispatch({ type: 'field', field: 'notice', value: null })}>{state.notice}</Notice>
 
       <div className="eb-cal" aria-labelledby="eb-cal-title">

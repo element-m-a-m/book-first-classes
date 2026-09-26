@@ -48,10 +48,6 @@ export function Group({ state, dispatch, next, back, Heading }) {
           </Choice>
         ))}
       </fieldset>
-      <section className="eb-location-section" aria-labelledby="eb-address-title">
-        <h3 id="eb-address-title" className="eb-h2">כתובת</h3>
-        <Location compact />
-      </section>
       <Notice onDismiss={() => dispatch({ type: 'field', field: 'notice', value: null })}>{state.notice}</Notice>
       {state.audience && (
         <fieldset className="eb-choices eb-group-list" key={state.audience}>

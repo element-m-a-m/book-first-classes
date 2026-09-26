@@ -177,7 +177,7 @@ export function App({ params, embedded }) {
 
   const showBar = path === 'group' && group && ['dates', 'contact'].includes(state.step);
   return (
-    <div className={`eb ${embedded ? 'eb--embed' : 'eb--standalone'}${idleOpen && !embedded ? ' eb--sheet-open' : ''}`} ref={rootRef} lang="he" dir="rtl">
+    <div className={`eb ${embedded ? 'eb--embed' : 'eb--standalone'}`} ref={rootRef} lang="he" dir="rtl">
       {!embedded && (
         <header className="eb-brand">
           <img src={logoUrl} alt="" width="40" height="40" />
@@ -197,12 +197,11 @@ export function App({ params, embedded }) {
           </div>
         )}
         {exitOpen && embedded && <ExitIntent inline onClose={() => setExitOpen(false)} />}
-        {idleOpen && embedded && <IdleNudge inline groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
-        {body}
+        <div className="eb-transition" key={state.step}>{body}</div>
       </main>
       <p className="eb-sr" aria-live="polite" ref={liveRef} />
       {exitOpen && !embedded && <ExitIntent onClose={() => setExitOpen(false)} />}
-      {idleOpen && !embedded && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
+      {idleOpen && !isDone && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
     </div>
   );
 }

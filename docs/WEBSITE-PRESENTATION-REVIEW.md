@@ -18,3 +18,15 @@ Backend handoff is separate: v14 b6e5659 reported LIVE and exact source inspecte
 
 ## Owner follow-up
 Replaced the sale badge with the exact requested `49% הנחה!` and removed the separate red average-discount line. Private format cards share a compact grid, descriptions span the full width, text unchanged. Equal heights verified at 320/390/475/1280px, no overflow. At 390px: 114.16 to 86.69px. Both presentation checks pass. Local draft only.
+
+## Focused screens, motion and floating help — owner follow-up
+- Removed the offer-screen introduction exactly as requested.
+- Removed the full address/heading from Group. Dates shows a compact street/city line; Summary keeps the full address.
+- Step transitions 420ms, group reveal 460ms, selected-card feedback 420ms; no input delays, reduced-motion override preserved.
+- Idle help now floats outside normal flow in both embed and standalone. Keeps existing 60s inactivity timing, once per journey, existing WhatsApp action and Continue dismissal. Added accessible X and Escape. Does not steal focus; restores focus on dismissal when appropriate; existing input/selection preserved. Tracks the visible portion of same-origin parent iframe through scroll/resize/visual viewport events; uses IntersectionObserver fallback for other embeddings. When too little of the iframe is visible, waits rather than expanding the frame or showing a clipped panel. Exit-intent presentation unchanged.
+- No payload, pricing, backend or published-release changes. Review build remains on :8853.
+- 48 behavior/contract/journey checks passed (47 initial, 1 sizing assertion updated to actual content and rerun). Includes overlay height and heading-position stability, entered-name preservation, X/Escape, host scrolling, reduced motion, and axe with help open in standalone/iframe. Screenshots: focused-groups, floating-help, dates-location at 390 and 1280px.
+
+Motion QA refinement: replaced text-opacity fades and calendar color interpolation with translation/scale to maintain contrast throughout transitions, not just at rest.
+
+Final accessibility pass: all 7 viewport/embedded audits passed, covering every screen at 320/360/390/768/1280px. Together with the 48 behavior/contract checks, 55 browser checks passed. No production submission.

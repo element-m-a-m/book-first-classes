@@ -123,7 +123,9 @@ test('website v2 parent script (handoff): carries the carousel choice, sizes, ha
   // visitor flips the carousel to 3 שיעורים before touching the widget -> setContext applies
   await page.getByRole('button', { name: '3 שיעורים' }).click();
   const h1 = await page.locator('iframe').evaluate((f) => f.getBoundingClientRect().height);
-  expect(h1).toBeGreaterThan(300);
+  expect(h1).toBeGreaterThan(100);
+  const contentHeight = await frame.locator('.eb').evaluate(el => Math.ceil(el.getBoundingClientRect().height));
+  expect(Math.abs(h1 - contentHeight)).toBeLessThanOrEqual(2);
   await frame.getByRole('button', { name: 'חזרה' }).click(); // first interaction inside the widget
   await expect(frame.getByRole('radio', { name: '3 שיעורי היכרות' })).toBeChecked();
   // after the visitor starts using the widget, the carousel no longer changes it

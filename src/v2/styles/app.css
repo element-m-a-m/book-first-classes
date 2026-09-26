@@ -199,7 +199,6 @@ button.eb-cal__day { cursor: pointer; }
 .eb-scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(18, 22, 20, .6); }
 .eb-pop { display: grid; gap: 10px; padding: 18px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-card); text-align: center; }
 .eb-pop--modal { max-inline-size: 22rem; box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, .2); }
-.eb--sheet-open { padding-block-end: 200px; } /* the idle sheet must never hide the main button */
 .eb-pop--sheet { position: fixed; inset-inline: 12px; inset-block-end: 12px; z-index: 40; max-inline-size: 30rem; margin-inline: auto; box-shadow: 0 -4px 24px rgba(0, 0, 0, .12); }
 .eb-pop--inline { margin-block-end: 12px; }
 .eb-pop__title { margin: 0; font-weight: 800; font-size: 1.125rem; }
@@ -220,9 +219,8 @@ button.eb-cal__day { cursor: pointer; }
 
 /* Website review: keep each decision compact and price only the selected package. */
 .eb-offer__pricing { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding-block: 4px; }
-.eb-location-section { display: grid; gap: 8px; padding-block: 4px 14px; border-block-end: 1px solid var(--line); }
-.eb-group-list { animation: eb-group-reveal 250ms ease-out both; }
-@keyframes eb-group-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.eb-group-list { animation: eb-group-reveal 460ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes eb-group-reveal { from { transform: translateY(-18px); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .eb-group-list { animation: none; } }
 
 /* Equal-height private formats: let the description use the entire card width. */
@@ -232,3 +230,15 @@ button.eb-cal__day { cursor: pointer; }
 .eb-private-formats .eb-choice__head { grid-column: 2; }
 .eb-private-formats .eb-choice__details { grid-column: 1 / -1; align-self: start; }
 .eb-private-formats .eb-segment__sub { line-height: 1.35; }
+
+/* Visible feedback without delaying input or changing the form's height. */
+.eb-transition { animation: eb-step-enter 420ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes eb-step-enter { from { transform: translateY(16px); } to { transform: translateY(0); } }
+.eb-choice.is-checked { animation: eb-choice-select 420ms ease-out; }
+@keyframes eb-choice-select { from { background-color: #f0dfb8; } to { background-color: #fff; } }
+.eb-cal__day.is-selected { animation: eb-date-select 420ms ease-out; }
+@keyframes eb-date-select { from { transform: scale(.9); } to { transform: scale(1); } }
+.eb-date-location svg { vertical-align: -2px; }
+.eb-pop--help { position: fixed; z-index: 60; inset-inline: 12px; inline-size: auto; max-inline-size: 30rem; margin-inline: auto; overflow: auto; overscroll-behavior: contain; box-shadow: 0 12px 36px rgba(18,22,20,.22); border-color: var(--line-strong); padding: 20px 16px 16px; visibility: hidden; animation: eb-step-enter 420ms ease-out; }
+.eb-pop--help .eb-pop__title { padding-inline: 32px; }
+.eb-pop__close { position: absolute; inset-inline-end: 2px; inset-block-start: 2px; inline-size: 40px; block-size: 40px; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; cursor: pointer; }
