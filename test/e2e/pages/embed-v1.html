@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embed contract v1 test host (current website)</title>
+<style>body { margin: 0; font-family: Arial, sans-serif; } iframe { display: block; inline-size: 100%; border: 0; }</style>
+</head>
+<body>
+<!-- Markup mirrors element-website src/chrome/booking.html; script is the website's booking.js, verbatim. -->
+<div class="booking-widget" data-state="idle">
+  <div class="booking-widget__stage">
+    <div class="booking-widget__status" role="status" aria-live="polite">
+      <strong>מתחילים עם שיעורי היכרות</strong>
+      <p>להרשמה, אפשר גם לפתוח את הקישור למטה או לדבר איתנו.</p>
+      <button class="booking-widget__retry" type="button" hidden>לנסות שוב</button>
+    </div>
+    <iframe class="book__frame" data-src="/.cache/build-v2/index.html" title="הרשמה לשיעורי היכרות — אלמנט" aria-hidden="true" tabindex="-1"
+      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
+  </div>
+</div>
+<script src="website-booking-v1.js"></script>
+</body>
+</html>

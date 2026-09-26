@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embed contract v2 test host</title>
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; background: #f5f1e8; }
+  .site { max-width: 40rem; margin: 0 auto; padding: 16px; }
+  iframe { display: block; inline-size: 100%; border: 0; block-size: 0; }
+</style>
+</head>
+<body>
+<div class="site">
+  <h1>אתר לדוגמה</h1>
+  <iframe id="w" title="הרשמה לשיעורי היכרות - אלמנט"></iframe>
+</div>
+<script>
+  // Minimal v2 parent: sizes the iframe from ready/resize, records every message it receives.
+  window.__msgs = [];
+  const q = new URLSearchParams(location.search);
+  const frame = document.getElementById('w');
+  frame.src = q.get('src') || '/.cache/build-v2/index.html?embed=1';
+  window.addEventListener('message', (e) => {
+    if (e.source !== frame.contentWindow) return;
+    window.__msgs.push({ origin: e.origin, data: e.data });
+    const d = e.data;
+    if (d && d.ns === 'element:booking' && d.v === 2 && (d.type === 'ready' || d.type === 'resize') && d.height >= 100 && d.height <= 5000) {
+      frame.style.blockSize = Math.ceil(d.height) + 'px';
+    }
+  });
+  window.sendToChild = (msg, target) => frame.contentWindow.postMessage(msg, target || '*');
+</script>
+</body>
+</html>

@@ -17,14 +17,15 @@ const UMD = {
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js': 'node_modules/react-dom/umd/react-dom.production.min.js',
 };
 
-export async function openWidget(page, url, { now = FIXED_NOW } = {}) {
+export async function openWidget(page, url, { now = FIXED_NOW, host = false } = {}) {
   const rec = { events: [], opened: [], blocked: [], steps: [] };
   await page.clock.install({ time: now });
   await page.addInitScript(() => {
+    window.__EB_ALLOW_WEBHOOK__ = true; // v2 runs dry on 127.0.0.1 unless told otherwise; every request is intercepted here
     window.__opened = [];
     window.open = (u) => { window.__opened.push(String(u)); return null; };
   });
-  await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, async (route) => {
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, async (route) => {
     const req = route.request(), u = req.url();
     if (u.startsWith('https://script.google.com/')) {
       rec.events.push(JSON.parse(req.postData() || '{}'));
@@ -40,7 +41,7 @@ export async function openWidget(page, url, { now = FIXED_NOW } = {}) {
     return route.abort();
   });
   await page.goto(url);
-  await page.locator('#element-booking-widget-container *').first().waitFor();
+  if (!host) await page.locator('#element-booking-widget-container *').first().waitFor();
   return rec;
 }
 
