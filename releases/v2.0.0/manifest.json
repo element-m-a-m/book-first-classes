@@ -1,0 +1,15 @@
+{
+  "tree": "v2",
+  "version": "2.0.0",
+  "commit": "4a07dd74",
+  "embedContract": 2,
+  "payloadSchema": 2,
+  "files": {
+    "app.E4IE54ZW.css": "a556af7b61f85d0448e2a4360027927ceb16c96b315c4bc714f7b4b4aaf7ce49",
+    "app.OIUAVA5I.js": "e53c276ffca6a768c6ab7469f73be05e7cea18d5ec1f779584ac96f8789fc1b7",
+    "assets/Heebo-hebrew.IR7WCCQS.woff2": "f1f7cfaef59431c7b391df81fb05520273303840bbe917213a2ab9f41b839675",
+    "assets/Heebo-latin.ELH336XX.woff2": "50dae2e12dae22c920388023e35aaebcd1e1d27bbe915c83d64210377e083e60",
+    "assets/logo-96.KNEHQGLU.webp": "f7719a26481d9d61d7dc88c44309e65337f0e8b2843bf7034c599ea8e343fe60",
+    "index.html": "65b728d9846db8a8335306fcd1c9ce10269bb9c61ece9fb5ec16da60284aa8bc"
+  }
+}
