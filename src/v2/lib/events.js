@@ -2,7 +2,7 @@
 // Backward compatible: every legacy field keeps its name and meaning; schema-2 fields are additive.
 // `dates` stay ISO instants of Jerusalem midnight (what Code.gs v9 formats); `datesLocal`/`slots` carry
 // the civil dates so v10 no longer depends on the browser's zone.
-import { VERSION } from '../config/site.js';
+import { VERSION, WEBHOOK_KEY } from '../config/site.js';
 import { branchTitleOf } from '../config/groups.js';
 import { OFFERS, priceFor } from '../config/offers.js';
 import { goalById, FORMATS } from '../config/private.js';
@@ -33,7 +33,7 @@ export function buildPayload(event, s, ctx) {
   }
   Object.assign(p, {
     device: ctx.device, utm: ctx.utm.utm_source || '',
-    schema: 2, widgetVersion: VERSION, source: ctx.source, host: ctx.host, submissionId: s.submissionId,
+    schema: 2, widgetVersion: VERSION, source: ctx.source, host: ctx.host, submissionId: s.submissionId, key: WEBHOOK_KEY,
     offerId: s.offerId || '', phoneE164: toE164(s.phone),
   });
   if (s.offerId === 'private') {

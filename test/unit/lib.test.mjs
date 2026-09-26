@@ -57,6 +57,18 @@ test('payload: every legacy field name the backend reads is present with the leg
   assert.equal(p.categoryLabel, 'ילדים 6-8');
 });
 
+test('payload: every event carries the public widget key (Apps Script v11 gate, channel label)', async () => {
+  const site = await load('src/v2/config/site.js');
+  assert.match(site.WEBHOOK_KEY, /^ebw_[0-9a-f]{24}$/);
+  const ctx = { device: 'mobile', utm: {}, source: 'embed', host: 'x' };
+  const grp = ev.buildPayload('lead_started', { name: 'א ב', phone: '0500000000', audience: 'self', offerId: 'trial3',
+    group: gr.groupById('adults-38-58'), slots: [], goal: null, format: null, note: '', submissionId: 'w1', medHas: null, medText: '' }, ctx);
+  const pvt = ev.buildPayload('private_inquiry', { name: 'א ב', phone: '0500000000', audience: null, offerId: 'private', group: null,
+    slots: [], goal: 'private-rehab', format: 'individual', note: '', submissionId: 'w2', medHas: null, medText: '' }, ctx);
+  assert.equal(grp.key, site.WEBHOOK_KEY);
+  assert.equal(pvt.key, site.WEBHOOK_KEY);
+});
+
 test('payload: private inquiry carries goal, format and note; never dates', () => {
   const p = ev.buildPayload('private_inquiry', { name: 'א ב', phone: '0500000000', audience: null, offerId: 'private', group: null, slots: [],
     goal: 'private-fitness', format: 'duo', note: ' לחזור לכושר ', submissionId: 'w2', medHas: null, medText: '' },

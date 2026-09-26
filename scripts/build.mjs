@@ -17,8 +17,14 @@ const outIdx = args.indexOf('--out');
 const out = outIdx > -1 ? args[outIdx + 1] : `.cache/build-${tree}`;
 const TREES = {
   v1: { entry: 'src/v1/main.jsx', shell: 'src/v1/shell.html' },
-  v2: { entry: 'src/v2/main.jsx', shell: 'src/v2/shell.html', version: '2.0.0', embedContract: 2, payloadSchema: 2 },
+  v2: { entry: 'src/v2/main.jsx', shell: 'src/v2/shell.html', version: siteVersion('src/v2/config/site.js'), embedContract: 2, payloadSchema: 2 },
 };
+// Single source of truth for the version: the VERSION constant the app itself sends as widgetVersion.
+function siteVersion(file) {
+  const m = fs.readFileSync(file, 'utf8').match(/export const VERSION = '(\d+\.\d+\.\d+)'/);
+  if (!m) throw new Error(`no VERSION in ${file}`);
+  return m[1];
+}
 const T = TREES[tree];
 if (!T) { console.error(`unknown tree "${tree}" (known: ${Object.keys(TREES).join(', ')})`); process.exit(1); }
 

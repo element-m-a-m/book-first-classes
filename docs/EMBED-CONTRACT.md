@@ -101,6 +101,12 @@ utm_*`. Events: `lead_started` and `checkout_reached` (on the contact step, in o
 `booking_callback`, `abandoned_checkout` (90 s on the summary), `private_inquiry`. Apps Script v10 renders the new
 fields; v9 ignores them.
 
+Since 2.0.1 every payload also carries `key` = the public widget channel key (`WEBHOOK_KEY` in `src/v2/config/site.js`,
+matching the Script Property `WEBHOOK_KEY_WIDGET`). Apps Script v11+ strips it on entry and records the verdict in the
+Event Log "Auth" column; in `enforce` mode widget events without it are refused. It is public like the /exec URL, so it
+labels the channel and is not authentication. Server-side callers (the website's contact function) send the server
+secret instead, never the widget key.
+
 ## 7. Local development
 
 On `localhost`/`127.0.0.1` the widget never calls the production webhook: payloads go to `window.__ebDryRun`.
