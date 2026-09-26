@@ -1,0 +1,12 @@
+{
+  "name": "element-booking-widget",
+  "private": true,
+  "version": "1.0.0-legacy",
+  "type": "module",
+  "scripts": {
+    "parity:legacy": "node scripts/parity-legacy.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.17.19"
+  }
+}

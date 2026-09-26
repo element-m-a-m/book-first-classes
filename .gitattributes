@@ -1,0 +1,9 @@
+# Byte-exact artefacts: never convert line endings (core.autocrlf is on for this machine).
+* text=auto eol=lf
+releases/** -text
+legacy/shell-*.html -text
+index.html -text
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
