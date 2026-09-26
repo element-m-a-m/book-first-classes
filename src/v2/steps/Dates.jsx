@@ -4,7 +4,6 @@ import { slotOn, slotsOf, durationOf } from '../config/timetable.js';
 import { OFFERS } from '../config/offers.js';
 import { civilOf, addDays, dowOf, parts, weekStart, instantOf, HDAYS, HDAYS_S, HMONTHS, fmtLong } from '../lib/civil-date.js';
 import { closureFor } from '../lib/closures.js';
-import { waLink, daysWA } from '../lib/messages.js';
 import { maxDatesOf } from '../state/flow.js';
 import { Button, Time, T, Icon, Notice, Price } from '../ui/primitives.jsx';
 
@@ -104,9 +103,6 @@ export function Dates({ state, dispatch, next, Heading, nowMs }) {
       <Button onClick={next} disabled={state.dates.length < 1}>המשך</Button>
       <div className="eb-alt">
         <Button variant="outline" onClick={() => dispatch({ type: 'skipDates' })}>לא מצאתי תאריך מתאים, אדלג ואתאם בהמשך</Button>
-        <a className="eb-link eb-link--wa" href={waLink(daysWA(group.label))} target="_blank" rel="noopener noreferrer">
-          <Icon name="wa" size={16} /> מתלבטים לגבי הימים? התייעצו איתנו בוואטסאפ
-        </a>
       </div>
     </section>
   );

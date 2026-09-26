@@ -163,6 +163,16 @@ export function App({ params, embedded }) {
   const stepIndex = steps.indexOf(state.step);
   const backStep = stepIndex > 0 ? steps[stepIndex - 1] : null;
 
+  // Top navigation shares the same validation/submission handlers as the bottom actions.
+  // Final decision screens keep their explicit booking or send-inquiry actions below the content.
+  const forward = {
+    offer: { action: () => go(state.offer === 'private' ? 'pgoal' : 'group'), disabled: !state.offer },
+    group: { action: () => go('dates'), disabled: !state.groupId },
+    dates: { action: () => go('contact'), disabled: state.dates.length < 1 },
+    contact: { action: submitContact, label: 'לסיכום' },
+    pgoal: { action: () => go('pcontact'), disabled: !state.goal || !state.format },
+  }[state.step];
+
   let body;
   switch (state.step) {
     case 'offer': body = <Offer {...common} next={() => go(state.offer === 'private' ? 'pgoal' : 'group')} />; break;
@@ -197,7 +207,7 @@ export function App({ params, embedded }) {
         </section>
       )}
       <main className="eb-main">
-        {!isDone && <Stepper steps={steps} current={state.step} back={backStep ? () => go(backStep) : undefined} />}
+        {!isDone && <Stepper steps={steps} current={state.step} back={backStep ? () => go(backStep) : undefined} forward={forward?.action} forwardDisabled={forward?.disabled} forwardLabel={forward?.label} />}
         {exitOpen && embedded && <ExitIntent inline onClose={() => setExitOpen(false)} />}
         <div className="eb-transition" key={state.step}>{body}</div>
       </main>

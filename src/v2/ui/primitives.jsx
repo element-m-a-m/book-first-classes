@@ -100,17 +100,21 @@ export function Notice({ children, onDismiss }) {
   );
 }
 
-export function Stepper({ steps, current, back }) {
+export function Stepper({ steps, current, back, forward, forwardDisabled = false, forwardLabel = 'המשך' }) {
   const idx = Math.max(0, steps.indexOf(current));
   return (
     <div className="eb-stepper">
       <div className="eb-stepper__nav">
         {back && <BackButton onClick={back} />}
-        <p className="eb-stepper__label">שלב <T>{String(idx + 1)}</T> מתוך <T>{String(steps.length)}</T></p>
+        <div className="eb-stepper__progress" role="group" aria-label={'שלב ' + (idx + 1) + ' מתוך ' + steps.length}>
+          <ol className="eb-stepper__bar" aria-hidden="true">
+            {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
+          </ol>
+        </div>
+        {forward && <button type="button" className="eb-stepper__forward" aria-label={forwardLabel === 'המשך' ? 'המשך לשלב הבא' : 'לסיכום ההרשמה'} disabled={forwardDisabled} onClick={(e) => { if (e.detail < 2) forward(); }}>
+          {forwardLabel}<svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 4-6 6 6 6" /></svg>
+        </button>}
       </div>
-      <ol className="eb-stepper__bar" aria-hidden="true">
-        {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
-      </ol>
     </div>
   );
 }
