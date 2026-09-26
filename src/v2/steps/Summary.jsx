@@ -65,7 +65,7 @@ export function Summary({ state, group, slots, pay, callback, Heading, failed, r
       )}
       <div className="eb-option eb-option--preferred">
         <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
-        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן</p>
+        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן דרך מערכת <bdi dir="ltr">Boostapp</bdi></p>
         <LinkButton variant="primary" href={payUrlFor(state.offer, group.id)} onClick={(e) => {
           if (e.detail >= 2) { e.preventDefault(); return; }
           pay();
