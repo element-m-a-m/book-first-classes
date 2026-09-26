@@ -72,7 +72,7 @@ export function Contact({ state, dispatch, submit, back, Heading }) {
           </div>
           {show('med') && <p id="eb-med-err" className="eb-field__error">{err.med}</p>}
           {state.medHas === true && (
-            <Field id="eb-med" label="פרטים (לא חובה)">
+            <Field id="eb-med" label="פרטים">
               {(a) => (
                 <textarea id="eb-med" className="eb-input eb-textarea" value={state.medText} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..."
                   onChange={(e) => dispatch({ type: 'field', field: 'medText', value: e.target.value })} {...a} />

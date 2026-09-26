@@ -23,11 +23,12 @@ export function PriceLine({ offer, groupId }) {
   return <span className="eb-price"><Price value={priceFor(offer, groupId)} /></span>;
 }
 
-export function Location() {
+export function Location({ compact = false }) {
+  const rows = compact ? [ADDRESS_ROWS[0], ADDRESS_ROWS.slice(1).join(', ')] : ADDRESS_ROWS;
   return (
     <div className="eb-location">
       <Icon name="pin" size={18} />
-      <address>{ADDRESS_ROWS.map((r) => <span key={r}>{r}</span>)}</address>
+      <address>{rows.map((r) => <span key={r}>{r}</span>)}</address>
     </div>
   );
 }
@@ -47,9 +48,13 @@ export function Group({ state, dispatch, next, back, Heading }) {
           </Choice>
         ))}
       </fieldset>
+      <section className="eb-location-section" aria-labelledby="eb-address-title">
+        <h3 id="eb-address-title" className="eb-h2">כתובת</h3>
+        <Location compact />
+      </section>
       <Notice onDismiss={() => dispatch({ type: 'field', field: 'notice', value: null })}>{state.notice}</Notice>
       {state.audience && (
-        <fieldset className="eb-choices">
+        <fieldset className="eb-choices eb-group-list" key={state.audience}>
           <legend className="eb-subhead">בחרו את השיעור הרצוי:</legend>
           {list.map((g) => (
             <Choice key={g.id} name="group" value={g.id} checked={state.groupId === g.id} accent={accentOf(g)}
@@ -63,13 +68,11 @@ export function Group({ state, dispatch, next, back, Heading }) {
               </span>
               <span className="eb-group__foot">
                 {!g.desc.includes('בהנחיית') && <span className="eb-group__coach">בהנחיית {g.coach}</span>}
-                <PriceLine offer={state.offer} groupId={g.id} />
               </span>
             </Choice>
           ))}
         </fieldset>
       )}
-      <Location />
       <Button onClick={next} disabled={!state.groupId}>המשך לבחירת מועדים</Button>
     </section>
   );

@@ -42,7 +42,7 @@ export async function toGroup(page, offerText, g) {
 export async function fillContact(page, { medical = null } = {}) {
   await page.getByLabel('שם מלא').fill(TEST_LEAD.name);
   await page.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
-  if (medical) { await choose(page, 'יש מה לדעת'); await page.getByLabel('פרטים (לא חובה)').fill(medical); } else await choose(page, 'הכל תקין');
+  if (medical) { await choose(page, 'יש מה לדעת'); await page.getByLabel('פרטים', { exact: true }).fill(medical); } else await choose(page, 'הכל תקין');
 }
 
 export async function groupJourney(page, g, { offer = 'trial3', dates = offer === 'single' ? 1 : 3, finish = 'selfbook', medical = null } = {}) {

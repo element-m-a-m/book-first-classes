@@ -217,3 +217,11 @@ button.eb-cal__day { cursor: pointer; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 @media (forced-colors: active) { .eb-choice.is-checked, .eb-cal__day.is-selected { outline: 2px solid CanvasText; } }
+
+/* Website review: keep each decision compact and price only the selected package. */
+.eb-offer__pricing { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding-block: 4px; }
+.eb-offer__discount { color: var(--ma); font-size: .8125rem; font-weight: 700; }
+.eb-location-section { display: grid; gap: 8px; padding-block: 4px 14px; border-block-end: 1px solid var(--line); }
+.eb-group-list { animation: eb-group-reveal 250ms ease-out both; }
+@keyframes eb-group-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .eb-group-list { animation: none; } }
