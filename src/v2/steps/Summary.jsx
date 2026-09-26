@@ -54,18 +54,18 @@ export function WhatToBring() {
 
 export function Summary({ state, group, slots, pay, callback, Heading, failed, retry }) {
   return (
-    <section className="eb-step">
+    <section className="eb-step eb-step--summary">
       <Heading>סיכום והרשמה</Heading>
-      <p className="eb-lead">בדקו את הפרטים והבטיחו מקום</p>
+      <p className="eb-lead">איך תרצו להמשיך?</p>
       {failed > 0 && (
         <Notice>
           לא הצלחנו לשמור את הפרטים אצלנו. <button type="button" className="eb-link" onClick={retry}>ניסיון נוסף</button>
           {' '}או <a className="eb-link" href={waLink(QUESTION_WA)} target="_blank" rel="noopener noreferrer">כתבו לנו בוואטסאפ</a>
         </Notice>
       )}
-      <div className="eb-option">
-        <p className="eb-option__title">השלמת ההרשמה</p>
-        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן · השיבוץ יאושר סופית ע"י הצוות</p>
+      <div className="eb-option eb-option--preferred">
+        <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
+        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן</p>
         <LinkButton variant="primary" href={payUrlFor(state.offer, group.id)} onClick={(e) => {
           if (e.detail >= 2) { e.preventDefault(); return; }
           pay();
