@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website host with the proposed v2 parent script</title>
+<style>body { margin: 0; font-family: Arial, sans-serif; } iframe { display: block; inline-size: 100%; border: 0; } .spacer { block-size: 1400px; }</style>
+</head>
+<body>
+<!-- Mirrors element-website src/chrome/booking.html with the handoff changes (data-offer on the carousel buttons). -->
+<div class="trial-offers__selectors" role="group" aria-label="הצגת אפשרויות ומחירים">
+  <button type="button" data-offer-select="0" data-offer="trial3" aria-pressed="false">3 שיעורים</button>
+  <button type="button" data-offer-select="1" data-offer="single" aria-pressed="true">שיעור בודד</button>
+  <button type="button" data-offer-select="2" data-offer="private" aria-pressed="false">אישי / זוגי</button>
+</div>
+<script>document.querySelectorAll('[data-offer-select]').forEach(function (b) { b.addEventListener('click', function () {
+  document.querySelectorAll('[data-offer-select]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }); });</script>
+<div class="booking-widget" data-state="idle">
+  <div class="booking-widget__stage">
+    <div class="booking-widget__status" role="status" aria-live="polite">
+      <strong>מתחילים עם שיעורי היכרות</strong><p>טוען…</p>
+      <button class="booking-widget__retry" type="button" hidden>לנסות שוב</button>
+    </div>
+    <iframe class="book__frame" data-src="/.cache/build-v2/index.html" title="הרשמה לשיעורי היכרות - אלמנט" aria-hidden="true" tabindex="-1"
+      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
+  </div>
+</div>
+<div class="spacer"></div>
+<script src="/docs/website/booking.v2.js"></script>
+</body>
+</html>

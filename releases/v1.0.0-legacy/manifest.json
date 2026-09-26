@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0-legacy",
+  "commit": "4dcb70c5",
+  "note": "Byte copy of the live widget before v2 (instant rollback: copy index.html to repo root).",
+  "files": {
+    "index.html": "64e966e37a910772815b83b416a4443ce8d91d2c9ab0983d2c4b3bb374a40998"
+  }
+}

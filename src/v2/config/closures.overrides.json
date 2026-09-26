@@ -1,0 +1,4 @@
+{
+ "about": "Manual closures/openings that win over closures.generated.json. action: close|open; scope: all or an array of group ids. Example: {\"date\": \"2026-12-24\", \"scope\": \"all\", \"action\": \"close\", \"reason\": \"hall unavailable\"}",
+ "overrides": []
+}

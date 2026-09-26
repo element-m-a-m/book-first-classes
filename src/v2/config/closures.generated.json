@@ -1,0 +1,512 @@
+{
+ "generatedFrom": "2026-01-01",
+ "horizon": "2030-12-31",
+ "rules": "Spoke 8 §3 + decisions 14/15 (26-Sep-2026)",
+ "closures": [
+  {
+   "date": "2026-04-01",
+   "scope": "all",
+   "reason": "pesach-eve"
+  },
+  {
+   "date": "2026-04-02",
+   "scope": "all",
+   "reason": "pesach"
+  },
+  {
+   "date": "2026-04-07",
+   "scope": "all",
+   "reason": "pesach-7-eve"
+  },
+  {
+   "date": "2026-04-08",
+   "scope": "all",
+   "reason": "pesach-7"
+  },
+  {
+   "date": "2026-04-20",
+   "scope": "all",
+   "reason": "yom-hazikaron-eve"
+  },
+  {
+   "date": "2026-04-21",
+   "scope": "all",
+   "reason": "yom-hazikaron"
+  },
+  {
+   "date": "2026-04-22",
+   "scope": "all",
+   "reason": "yom-haatzmaut"
+  },
+  {
+   "date": "2026-05-21",
+   "scope": "all",
+   "reason": "shavuot-eve"
+  },
+  {
+   "date": "2026-05-22",
+   "scope": "all",
+   "reason": "shavuot"
+  },
+  {
+   "date": "2026-08-23",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-24",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-25",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-26",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-27",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-28",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-30",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-08-31",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2026-09-13",
+   "scope": "all",
+   "reason": "rosh-hashana-2"
+  },
+  {
+   "date": "2026-09-20",
+   "scope": "all",
+   "reason": "yom-kippur-eve"
+  },
+  {
+   "date": "2026-09-21",
+   "scope": "all",
+   "reason": "yom-kippur"
+  },
+  {
+   "date": "2027-04-21",
+   "scope": "all",
+   "reason": "pesach-eve"
+  },
+  {
+   "date": "2027-04-22",
+   "scope": "all",
+   "reason": "pesach"
+  },
+  {
+   "date": "2027-04-27",
+   "scope": "all",
+   "reason": "pesach-7-eve"
+  },
+  {
+   "date": "2027-04-28",
+   "scope": "all",
+   "reason": "pesach-7"
+  },
+  {
+   "date": "2027-05-10",
+   "scope": "all",
+   "reason": "yom-hazikaron-eve"
+  },
+  {
+   "date": "2027-05-11",
+   "scope": "all",
+   "reason": "yom-hazikaron"
+  },
+  {
+   "date": "2027-05-12",
+   "scope": "all",
+   "reason": "yom-haatzmaut"
+  },
+  {
+   "date": "2027-06-10",
+   "scope": "all",
+   "reason": "shavuot-eve"
+  },
+  {
+   "date": "2027-06-11",
+   "scope": "all",
+   "reason": "shavuot"
+  },
+  {
+   "date": "2027-08-22",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-23",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-24",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-25",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-26",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-27",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-29",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-30",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-08-31",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2027-10-03",
+   "scope": "all",
+   "reason": "rosh-hashana-2"
+  },
+  {
+   "date": "2027-10-10",
+   "scope": "all",
+   "reason": "yom-kippur-eve"
+  },
+  {
+   "date": "2027-10-11",
+   "scope": "all",
+   "reason": "yom-kippur"
+  },
+  {
+   "date": "2028-04-10",
+   "scope": "all",
+   "reason": "pesach-eve"
+  },
+  {
+   "date": "2028-04-11",
+   "scope": "all",
+   "reason": "pesach"
+  },
+  {
+   "date": "2028-04-16",
+   "scope": "all",
+   "reason": "pesach-7-eve"
+  },
+  {
+   "date": "2028-04-17",
+   "scope": "all",
+   "reason": "pesach-7"
+  },
+  {
+   "date": "2028-04-30",
+   "scope": "all",
+   "reason": "yom-hazikaron-eve"
+  },
+  {
+   "date": "2028-05-01",
+   "scope": "all",
+   "reason": "yom-hazikaron"
+  },
+  {
+   "date": "2028-05-02",
+   "scope": "all",
+   "reason": "yom-haatzmaut"
+  },
+  {
+   "date": "2028-05-30",
+   "scope": "all",
+   "reason": "shavuot-eve"
+  },
+  {
+   "date": "2028-05-31",
+   "scope": "all",
+   "reason": "shavuot"
+  },
+  {
+   "date": "2028-08-27",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2028-08-28",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2028-08-29",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2028-08-30",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2028-08-31",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2028-09-20",
+   "scope": "all",
+   "reason": "rosh-hashana-1-eve"
+  },
+  {
+   "date": "2028-09-21",
+   "scope": "all",
+   "reason": "rosh-hashana-1+rosh-hashana-2-eve"
+  },
+  {
+   "date": "2028-09-22",
+   "scope": "all",
+   "reason": "rosh-hashana-2"
+  },
+  {
+   "date": "2028-10-04",
+   "scope": "all",
+   "reason": "sukkot-eve"
+  },
+  {
+   "date": "2028-10-05",
+   "scope": "all",
+   "reason": "sukkot"
+  },
+  {
+   "date": "2028-10-11",
+   "scope": "all",
+   "reason": "shemini-atzeret-eve"
+  },
+  {
+   "date": "2028-10-12",
+   "scope": "all",
+   "reason": "shemini-atzeret"
+  },
+  {
+   "date": "2029-04-05",
+   "scope": "all",
+   "reason": "pesach-7-eve"
+  },
+  {
+   "date": "2029-04-06",
+   "scope": "all",
+   "reason": "pesach-7"
+  },
+  {
+   "date": "2029-04-17",
+   "scope": "all",
+   "reason": "yom-hazikaron-eve"
+  },
+  {
+   "date": "2029-04-18",
+   "scope": "all",
+   "reason": "yom-hazikaron"
+  },
+  {
+   "date": "2029-04-19",
+   "scope": "all",
+   "reason": "yom-haatzmaut"
+  },
+  {
+   "date": "2029-05-20",
+   "scope": "all",
+   "reason": "shavuot"
+  },
+  {
+   "date": "2029-08-26",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-08-27",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-08-28",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-08-29",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-08-30",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-08-31",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2029-09-09",
+   "scope": "all",
+   "reason": "rosh-hashana-1-eve"
+  },
+  {
+   "date": "2029-09-10",
+   "scope": "all",
+   "reason": "rosh-hashana-1+rosh-hashana-2-eve"
+  },
+  {
+   "date": "2029-09-11",
+   "scope": "all",
+   "reason": "rosh-hashana-2"
+  },
+  {
+   "date": "2029-09-18",
+   "scope": "all",
+   "reason": "yom-kippur-eve"
+  },
+  {
+   "date": "2029-09-19",
+   "scope": "all",
+   "reason": "yom-kippur"
+  },
+  {
+   "date": "2029-09-23",
+   "scope": "all",
+   "reason": "sukkot-eve"
+  },
+  {
+   "date": "2029-09-24",
+   "scope": "all",
+   "reason": "sukkot"
+  },
+  {
+   "date": "2029-09-30",
+   "scope": "all",
+   "reason": "shemini-atzeret-eve"
+  },
+  {
+   "date": "2029-10-01",
+   "scope": "all",
+   "reason": "shemini-atzeret"
+  },
+  {
+   "date": "2030-04-17",
+   "scope": "all",
+   "reason": "pesach-eve"
+  },
+  {
+   "date": "2030-04-18",
+   "scope": "all",
+   "reason": "pesach"
+  },
+  {
+   "date": "2030-04-23",
+   "scope": "all",
+   "reason": "pesach-7-eve"
+  },
+  {
+   "date": "2030-04-24",
+   "scope": "all",
+   "reason": "pesach-7"
+  },
+  {
+   "date": "2030-05-06",
+   "scope": "all",
+   "reason": "yom-hazikaron-eve"
+  },
+  {
+   "date": "2030-05-07",
+   "scope": "all",
+   "reason": "yom-hazikaron"
+  },
+  {
+   "date": "2030-05-08",
+   "scope": "all",
+   "reason": "yom-haatzmaut"
+  },
+  {
+   "date": "2030-06-06",
+   "scope": "all",
+   "reason": "shavuot-eve"
+  },
+  {
+   "date": "2030-06-07",
+   "scope": "all",
+   "reason": "shavuot"
+  },
+  {
+   "date": "2030-08-25",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-08-26",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-08-27",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-08-28",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-08-29",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-08-30",
+   "scope": "all",
+   "reason": "august-break"
+  },
+  {
+   "date": "2030-09-29",
+   "scope": "all",
+   "reason": "rosh-hashana-2"
+  },
+  {
+   "date": "2030-10-06",
+   "scope": "all",
+   "reason": "yom-kippur-eve"
+  },
+  {
+   "date": "2030-10-07",
+   "scope": "all",
+   "reason": "yom-kippur"
+  }
+ ]
+}
