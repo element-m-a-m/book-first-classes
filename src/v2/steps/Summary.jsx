@@ -11,7 +11,11 @@ export function SlotList({ slots }) {
   return (
     <ul className="eb-slots">
       {slots.map((s) => (
-        <li key={s.date}>יום {HDAYS[dowOf(s.date)]}, <T>{fmtDots(s.date)}</T> · <Time start={s.start} end={s.end} /></li>
+        <li key={s.date}>
+          <span className="eb-slot__day">יום {HDAYS[dowOf(s.date)]}</span>
+          <time className="eb-slot__date" dateTime={s.date}><T>{fmtDots(s.date)}</T></time>
+          <span className="eb-slot__time"><Time start={s.start} end={s.end} /></span>
+        </li>
       ))}
     </ul>
   );
@@ -60,17 +64,17 @@ export function Summary({ state, group, slots, back, pay, callback, Heading, fai
         </Notice>
       )}
       <OrderCard group={group} offer={state.offer} slots={slots} />
-      <Location />
+      <Location compact />
       <h3 className="eb-subhead">איך תרצו להמשיך?</h3>
       <div className="eb-option">
         <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
         <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן · השיבוץ יאושר סופית ע"י הצוות</p>
-        <Button onClick={pay}>מעבר למערכת ההזמנה</Button>
+        <Button onClick={(e) => { if (e.detail < 2) pay(); }}>מעבר למערכת ההזמנה</Button>
       </div>
       <div className="eb-option">
         <p className="eb-option__title">נציג יחזור אליי (לתיאום והרשמה)</p>
         <p className="eb-meta">נפתח שיחת וואטסאפ עם הפרטים שמילאתם.</p>
-        <Button variant="wa" onClick={callback}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
+        <Button variant="wa-outline" onClick={(e) => { if (e.detail < 2) callback(); }}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
       </div>
       <WhatToBring />
     </section>

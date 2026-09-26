@@ -150,7 +150,7 @@ export function App({ params, embedded }) {
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
     const id = setInterval(() => {
       const s = stateRef.current;
-      if (Date.now() - last > IDLE_MS && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.idle) { seen.current.idle = true; setIdleOpen(true); }
+      if (Date.now() - last > IDLE_MS && s.step !== 'offer' && s.step !== 'summary' && !DONE_STEPS.includes(s.step) && !seen.current.idle) { seen.current.idle = true; setIdleOpen(true); }
     }, 5000);
     return () => { evs.forEach((e) => window.removeEventListener(e, touch)); clearInterval(id); };
   }, []);
@@ -208,7 +208,7 @@ export function App({ params, embedded }) {
       </main>
       <p className="eb-sr" aria-live="polite" ref={liveRef} />
       {exitOpen && !embedded && <ExitIntent onClose={() => setExitOpen(false)} />}
-      {idleOpen && !isDone && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
+      {idleOpen && !isDone && state.step !== 'summary' && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
     </div>
   );
 }

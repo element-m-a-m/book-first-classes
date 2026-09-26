@@ -61,6 +61,8 @@ bdi { unicode-bidi: isolate; }
 .eb-btn--secondary { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
 .eb-btn--secondary:hover { border-color: var(--ink); }
 .eb-btn--wa { background: var(--wa); color: #fff; }
+.eb-btn--wa-outline { background: transparent; color: var(--wa); border-color: var(--wa); }
+.eb-btn--wa-outline:hover { background: #edf4ee; }
 .eb-btn:disabled { background: var(--paper-deep); color: #6f7772; border-color: var(--line); cursor: not-allowed; }
 .eb-back { justify-self: start; display: inline-flex; align-items: center; gap: 4px; min-block-size: 44px; padding: 0 4px; margin: -6px -4px -6px 0;
   background: none; border: 0; color: var(--muted); font-size: .9375rem; cursor: pointer; }
@@ -174,7 +176,16 @@ button.eb-cal__day { cursor: pointer; }
 .eb-card__row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .eb-card__row p { margin: 0; }
 .eb-card__title { margin: 0; font-weight: 700; }
-.eb-slots { margin: 0; padding-inline-start: 18px; display: grid; gap: 2px; font-size: .9375rem; }
+.eb-slots { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: .9375rem; container-type: inline-size; }
+.eb-slots li { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr) max-content; align-items: baseline; column-gap: .5rem; }
+.eb-slot__day, .eb-slot__date, .eb-slot__time { white-space: nowrap; }
+.eb-slot__time { justify-self: end; font-variant-numeric: tabular-nums; }
+.eb-slot__date { font-variant-numeric: tabular-nums; }
+@container (min-width: 26rem) { .eb-slots li { column-gap: 2rem; } }
+@container (max-width: 16rem) {
+  .eb-slots li { grid-template-columns: 1fr max-content; row-gap: 2px; }
+  .eb-slot__time { grid-column: 1 / -1; }
+}
 .eb-rates { margin: 0; display: grid; gap: 6px; }
 .eb-rates div { display: flex; justify-content: space-between; gap: 8px; }
 .eb-rates dt { color: var(--muted); }

@@ -39,3 +39,14 @@ Final accessibility pass: all 7 viewport/embedded audits passed, covering every 
 - Choice cards can be cleared by a second pointer click or Space. Native radio exclusivity/arrow navigation retained. Offer clearing resets dependent selections, audience/group clearing removes stale dates, private price summary and Continue require both format and goal. Medical choices can return to unanswered, still requiring an explicit answer before submission; entered text is preserved. Navigation/submission buttons remain actions, not toggles.
 - Validation: 59 browser checks passed (including new pointer/keyboard deselection and dependency tests, complete group/private journeys, iframe contracts, mocks, help overlay, and axe checks); 17 unit checks passed. Visual evidence: refined-offers-390/475/1440.png and location-color-options.png.
 - Local review only on :8853. No new release/tag, push, deployment, production lead, or Apps Script change. Website site/booking remains manifest-verified v2.0.1.
+
+
+## Summary layout and action hierarchy — 26 September follow-up
+- Selected dates now use aligned day/date/time columns, with hours at the left edge and no list bullets or dot separator. Container queries provide a deliberate two-line fallback below 16rem of row width; wider rows have increased gaps. Date/time values and backend serialization unchanged.
+- Summary address now uses the existing compact two-row representation: venue, then street/neighborhood/city with natural wrapping.
+- Booking remains gold; summary WhatsApp callback uses a transparent green outline. Callback handler, payload and destination unchanged.
+- Timed help cannot open or remain visible on summary; it remains available on intermediate steps. Exit-intent logic is unchanged.
+- Website-owned duplicate WhatsApp link removed from all ten booking sections. The bottom strip is hidden when the iframe is ready; separate-window fallback remains available for failed/loading states.
+- Actual :8853 website summary visually checked at 383/1280px. All three date columns remain on one line at 383px. Local only, no release, push, deployment, backend edits or real leads.
+
+Validation completion: 42 of 43 widget behavior/journey checks passed initially; shorter summary exposed a double-click fall-through into booking. Summary actions now ignore the second click of a double-click (keyboard activation remains supported). The failing deduplication/resubmit check passes after that guard. Two actual website iframe layout checks pass at 383/1280px, and website gates all pass. Initial default-port test run hit another checkout; discarded those results and used isolated review config on :4185. No changes to the other checkout/server.
