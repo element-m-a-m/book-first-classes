@@ -1,7 +1,10 @@
 // Site-wide constants for the v2 widget.
-export const VERSION = '2.0.0';
+export const VERSION = '2.0.1';
 export const TZ = 'Asia/Jerusalem';
 export const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJ0CjKQq8jM0i_Mg1qgCkwbLeY2Gb9f5iX2kF6CC-4PQz8keR9O7CWNW3os8ch2bt00A/exec';
+// Public channel key for the Apps Script request gate (Script Property WEBHOOK_KEY_WIDGET). It is public
+// like the URL above: it labels the widget channel and allows rotation; it is NOT authentication.
+export const WEBHOOK_KEY = 'ebw_44a128a7b4274164851f2a8e';
 export const WA_PHONE = '972512826106';
 export const PRIVACY_URL = 'https://element-m-a-m.co.il/legal/privacy-policy.html';
 // Same wording as the website booking section (src/chrome/booking.html).
