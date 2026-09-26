@@ -108,3 +108,25 @@ test('v1: the current website booking.js loads the v2 widget, sizes it and marks
   await expect.poll(() => page.locator('iframe').evaluate((f) => f.getBoundingClientRect().height)).not.toBe(h); // resize reached the parent
   expect(rec.blocked).toEqual([]);
 });
+
+test('website v2 parent script (handoff): carries the carousel choice, sizes, hands over later choices until the visitor starts', async ({ page }) => {
+  const rec = await openWidget(page, '/test/e2e/pages/website-v2.html?utm_source=website&utm_campaign=autumn', { host: true });
+  await expect(page.locator('.booking-widget')).toHaveAttribute('data-state', 'ready', { timeout: 10000 });
+  const frame = page.frameLocator('iframe');
+  // the carousel showed "שיעור בודד" when the widget loaded -> offer=single in the iframe URL
+  await expect(frame.locator('h2')).toHaveText('עבור מי השיעור?');
+  expect(await page.locator('iframe').getAttribute('src')).toMatch(/offer=single/);
+  expect(await page.locator('iframe').getAttribute('src')).toMatch(/utm_campaign=autumn/);
+  // visitor flips the carousel to 3 שיעורים before touching the widget -> setContext applies
+  await page.getByRole('button', { name: '3 שיעורים' }).click();
+  const h1 = await page.locator('iframe').evaluate((f) => f.getBoundingClientRect().height);
+  expect(h1).toBeGreaterThan(300);
+  await frame.getByRole('button', { name: 'חזרה' }).click(); // first interaction inside the widget
+  await expect(frame.getByRole('radio', { name: '3 שיעורי היכרות' })).toBeChecked();
+  // after the visitor starts using the widget, the carousel no longer changes it
+  await page.getByRole('button', { name: 'אישי / זוגי' }).click();
+  await page.waitForTimeout(300);
+  await expect(frame.getByRole('radio', { name: '3 שיעורי היכרות' })).toBeChecked();
+  await expect(frame.getByRole('radio', { name: 'אימון אישי / זוגי' })).not.toBeChecked();
+  expect(rec.blocked).toEqual([]);
+});
