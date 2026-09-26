@@ -41,7 +41,7 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   await frame.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
   await frame.locator('label.eb-choice', { has: frame.getByRole('radio', { name: 'הכל תקין' }) }).click();
   await frame.getByRole('button', { name: 'המשך לסיכום' }).click();
-  await frame.getByRole('button', { name: 'מעבר למערכת ההזמנה' }).click();
+  await frame.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click();
   await waitEvents(page, rec, 3);
   const p = rec.events[1];
   expect(p.source).toBe('embed');
@@ -51,7 +51,7 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   expect(p.utm_campaign).toBe('autumn');
   const all = await msgs(page);
   const steps = v2(all, 'step').map((d) => d.step);
-  expect(steps).toEqual(['group', 'dates', 'contact', 'summary', 'done']);
+  expect(steps).toEqual(['group', 'dates', 'contact', 'summary']);
   expect(v2(all, 'complete')).toEqual([{ ns: 'element:booking', v: 2, type: 'complete', outcome: 'selfbook' }]);
   const text = JSON.stringify(all);
   for (const pii of [TEST_LEAD.name, '0500000000', '050-0000000', '+972500000000', '500000000']) expect(text).not.toContain(pii);

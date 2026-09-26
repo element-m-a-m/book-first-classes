@@ -25,7 +25,7 @@ for (const width of [320, 383, 475, 1280]) {
     await expect(page.getByRole('button', { name: /בקשת שיחה חוזרת/ })).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
     await page.clock.fastForward(70000);
     await expect(page.locator('.eb-pop--help')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'מעבר למערכת ההזמנה', exact:true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח', exact:true })).toBeVisible();
     await page.screenshot({ path:`.cache/summary-refined-${width}.png`, fullPage:true });
   });
 }

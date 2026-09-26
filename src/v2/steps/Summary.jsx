@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { OFFERS } from '../config/offers.js';
+import { OFFERS, payUrlFor } from '../config/offers.js';
 import { WHAT_TO_BRING } from '../config/site.js';
 import { HDAYS, dowOf, fmtDots } from '../lib/civil-date.js';
 import { waLink, QUESTION_WA } from '../lib/messages.js';
-import { Button, Time, T, Icon, Notice } from '../ui/primitives.jsx';
+import { Button, LinkButton, Time, T, Icon, Notice } from '../ui/primitives.jsx';
 import { PriceLine, Location } from './Group.jsx';
+import { CalendarButton } from '../ui/CalendarButton.jsx';
 
 export function SlotList({ slots }) {
   if (!slots.length) return <p className="eb-muted">מועדים יתואמו טלפונית בהמשך</p>;
@@ -62,19 +63,22 @@ export function Summary({ state, group, slots, pay, callback, Heading, failed, r
           {' '}או <a className="eb-link" href={waLink(QUESTION_WA)} target="_blank" rel="noopener noreferrer">כתבו לנו בוואטסאפ</a>
         </Notice>
       )}
-      <OrderCard group={group} offer={state.offer} slots={slots} />
-      <Location compact />
-      <h3 className="eb-subhead">איך תרצו להמשיך?</h3>
       <div className="eb-option">
-        <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
+        <p className="eb-option__title">השלמת ההרשמה</p>
         <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן · השיבוץ יאושר סופית ע"י הצוות</p>
-        <Button onClick={(e) => { if (e.detail < 2) pay(); }}>מעבר למערכת ההזמנה</Button>
+        <LinkButton variant="primary" href={payUrlFor(state.offer, group.id)} onClick={(e) => {
+          if (e.detail >= 2) { e.preventDefault(); return; }
+          pay();
+        }}>לחצו כאן לתשלום מאובטח</LinkButton>
       </div>
       <div className="eb-option">
         <p className="eb-option__title">נציג יחזור אליי (לתיאום והרשמה)</p>
         <p className="eb-meta">נפתח שיחת וואטסאפ עם הפרטים שמילאתם.</p>
         <Button variant="wa-outline" onClick={(e) => { if (e.detail < 2) callback(); }}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
       </div>
+      <OrderCard group={group} offer={state.offer} slots={slots} />
+      <Location compact />
+      <CalendarButton slots={slots} label={group.label} />
       <WhatToBring />
     </section>
   );

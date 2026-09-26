@@ -17,12 +17,12 @@ import { Group, Location } from './steps/Group.jsx';
 import { Dates } from './steps/Dates.jsx';
 import { Contact, contactErrors } from './steps/Contact.jsx';
 import { Summary } from './steps/Summary.jsx';
-import { Done, DoneCallback } from './steps/Done.jsx';
+import { DoneCallback } from './steps/Done.jsx';
 import { PrivateGoal, PrivateContact, PrivateDone } from './steps/Private.jsx';
 import logoUrl from './assets/logo-96.webp';
 
 const ANALYTICS = { offer: 'Viewed_Offer', group: 'Viewed_Category_Select', dates: 'Viewed_Dates_Select', contact: 'Viewed_Contact',
-  summary: 'Viewed_Checkout', done: 'Pending_Payment_Gateway', 'done-callback': 'Completed_Booking_WA', pgoal: 'Viewed_Private_Goal',
+  summary: 'Viewed_Checkout', 'done-callback': 'Completed_Booking_WA', pgoal: 'Viewed_Private_Goal',
   pcontact: 'Viewed_Private_Form', pdone: 'Completed_Private_Lead' };
 const ABANDON_MS = 90000;
 const IDLE_MS = 60000;
@@ -40,6 +40,7 @@ export function App({ params, embedded }) {
   const stateRef = useRef(state);
   stateRef.current = state;
   const subIds = useRef(new Map());
+  const paymentChoices = useRef(new Set());
 
   // Local previews never reach the production webhook: on localhost the sender records payloads in
   // window.__ebDryRun instead. The e2e harness opts in (window.__EB_ALLOW_WEBHOOK__) and intercepts every request.
@@ -55,7 +56,7 @@ export function App({ params, embedded }) {
   const embed = useMemo(() => createEmbed({
     hasInteracted: () => stateRef.current.interacted,
     onContext: ({ offer, group }) => dispatch({ type: 'context', offer: OFFERS[offer] ? offer : null, group: resolveGroup(group), user: false }),
-    onExitIntent: () => { if (!seen.current.exit && !DONE_STEPS.includes(stateRef.current.step) && stateRef.current.step !== 'offer') { seen.current.exit = true; setExitOpen(true); } },
+    onExitIntent: () => { if (!seen.current.exit && !DONE_STEPS.includes(stateRef.current.step) && stateRef.current.step !== 'offer' && !paymentChoices.current.has(snapshot().submissionId)) { seen.current.exit = true; setExitOpen(true); } },
   }), []);
 
   useEffect(() => { embed.observe(rootRef.current); }, []);
@@ -110,8 +111,12 @@ export function App({ params, embedded }) {
     embed.complete('private');
   };
   const pay = () => {
-    fire('booking_selfbook', snapshot());
-    dispatch({ type: 'go', step: 'done', outcome: 'selfbook' });
+    const snap = snapshot();
+    if (paymentChoices.current.has(snap.submissionId)) return;
+    paymentChoices.current.add(snap.submissionId);
+    setExitOpen(false);
+    fire('booking_selfbook', snap);
+    if (window.dataLayer) window.dataLayer.push({ event: 'Pending_Payment_Gateway', category: group.label, package: state.offer });
     embed.complete('selfbook');
   };
   const callback = () => {
@@ -127,7 +132,10 @@ export function App({ params, embedded }) {
   // ── abandoned checkout: 90 s on the summary without choosing ──
   useEffect(() => {
     if (state.step !== 'summary') return undefined;
-    const id = setTimeout(() => fire('abandoned_checkout', snapshot()), ABANDON_MS);
+    const id = setTimeout(() => {
+      const snap = snapshot();
+      if (!paymentChoices.current.has(snap.submissionId)) fire('abandoned_checkout', snap);
+    }, ABANDON_MS);
     return () => clearTimeout(id);
   }, [state.step]);
 
@@ -136,7 +144,7 @@ export function App({ params, embedded }) {
     if (embedded) return undefined;
     const h = (e) => {
       const s = stateRef.current;
-      if (e.clientY <= 0 && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.exit) { seen.current.exit = true; setExitOpen(true); }
+      if (e.clientY <= 0 && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.exit && !paymentChoices.current.has(snapshot().submissionId)) { seen.current.exit = true; setExitOpen(true); }
     };
     document.addEventListener('mouseleave', h);
     return () => document.removeEventListener('mouseleave', h);
@@ -156,7 +164,7 @@ export function App({ params, embedded }) {
   }, []);
 
   const go = (step) => dispatch({ type: 'go', step });
-  const restart = () => { subIds.current.clear(); dispatch({ type: 'reset' }); };
+  const restart = () => { subIds.current.clear(); paymentChoices.current.clear(); dispatch({ type: 'reset' }); };
   const Heading = useCallback(({ children }) => <h2 className="eb-h2" tabIndex={-1} ref={headingRef}>{children}</h2>, []);
   const common = { state, dispatch, Heading };
 
@@ -180,7 +188,6 @@ export function App({ params, embedded }) {
     case 'dates': body = <Dates {...common} nowMs={Date.now()} next={() => go('contact')} />; break;
     case 'contact': body = <Contact {...common} submit={submitContact} />; break;
     case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
-    case 'done': body = <Done {...common} group={group} slots={slots} restart={restart} />; break;
     case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} />; break;
     case 'pgoal': body = <PrivateGoal {...common} next={() => go('pcontact')} />; break;
     case 'pcontact': body = <PrivateContact {...common} submit={submitPrivate} />; break;

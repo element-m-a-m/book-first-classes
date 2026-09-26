@@ -56,7 +56,7 @@ export async function groupJourney(page, g, { offer = 'trial3', dates = offer ==
   await fillContact(page, { medical });
   await press(page, 'המשך לסיכום');
   await expect(heading(page)).toHaveText('סיכום והרשמה');
-  if (finish === 'selfbook') { await press(page, 'מעבר למערכת ההזמנה'); await expect(heading(page)).toHaveText('ההזמנה שלכם מוכנה!'); }
+  if (finish === 'selfbook') { await page.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click(); await expect(heading(page)).toHaveText('סיכום והרשמה'); }
   if (finish === 'callback') { await page.getByRole('button', { name: /בקשת שיחה חוזרת/ }).click(); await expect(heading(page)).toHaveText('הפנייה נשלחה בהצלחה!'); }
 }
 
