@@ -32,6 +32,12 @@ bdi { unicode-bidi: isolate; }
 .eb-brand__line { color: var(--muted); font-size: .875rem; }
 .eb-brand__wa { margin-inline-start: auto; flex: none; font-size: .875rem; font-weight: 500; text-decoration: none; white-space: nowrap; }
 .eb-brand__wa:hover { text-decoration: underline; }
+/* Narrow screens: the link gets its own row under the name, so the name and subtitle keep their lines. */
+@media (max-width: 559px) {
+  .eb-brand { flex-wrap: wrap; row-gap: 0; }
+  .eb-brand > div { flex: 1 1 0; min-inline-size: 0; }
+  .eb-brand__wa { flex-basis: calc(100% - 52px); margin-inline-start: 52px; margin-block: -4px -10px; }
+}
 
 /* stepper */
 .eb-stepper { margin-block-end: 14px; }
