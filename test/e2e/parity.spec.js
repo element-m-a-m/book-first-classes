@@ -32,6 +32,10 @@ for (const j of JOURNEYS) {
     expect(out.v1.blocked, 'v1 made unexpected network calls').toEqual([]);
     expect(out.legacy.events.length, 'journey produced no webhook events').toBeGreaterThan(0);
     expect(out.v1).toEqual(out.legacy);
-    expect(out.legacy).toEqual(JSON.parse(fs.readFileSync(gp, 'utf8')));
+    // The goldens predate the harness's payment-tab recorder: no legacy journey may open a payment tab,
+    // and everything the golden did record must match exactly.
+    const { payments, ...recorded } = out.legacy;
+    expect(payments, 'legacy journeys never open a payment tab').toEqual([]);
+    expect(recorded).toEqual(JSON.parse(fs.readFileSync(gp, 'utf8')));
   });
 }

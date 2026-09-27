@@ -7,7 +7,9 @@ const radio = (page, name) => page.getByRole('radio',{name,exact:true});
 
 test('offer cards toggle by pointer and Space; first-step copy is concise', async ({page}) => {
   await openWidget(page,V2_URL);
-  await expect(page.locator('.eb-stepper__label')).toHaveText('שלב 1 מתוך 5');
+  // The visible step counter was removed in review (1a8dcc3); the position stays in the accessible label.
+  await expect(page.locator('.eb-stepper__label')).toHaveCount(0);
+  await expect(page.locator('.eb-stepper__progress')).toHaveAttribute('aria-label','שלב 1 מתוך 5');
   await expect(page.locator('.eb-step .eb-hint')).toHaveCount(0);
   for(const name of ['3 שיעורי היכרות','שיעור היכרות בודד','אימון אישי / זוגי']) {
     await card(page,name).click();
