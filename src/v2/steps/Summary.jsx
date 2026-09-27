@@ -1,17 +1,22 @@
 import { useState } from 'react';
-import { OFFERS } from '../config/offers.js';
+import { OFFERS, payUrlFor } from '../config/offers.js';
 import { WHAT_TO_BRING } from '../config/site.js';
 import { HDAYS, dowOf, fmtDots } from '../lib/civil-date.js';
 import { waLink, QUESTION_WA } from '../lib/messages.js';
-import { Button, BackButton, Time, T, Icon, Notice } from '../ui/primitives.jsx';
+import { Button, LinkButton, Time, T, Icon, Notice } from '../ui/primitives.jsx';
 import { PriceLine, Location } from './Group.jsx';
+import { CalendarButton } from '../ui/CalendarButton.jsx';
 
 export function SlotList({ slots }) {
   if (!slots.length) return <p className="eb-muted">מועדים יתואמו טלפונית בהמשך</p>;
   return (
     <ul className="eb-slots">
       {slots.map((s) => (
-        <li key={s.date}>יום {HDAYS[dowOf(s.date)]}, <T>{fmtDots(s.date)}</T> · <Time start={s.start} end={s.end} /></li>
+        <li key={s.date}>
+          <span className="eb-slot__day">יום {HDAYS[dowOf(s.date)]}</span>
+          <time className="eb-slot__date" dateTime={s.date}><T>{fmtDots(s.date)}</T></time>
+          <span className="eb-slot__time"><Time start={s.start} end={s.end} /></span>
+        </li>
       ))}
     </ul>
   );
@@ -47,32 +52,37 @@ export function WhatToBring() {
   );
 }
 
-export function Summary({ state, group, slots, back, pay, callback, Heading, failed, retry }) {
+export function Summary({ state, group, slots, pay, callback, restart, Heading, failed, retry }) {
   return (
-    <section className="eb-step">
-      <BackButton onClick={back} />
+    <section className="eb-step eb-step--summary">
       <Heading>סיכום והרשמה</Heading>
-      <p className="eb-lead">בדקו את הפרטים והבטיחו מקום</p>
+      <p className="eb-lead">איך תרצו להמשיך?</p>
       {failed > 0 && (
         <Notice>
           לא הצלחנו לשמור את הפרטים אצלנו. <button type="button" className="eb-link" onClick={retry}>ניסיון נוסף</button>
           {' '}או <a className="eb-link" href={waLink(QUESTION_WA)} target="_blank" rel="noopener noreferrer">כתבו לנו בוואטסאפ</a>
         </Notice>
       )}
-      <OrderCard group={group} offer={state.offer} slots={slots} />
-      <Location />
-      <h3 className="eb-subhead">איך תרצו להמשיך?</h3>
-      <div className="eb-option">
+      <div className="eb-option eb-option--preferred">
         <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
-        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן · השיבוץ יאושר סופית ע"י הצוות</p>
-        <Button onClick={pay}>מעבר למערכת ההזמנה</Button>
+        <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן דרך מערכת <bdi dir="ltr">Boostapp</bdi></p>
+        {/* Middle-click opens the payment page without a click event; it is the same payment intent.
+            pay() records it once per submission, however many times the link is activated. */}
+        <LinkButton variant="primary" href={payUrlFor(state.offer, group.id)} onClick={(e) => {
+          if (e.detail >= 2) { e.preventDefault(); return; }
+          pay();
+        }} onAuxClick={(e) => { if (e.button === 1) pay(); }}>לחצו כאן לתשלום מאובטח</LinkButton>
       </div>
       <div className="eb-option">
         <p className="eb-option__title">נציג יחזור אליי (לתיאום והרשמה)</p>
-        <p className="eb-meta">נפתח שיחת וואטסאפ עם הפרטים שמילאתם.</p>
-        <Button variant="wa" onClick={callback}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
+        <Button variant="wa-outline" onClick={(e) => { if (e.detail < 2) callback(); }}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
       </div>
+      <OrderCard group={group} offer={state.offer} slots={slots} />
+      <Location compact />
+      <CalendarButton slots={slots} label={group.label} />
       <WhatToBring />
+      {/* E.g. a parent booking a second child: a fresh journey with fresh submission IDs. */}
+      <Button variant="outline" className="eb-another" onClick={restart}>הזמנת שיעור נוסף</Button>
     </section>
   );
 }

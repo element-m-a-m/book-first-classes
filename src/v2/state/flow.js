@@ -1,4 +1,4 @@
-// Flow state (plan §3.3). Group path: offer -> group -> dates -> contact -> summary -> done | done-callback.
+// Flow state (plan §3.3). Group path: offer -> group -> dates -> contact -> summary (direct payment) | done-callback.
 // Private path: offer -> pgoal -> pcontact -> pdone. Back keeps selections; changing an earlier choice clears only
 // what depends on it and says so in `notice`.
 import { groupById } from '../config/groups.js';
@@ -7,7 +7,7 @@ import { OFFERS } from '../config/offers.js';
 export const GROUP_STEPS = ['offer', 'group', 'dates', 'contact', 'summary'];
 export const PRIVATE_STEPS = ['offer', 'pgoal', 'pcontact'];
 export const STEP_NAMES = { offer: 'הצעה', group: 'קבוצה', dates: 'מועדים', contact: 'פרטים', summary: 'סיכום', pgoal: 'תחום', pcontact: 'פרטים' };
-export const DONE_STEPS = ['done', 'done-callback', 'pdone'];
+export const DONE_STEPS = ['done-callback', 'pdone'];
 
 export const initialState = {
   step: 'offer', offer: null, audience: null, groupId: null, dates: [], datesSkipped: false,
@@ -38,6 +38,10 @@ export function reducer(state, a) {
     case 'offer': {
       if (a.offer === state.offer) return s;
       s.offer = a.offer;
+      if (!a.offer) {
+        s.audience = null; s.groupId = null; s.dates = []; s.datesSkipped = false;
+        s.goal = null; s.format = null; s.notice = null; return s;
+      }
       s.notice = null;
       const wasPrivate = state.offer === 'private', isPrivate = a.offer === 'private';
       if (!wasPrivate && !isPrivate && a.offer === 'single' && state.dates.length > 1) {
@@ -53,13 +57,14 @@ export function reducer(state, a) {
       if (g && g.audience !== a.audience) {
         s.groupId = null;
         if (state.dates.length) { s.dates = []; s.notice = 'הקבוצה והמועדים שבחרתם נוקו, כי השתנה עבור מי השיעור.'; } else s.notice = null;
+        s.datesSkipped = false;
       }
       return s;
     }
     case 'group': {
       if (a.groupId === state.groupId) return s;
       s.groupId = a.groupId;
-      s.audience = groupById(a.groupId).audience;
+      if (a.groupId) s.audience = groupById(a.groupId).audience;
       s.notice = null;
       if (state.dates.length || state.datesSkipped) { s.dates = []; s.datesSkipped = false; s.notice = 'המועדים שבחרתם נוקו, כי הקבוצה השתנתה.'; }
       return s;

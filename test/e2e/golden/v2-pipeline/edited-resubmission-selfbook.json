@@ -1,0 +1,353 @@
+{
+  "journey": "edited-resubmission-selfbook",
+  "events": [
+    {
+      "event": "lead_started",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "checkout_reached",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "booking_selfbook",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "lead_started",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "ברך שמאל רגישה",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-2",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "checkout_reached",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "ברך שמאל רגישה",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-2",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "booking_selfbook",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-38-58",
+      "categoryLabel": "כושר ולחימה לגילאי 40+",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-07T21:00:00.000Z",
+        "2026-10-11T21:00:00.000Z",
+        "2026-10-14T21:00:00.000Z"
+      ],
+      "classTime": "18:15",
+      "medical": "ברך שמאל רגישה",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-2",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-08",
+        "2026-10-12",
+        "2026-10-15"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-08",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-08T18:15:00+03:00",
+          "endIso": "2026-10-08T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-12",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-12T18:15:00+03:00",
+          "endIso": "2026-10-12T19:45:00+03:00"
+        },
+        {
+          "date": "2026-10-15",
+          "start": "18:15",
+          "end": "19:45",
+          "startIso": "2026-10-15T18:15:00+03:00",
+          "endIso": "2026-10-15T19:45:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    }
+  ]
+}

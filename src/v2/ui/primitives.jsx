@@ -14,6 +14,7 @@ export const Time = ({ start, end }) => <bdi dir="ltr">{end ? `${start}-${end}` 
 const ICONS = {
   check: 'M5 10.5L8.5 14L15 7',
   back: 'M7 4l6 6-6 6',
+  forward: 'M13 4l-6 6 6 6',
   pin: 'M10 18s6-5.2 6-9.5A6 6 0 0 0 4 8.5C4 12.8 10 18 10 18Zm0-7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
   clock: 'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm0-10v3.5l2.5 1.5',
   lock: 'M6 9V7a4 4 0 1 1 8 0v2M5 9h10v8H5z',
@@ -64,7 +65,9 @@ export function Choice({ name, value, checked, onChange, title, aside, children,
   return (
     <label htmlFor={id} className={`eb-choice ${checked ? 'is-checked' : ''} ${className}`} data-accent={accent}>
       <input id={id} type="radio" className="eb-choice__input" name={name} value={value} checked={checked}
-        aria-labelledby={tid} aria-describedby={children ? did : undefined} onChange={() => onChange(value)} />
+        aria-labelledby={tid} aria-describedby={children ? did : undefined} onClick={() => { if (checked) onChange(null); }}
+        onKeyDown={(e) => { if (e.key === ' ') { e.preventDefault(); if (!e.repeat) onChange(checked ? null : value); } }}
+        onChange={() => { if (!checked) onChange(value); }} />
       <span className="eb-choice__mark" aria-hidden="true"><Icon name="check" size={14} /></span>
       <span className="eb-choice__body">
         <span className="eb-choice__head"><span id={tid} className="eb-choice__title">{title}</span>{aside}</span>
@@ -98,14 +101,21 @@ export function Notice({ children, onDismiss }) {
   );
 }
 
-export function Stepper({ steps, names, current }) {
+export function Stepper({ steps, current, back, forward, forwardDisabled = false, forwardLabel = 'המשך' }) {
   const idx = Math.max(0, steps.indexOf(current));
   return (
     <div className="eb-stepper">
-      <p className="eb-stepper__label">שלב <T>{`${idx + 1}`}</T> מתוך <T>{`${steps.length}`}</T> · {names[steps[idx]]}</p>
-      <ol className="eb-stepper__bar" aria-hidden="true">
-        {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
-      </ol>
+      <div className="eb-stepper__nav">
+        {back && <BackButton onClick={back} />}
+        <div className="eb-stepper__progress" role="group" aria-label={'שלב ' + (idx + 1) + ' מתוך ' + steps.length}>
+          <ol className="eb-stepper__bar" aria-hidden="true">
+            {steps.map((s, i) => <li key={s} className={i < idx ? 'is-done' : i === idx ? 'is-current' : ''} />)}
+          </ol>
+        </div>
+        {forward && <button type="button" className="eb-stepper__forward" aria-label={forwardLabel === 'המשך' ? 'המשך לשלב הבא' : 'לסיכום ההרשמה'} disabled={forwardDisabled} onClick={(e) => { if (e.detail < 2) forward(); }}>
+          {forwardLabel}<Icon name="forward" size={16} />
+        </button>}
+      </div>
     </div>
   );
 }

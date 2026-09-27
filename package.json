@@ -7,7 +7,10 @@
     "build:v1": "node scripts/build.mjs v1",
     "serve": "node scripts/serve.mjs 4173",
     "parity:legacy": "node scripts/parity-legacy.mjs",
-    "test:parity": "node scripts/build.mjs v1 && playwright test parity"
+    "test:parity": "node scripts/build.mjs v1 && playwright test parity",
+    "build:v2": "node scripts/build.mjs v2",
+    "test:unit": "node --test \"test/unit/*.test.mjs\"",
+    "test:e2e": "node scripts/build.mjs v2 && node scripts/build.mjs v1 && playwright test"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

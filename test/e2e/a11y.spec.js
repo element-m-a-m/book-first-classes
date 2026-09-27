@@ -44,8 +44,8 @@ for (const [w, h] of VIEWPORTS) {
     await press(page, 'המשך לסיכום');
     await expect(heading(page)).toHaveText('סיכום והרשמה');
     await audit(page, '05-summary', w, 'standalone');
-    await press(page, 'מעבר למערכת ההזמנה');
-    await audit(page, '06-done', w, 'standalone');
+    await page.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click();
+    await audit(page, '06-payment-opened', w, 'standalone');
     await page.goto(V2_URL);
     await choose(page, 'אימון אישי / זוגי');
     await press(page, 'המשך');

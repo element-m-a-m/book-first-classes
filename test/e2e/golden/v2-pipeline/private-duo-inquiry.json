@@ -1,0 +1,28 @@
+{
+  "journey": "private-duo-inquiry",
+  "events": [
+    {
+      "event": "private_inquiry",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "",
+      "categoryId": "private-rehab",
+      "categoryLabel": "שיקום וחזרה לאימון",
+      "branchTitle": "אימון אישי",
+      "pvMsg": "",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "private",
+      "phoneE164": "+972500000000",
+      "privateFormat": "duo",
+      "privateFormatLabel": "זוגי",
+      "utm_source": "pipeline-test"
+    }
+  ]
+}

@@ -30,18 +30,30 @@ bdi { unicode-bidi: isolate; }
 .eb-brand p { margin: 0; }
 .eb-brand__name { font-weight: 700; font-size: 1rem; }
 .eb-brand__line { color: var(--muted); font-size: .875rem; }
+.eb-brand__wa { margin-inline-start: auto; flex: none; font-size: .875rem; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.eb-brand__wa:hover { text-decoration: underline; }
+/* Narrow screens: the link gets its own row under the name, so the name and subtitle keep their lines. */
+@media (max-width: 559px) {
+  .eb-brand { flex-wrap: wrap; row-gap: 0; }
+  .eb-brand > div { flex: 1 1 0; min-inline-size: 0; }
+  .eb-brand__wa { flex-basis: calc(100% - 52px); margin-inline-start: 52px; margin-block: -4px -10px; }
+}
 
 /* stepper */
 .eb-stepper { margin-block-end: 14px; }
-.eb-stepper__label { margin: 0 0 6px; font-size: .8125rem; color: var(--muted); font-weight: 500; }
+.eb-stepper__nav { display: grid; grid-template-columns: 72px minmax(0, 1fr) 72px; gap: 12px; align-items: center; min-block-size: 44px; }
+.eb-stepper__nav .eb-back, .eb-stepper__forward { display: inline-flex; align-items: center; justify-content: center; gap: 4px; inline-size: 100%; min-block-size: 44px; margin: 0; padding: 4px; background: transparent; border: 0; border-radius: var(--radius-card); color: var(--muted); font-size: .875rem; font-weight: 400; cursor: pointer; }
+.eb-stepper__nav .eb-back { grid-column: 1; grid-row: 1; }
+.eb-stepper__progress { grid-column: 2; grid-row: 1; inline-size: 100%; max-inline-size: 14rem; justify-self: center; }
+.eb-stepper__forward { grid-column: 3; grid-row: 1; }
+.eb-stepper__nav .eb-back:hover, .eb-stepper__forward:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 4px; }
+.eb-stepper__forward:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 340px) { .eb-stepper__nav { grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 8px; } }
 .eb-stepper__bar { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .eb-stepper__bar li { flex: 1; block-size: 4px; border-radius: 2px; background: var(--line); }
 .eb-stepper__bar li.is-done { background: var(--gold-deep); }
 .eb-stepper__bar li.is-current { background: var(--gold); }
 
-.eb-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; margin-block-end: 14px;
-  background: var(--paper-deep); border-radius: var(--radius); font-size: .875rem; }
-.eb-bar__end { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; }
 
 /* type */
 .eb-step { display: grid; gap: 14px; }
@@ -60,7 +72,11 @@ bdi { unicode-bidi: isolate; }
 .eb-btn--primary:hover { background: #e2b660; }
 .eb-btn--secondary { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
 .eb-btn--secondary:hover { border-color: var(--ink); }
+.eb-btn--outline { background: transparent; color: var(--muted); border-color: var(--line-strong); font-size: .875rem; font-weight: 500; }
+.eb-btn--outline:hover { color: var(--ink); border-color: var(--ink); }
 .eb-btn--wa { background: var(--wa); color: #fff; }
+.eb-btn--wa-outline { background: transparent; color: var(--wa); border-color: var(--wa); }
+.eb-btn--wa-outline:hover { background: #edf4ee; }
 .eb-btn:disabled { background: var(--paper-deep); color: #6f7772; border-color: var(--line); cursor: not-allowed; }
 .eb-back { justify-self: start; display: inline-flex; align-items: center; gap: 4px; min-block-size: 44px; padding: 0 4px; margin: -6px -4px -6px 0;
   background: none; border: 0; color: var(--muted); font-size: .9375rem; cursor: pointer; }
@@ -102,7 +118,8 @@ bdi { unicode-bidi: isolate; }
 .eb-offer__price { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
 .eb-offer__compare { font-size: .875rem; color: var(--muted); }
 .eb-offer__compare del, .eb-price__was del { color: var(--muted); }
-.eb-offer__rates { display: grid; gap: 2px; }
+.eb-offer__rates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-block: 4px; }
+.eb-offer__rates > span { display: grid; grid-template-rows: auto 1fr; align-content: start; gap: 8px; }
 .eb-offer__rates bdi { font-weight: 800; }
 .eb-offer__meta { color: var(--muted); font-size: .875rem; }
 .eb-badge { font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--gold); color: var(--ink); }
@@ -173,13 +190,25 @@ button.eb-cal__day { cursor: pointer; }
 .eb-card__row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .eb-card__row p { margin: 0; }
 .eb-card__title { margin: 0; font-weight: 700; }
-.eb-slots { margin: 0; padding-inline-start: 18px; display: grid; gap: 2px; font-size: .9375rem; }
+.eb-slots { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: .9375rem; container-type: inline-size; }
+.eb-slots li { display: grid; grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr) max-content; align-items: baseline; column-gap: .5rem; }
+.eb-slot__day, .eb-slot__date, .eb-slot__time { white-space: nowrap; }
+.eb-slot__time { justify-self: end; font-variant-numeric: tabular-nums; }
+.eb-slot__date { font-variant-numeric: tabular-nums; }
+@container (min-width: 26rem) { .eb-slots li { column-gap: 2rem; } }
+@container (max-width: 16rem) {
+  .eb-slots li { grid-template-columns: 1fr max-content; row-gap: 2px; }
+  .eb-slot__time { grid-column: 1 / -1; }
+}
 .eb-rates { margin: 0; display: grid; gap: 6px; }
 .eb-rates div { display: flex; justify-content: space-between; gap: 8px; }
 .eb-rates dt { color: var(--muted); }
 .eb-rates dd { margin: 0; font-weight: 700; }
 .eb-option { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
+.eb-option--preferred { border-color: #b99a58; background: #f7efdc; box-shadow: inset 0 3px 0 var(--gold); }
 .eb-option__title { margin: 0; font-weight: 700; }
+.eb-step--summary .eb-location { flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.eb-step--summary .eb-location svg { margin-block-start: 0; }
 .eb-disclosure__btn { display: flex; justify-content: space-between; align-items: center; inline-size: 100%; min-block-size: var(--tap);
   padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-weight: 600; cursor: pointer; }
 .eb-disclosure__panel { margin: 0; padding: 10px 16px 4px; list-style: none; display: grid; gap: 6px; font-size: .9375rem; }
@@ -190,16 +219,11 @@ button.eb-cal__day { cursor: pointer; }
 .eb-done > * { inline-size: 100%; }
 .eb-done__icon { display: grid; place-items: center; inline-size: 52px !important; block-size: 52px; border-radius: 50%; background: var(--mv); color: #fff; }
 .eb-done .eb-card, .eb-done .eb-disclosure { text-align: start; }
-.eb-progress { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
-.eb-progress__label { margin: 0; font-weight: 700; }
-.eb-progress__track { block-size: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
-.eb-progress__track span { display: block; block-size: 100%; background: var(--gold-deep); transition: inline-size .1s linear; }
 
 /* popups */
 .eb-scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(18, 22, 20, .6); }
 .eb-pop { display: grid; gap: 10px; padding: 18px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-card); text-align: center; }
 .eb-pop--modal { max-inline-size: 22rem; box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, .2); }
-.eb--sheet-open { padding-block-end: 200px; } /* the idle sheet must never hide the main button */
 .eb-pop--sheet { position: fixed; inset-inline: 12px; inset-block-end: 12px; z-index: 40; max-inline-size: 30rem; margin-inline: auto; box-shadow: 0 -4px 24px rgba(0, 0, 0, .12); }
 .eb-pop--inline { margin-block-end: 12px; }
 .eb-pop__title { margin: 0; font-weight: 800; font-size: 1.125rem; }
@@ -217,3 +241,32 @@ button.eb-cal__day { cursor: pointer; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 @media (forced-colors: active) { .eb-choice.is-checked, .eb-cal__day.is-selected { outline: 2px solid CanvasText; } }
+
+/* Website review: keep each decision compact and price only the selected package. */
+.eb-offer__pricing { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding-block: 4px; }
+.eb-group-list { animation: eb-group-reveal 460ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes eb-group-reveal { from { transform: translateY(-18px); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .eb-group-list { animation: none; } }
+
+/* Equal-height private formats: let the description use the entire card width. */
+.eb-private-formats .eb-choice { display: grid; grid-template-columns: 20px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 4px 8px; padding: 10px 12px; }
+.eb-private-formats .eb-choice__mark { inline-size: 20px; block-size: 20px; margin-block-start: 2px; }
+.eb-private-formats .eb-choice__body { display: contents; }
+.eb-private-formats .eb-choice__head { grid-column: 2; }
+.eb-private-formats .eb-choice__details { grid-column: 1 / -1; align-self: start; }
+.eb-private-formats .eb-segment__sub { line-height: 1.35; }
+
+/* Visible feedback without delaying input or changing the form's height. */
+.eb-transition { animation: eb-step-enter 420ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes eb-step-enter { from { transform: translateY(16px); } to { transform: translateY(0); } }
+.eb-choice.is-checked { animation: eb-choice-select 420ms ease-out; }
+@keyframes eb-choice-select { from { background-color: #f0dfb8; } to { background-color: #fff; } }
+.eb-cal__day.is-selected { animation: eb-date-select 420ms ease-out; }
+@keyframes eb-date-select { from { transform: scale(.9); } to { transform: scale(1); } }
+.eb-pop--help { position: fixed; z-index: 60; inset-inline: 12px; inline-size: auto; max-inline-size: 30rem; margin-inline: auto; overflow: auto; overscroll-behavior: contain; box-shadow: 0 12px 36px rgba(18,22,20,.22); border-color: var(--line-strong); padding: 20px 16px 16px; visibility: hidden; animation: eb-step-enter 420ms ease-out; }
+.eb-pop--help .eb-pop__title { padding-inline: 32px; }
+.eb-pop__close { position: absolute; inset-inline-end: 2px; inset-block-start: 2px; inline-size: 40px; block-size: 40px; border: 0; background: transparent; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+
+.eb-standalone-location{display:grid;gap:8px;padding-block:0 14px;margin-block-end:18px;border-block-end:1px solid var(--line)}
+.eb-location-title{margin:0;font-size:1.375rem;line-height:1.3;font-weight:800}
+.eb-standalone-location .eb-link{justify-self:start;font-size:.875rem}
