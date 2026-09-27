@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { E2E_PORT } from './test/e2e/port.js';
 
 export default defineConfig({
   testDir: 'test/e2e',
@@ -6,7 +7,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: [['list']],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: `http://127.0.0.1:${E2E_PORT}`,
     browserName: 'chromium',
     timezoneId: 'Asia/Jerusalem',
     locale: 'he-IL',
@@ -14,8 +15,8 @@ export default defineConfig({
     serviceWorkers: 'block',
   },
   webServer: {
-    command: 'node scripts/serve.mjs 4173',
-    url: 'http://127.0.0.1:4173/package.json',
-    reuseExistingServer: true,
+    command: `node scripts/serve.mjs ${E2E_PORT}`,
+    url: `http://127.0.0.1:${E2E_PORT}/package.json`,
+    reuseExistingServer: false,
   },
 });

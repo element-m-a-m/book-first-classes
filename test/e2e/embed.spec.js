@@ -3,6 +3,7 @@
 import { test, expect } from '@playwright/test';
 import { VERSION } from '../../src/v2/config/site.js';
 import { openWidget, TEST_LEAD } from './harness.js';
+import { E2E_PORT } from './port.js';
 import { GROUPS_V2, press, choose, pickDays, fillContact, waitEvents } from './v2-driver.js';
 
 const V2_HOST = '/test/e2e/pages/embed-v2.html';
@@ -89,7 +90,7 @@ test('v2: exitIntent from the parent shows the WhatsApp prompt inline, once', as
 
 test('v2: an unknown parent origin gets no messages and cannot set context', async ({ page }) => {
   // parent on http://localhost, widget on http://127.0.0.1: different origins, parent not in the allowlist
-  await openWidget(page, 'http://localhost:4173' + V2_HOST + '?src=' + encodeURIComponent('http://127.0.0.1:4173/.cache/build-v2/index.html?embed=1'), { host: true });
+  await openWidget(page, `http://localhost:${E2E_PORT}` + V2_HOST + '?src=' + encodeURIComponent(`http://127.0.0.1:${E2E_PORT}/.cache/build-v2/index.html?embed=1`), { host: true });
   const frame = page.frameLocator('#w');
   await expect(frame.locator('h2')).toHaveText('איך תרצו להתחיל?');
   await page.evaluate(() => window.sendToChild({ ns: 'element:booking', v: 2, type: 'setContext', offer: 'private' }, '*'));
