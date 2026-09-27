@@ -79,3 +79,8 @@ Validation: 49 journey/embed/layout/navigation checks passed; 7 accessibility ch
 ### Preferred payment styling and checkout copy — 26 September 2026
 Applied owner comments: summary lead is now איך תרצו להמשיך?; payment title is הרשמה מהירה (תשלום אונליין); security line keeps only תשלום מאובטח ומוצפן. Preferred online card uses a warm sand tint, muted gold border and thin gold top accent, retaining the gold primary button. Summary address and pin are centered; other address placements unchanged.
 Verified actual website iframe at 383/439/1280px (three passing layout checks), inspected 439px screenshot, and passed the existing mobile accessibility journey at 390px. Local preview rebuilt on :8853. No payment handlers, destinations, published release or backend changed.
+
+
+### Quiet symmetrical top navigation — 27 September 2026
+Matched Back and top Continue with equal target sizes, muted regular-weight text, transparent backgrounds and mirrored shared chevrons. Removed the forward gold border and filled hover treatment. Selecting a card enables navigation without changing it into an emphasized CTA; disabled state remains distinguishable. Progress stays centered and compact (maximum 14rem); bottom Continue remains the prominent gold action.
+Validation: two existing group/private top-navigation checks passed; three actual website iframe checks passed at 320/383/1280px for centered progress, spacing, target size and keyboard Back with preserved selections. Inspected selected-date mobile screenshot. Isolated preview rebuilt on :8853; no release, payment, backend or deployment changes.

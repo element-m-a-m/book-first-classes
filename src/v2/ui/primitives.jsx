@@ -14,6 +14,7 @@ export const Time = ({ start, end }) => <bdi dir="ltr">{end ? `${start}-${end}` 
 const ICONS = {
   check: 'M5 10.5L8.5 14L15 7',
   back: 'M7 4l6 6-6 6',
+  forward: 'M13 4l-6 6 6 6',
   pin: 'M10 18s6-5.2 6-9.5A6 6 0 0 0 4 8.5C4 12.8 10 18 10 18Zm0-7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
   clock: 'M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14Zm0-10v3.5l2.5 1.5',
   lock: 'M6 9V7a4 4 0 1 1 8 0v2M5 9h10v8H5z',
@@ -112,7 +113,7 @@ export function Stepper({ steps, current, back, forward, forwardDisabled = false
           </ol>
         </div>
         {forward && <button type="button" className="eb-stepper__forward" aria-label={forwardLabel === 'המשך' ? 'המשך לשלב הבא' : 'לסיכום ההרשמה'} disabled={forwardDisabled} onClick={(e) => { if (e.detail < 2) forward(); }}>
-          {forwardLabel}<svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 4-6 6 6 6" /></svg>
+          {forwardLabel}<Icon name="forward" size={16} />
         </button>}
       </div>
     </div>
