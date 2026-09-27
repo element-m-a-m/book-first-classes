@@ -7,6 +7,9 @@ export const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJ0CjKQq8jM
 export const WEBHOOK_KEY = 'ebw_44a128a7b4274164851f2a8e';
 export const WA_PHONE = '972512826106';
 export const PRIVACY_URL = 'https://element-m-a-m.co.il/legal/privacy-policy.html';
+// Standalone directions: the same Google Maps place link as the website's contact page. It must not depend on the
+// website (pre-launch it answers 401), so standalone never links to contact.html#arrival.
+export const MAP_URL = 'https://maps.app.goo.gl/Ru3awL6neiGsfMky5';
 // Same wording as the website booking section (src/chrome/booking.html).
 export const PRIVACY_LINE = 'פרטי ההרשמה משמשים לתיאום ולניהול האימון באמצעות מערכות השירות שלנו.';
 

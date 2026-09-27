@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { WEBHOOK_URL } from './config/site.js';
+import { WEBHOOK_URL, MAP_URL } from './config/site.js';
 import { groupById } from './config/groups.js';
 import { slotOn } from './config/timetable.js';
 import { OFFERS } from './config/offers.js';
@@ -7,10 +7,10 @@ import { dowOf } from './lib/civil-date.js';
 import { buildPayload, createSender, newSubmissionId, selectionHash } from './lib/events.js';
 import { createEmbed } from './lib/embed.js';
 import { resolveGroup } from './lib/params.js';
-import { waLink, groupWA } from './lib/messages.js';
+import { waLink, groupWA, QUESTION_WA } from './lib/messages.js';
 import { toE164 } from './lib/phone.js';
 import { reducer, initialState, withContext, stepsOf, pathOf, STEP_NAMES, DONE_STEPS } from './state/flow.js';
-import { Stepper } from './ui/primitives.jsx';
+import { Stepper, Icon } from './ui/primitives.jsx';
 import { ExitIntent, IdleNudge } from './ui/Popups.jsx';
 import { Offer } from './steps/Offer.jsx';
 import { Group, Location } from './steps/Group.jsx';
@@ -187,7 +187,7 @@ export function App({ params, embedded }) {
     case 'group': body = <Group {...common} next={() => go('dates')} />; break;
     case 'dates': body = <Dates {...common} nowMs={Date.now()} next={() => go('contact')} />; break;
     case 'contact': body = <Contact {...common} submit={submitContact} />; break;
-    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
+    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} restart={restart} failed={failed} retry={() => sender.retryFailed()} />; break;
     case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} />; break;
     case 'pgoal': body = <PrivateGoal {...common} next={() => go('pcontact')} />; break;
     case 'pcontact': body = <PrivateContact {...common} submit={submitPrivate} />; break;
@@ -204,13 +204,18 @@ export function App({ params, embedded }) {
             <p className="eb-brand__name">אלמנט · אומנויות לחימה ותנועה</p>
             <p className="eb-brand__line">הרשמה לשיעורי היכרות ולאימונים אישיים</p>
           </div>
+          {/* Standalone has no website footer, so one quiet contact entry stays available on every step. */}
+          <a className="eb-link eb-link--wa eb-brand__wa" href={waLink(QUESTION_WA)} target="_blank" rel="noopener noreferrer">
+            <Icon name="wa" size={16} /> שאלה? וואטסאפ
+          </a>
         </header>
       )}
-      {!embedded && (
+      {/* Standalone only, first screen only: embedded pages show their own address band; Summary repeats the address. */}
+      {!embedded && state.step === 'offer' && (
         <section className="eb-standalone-location" aria-labelledby="eb-location-title">
           <h2 id="eb-location-title" className="eb-location-title">כתובת — כאן מתאמנים</h2>
           <Location compact />
-          <a className="eb-link" href="https://element-m-a-m.co.il/contact.html#arrival" target="_blank" rel="noopener noreferrer">מפה ופרטי הגעה ↗</a>
+          <a className="eb-link" href={MAP_URL} target="_blank" rel="noopener noreferrer">מפה ופרטי הגעה ↗</a>
         </section>
       )}
       <main className="eb-main">

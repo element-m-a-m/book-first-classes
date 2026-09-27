@@ -52,7 +52,7 @@ export function WhatToBring() {
   );
 }
 
-export function Summary({ state, group, slots, pay, callback, Heading, failed, retry }) {
+export function Summary({ state, group, slots, pay, callback, restart, Heading, failed, retry }) {
   return (
     <section className="eb-step eb-step--summary">
       <Heading>סיכום והרשמה</Heading>
@@ -66,10 +66,12 @@ export function Summary({ state, group, slots, pay, callback, Heading, failed, r
       <div className="eb-option eb-option--preferred">
         <p className="eb-option__title">הרשמה מהירה (תשלום אונליין)</p>
         <p className="eb-meta"><Icon name="lock" size={14} /> תשלום מאובטח ומוצפן דרך מערכת <bdi dir="ltr">Boostapp</bdi></p>
+        {/* Middle-click opens the payment page without a click event; it is the same payment intent.
+            pay() records it once per submission, however many times the link is activated. */}
         <LinkButton variant="primary" href={payUrlFor(state.offer, group.id)} onClick={(e) => {
           if (e.detail >= 2) { e.preventDefault(); return; }
           pay();
-        }}>לחצו כאן לתשלום מאובטח</LinkButton>
+        }} onAuxClick={(e) => { if (e.button === 1) pay(); }}>לחצו כאן לתשלום מאובטח</LinkButton>
       </div>
       <div className="eb-option">
         <p className="eb-option__title">נציג יחזור אליי (לתיאום והרשמה)</p>
@@ -79,6 +81,8 @@ export function Summary({ state, group, slots, pay, callback, Heading, failed, r
       <Location compact />
       <CalendarButton slots={slots} label={group.label} />
       <WhatToBring />
+      {/* E.g. a parent booking a second child: a fresh journey with fresh submission IDs. */}
+      <Button variant="outline" className="eb-another" onClick={restart}>הזמנת שיעור נוסף</Button>
     </section>
   );
 }
