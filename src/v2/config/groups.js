@@ -18,7 +18,7 @@ export const GROUPS = [
   { id: 'adults-38-58', label: 'כושר ולחימה לגילאי 40+', audience: 'self', track: 'martial', tag: 'ייחודי',
     desc: 'שילוב ייחודי של כושר, בריאות ואומנויות לחימה', coach: 'מנדי סטנדר' },
   { id: 'movement-class', label: 'מובמנט', audience: 'self', track: 'movement', tag: 'פופולרי',
-    desc: 'חופש בגוף, אינטליגנציה תנועתית, מודעות ומשחק.', coach: 'ליאור ורדי' },
+    desc: 'חופש בגוף, אינטליגנציה תנועתית, מודעות ומשחק דרך תנועה', coach: 'ליאור ורדי' },
   { id: 'strength', label: 'כוח וגמישות', audience: 'self', track: 'movement', accent: 'sc',
     desc: 'אימון גופני, חיזוק, שיפור טווחי תנועה והגנה מפציעות', coach: 'ליאור ורדי' },
 ];
