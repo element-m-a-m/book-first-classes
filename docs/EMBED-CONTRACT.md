@@ -38,7 +38,7 @@ Every message is an object `{ ns: 'element:booking', v: 2, type, … }`. None ca
 | `ready` | `height`, `version` | first render with a real height |
 | `resize` | `height` | content height changed |
 | `step` | `step`, `index`, `total`, `path` (`group`/`private`) | every step change |
-| `complete` | `outcome` (`selfbook` · `callback` · `private`) | the visitor finished a path |
+| `complete` | `outcome` (`selfbook` · `callback` · `private`) | the visitor chose a way to finish (see below) |
 | `error` | `code` (`render`) | the app failed to start - show the fallback |
 | `contextIgnored` | `reason` | a `setContext` arrived after the visitor started choosing |
 
@@ -49,10 +49,18 @@ Every message is an object `{ ns: 'element:booking', v: 2, type, … }`. None ca
 | `init` / `setContext` | `offer?`, `group?` | Same as the URL params, applied only before the visitor interacts |
 | `exitIntent` | - | Shows the WhatsApp prompt inline, once (iframe `mouseleave` is unreliable, so the parent detects it) |
 
+**Steps (since 2.1.0).** Group path: `offer` → `group` → `dates` → `contact` → `summary`. The summary is the one
+checkout screen: payment link and callback live on it, so there is **no `done` step** any more. Opening the payment
+link posts `complete {outcome:'selfbook'}` and the page stays on `summary`. The callback moves to `done-callback`
+(`index: -1`). Private path: `offer` → `pgoal` → `pcontact` → `pdone`.
+
+`complete` is intent, never proof of payment. It can repeat: once per submission for `selfbook` (an edited
+submission gets a fresh id and may pay again), and a `callback` can follow a `selfbook` on the same screen.
+
 Allowlisted parent origins: the widget's own origin, `https://element-m-a-m.co.il`, `https://www.element-m-a-m.co.il`,
 `https://element-website.pages.dev` and its preview subdomains.
 
-**Legacy v1 (kept until the website runs v2 for two weeks, removed in 2.1):** the widget also posts
+**Legacy v1 (kept; decision S9, 26-Sep-2026: they cost nothing and protect a parent still on the old script):** the widget also posts
 `{ type: 'element:booking:ready' | 'element:booking:resize' | 'element:booking:error', version: 1, height }` to its own
 origin, exactly as `site/booking/bridge.js` did, so the current website `booking.js` keeps working unchanged.
 
@@ -61,6 +69,11 @@ origin, exactly as `site/booking/bridge.js` did, so the current website `booking
 The widget measures its root with `ResizeObserver` (rAF-throttled) and reports `ready`/`resize`; the parent sets the
 iframe height. There is no internal scroll. On each step the widget moves focus to the step heading with
 `preventScroll`; the parent should scroll the iframe's top into view when it is above the viewport (on `step`).
+
+Idle help floats over the page and never changes the reported height. In a **same-origin** iframe it reads
+`window.frameElement` and the parent's visual viewport (and listens to the parent's scroll, resize and Escape) to
+stay inside the visible part of the frame; it hides when less than 200px of the frame is visible. Cross-origin, it
+falls back to an IntersectionObserver. It never shows on the summary or the finished screens.
 
 ## 5. Example embed
 
@@ -97,8 +110,10 @@ Unchanged legacy fields: `event, name, phone (raw), audience, categoryId, catego
 price, dates (ISO instant of Jerusalem midnight, now sorted), classTime (earliest picked slot), medical, pvMsg, device,
 utm (= utm_source)`. Added: `schema: 2, widgetVersion, source (embed|standalone), host, submissionId, offerId,
 phoneE164, datesLocal[], slots[{date,start,end,startIso,endIso}], datesSkipped, privateFormat, privateFormatLabel,
-utm_*`. Events: `lead_started` and `checkout_reached` (on the contact step, in order), `booking_selfbook`,
-`booking_callback`, `abandoned_checkout` (90 s on the summary), `private_inquiry`. Apps Script v10 renders the new
+utm_*`. Events: `lead_started` and `checkout_reached` (on the contact step, in order), `booking_selfbook` (activating
+the payment link - click, keyboard or middle-click - once per submission; viewing the summary sends nothing),
+`booking_callback`, `abandoned_checkout` (90 s on the summary without a choice; never after a payment choice),
+`private_inquiry`. Apps Script v10 renders the new
 fields; v9 ignores them.
 
 Since 2.0.1 every payload also carries `key` = the public widget channel key (`WEBHOOK_KEY` in `src/v2/config/site.js`,
@@ -111,3 +126,21 @@ secret instead, never the widget key.
 
 On `localhost`/`127.0.0.1` the widget never calls the production webhook: payloads go to `window.__ebDryRun`.
 Tests opt in with `window.__EB_ALLOW_WEBHOOK__ = true` and intercept every request.
+
+## 8. Standalone vs embedded (one implementation, deliberate differences)
+
+Mode: `embedded = window.parent !== window || ?embed=1` (`src/v2/main.jsx`). Every difference below hangs off that
+flag in `src/v2/App.jsx`; change one side only on purpose, and update this table with it. Decided with Lior on
+27-Sep-2026 (standalone items) on top of the website review (`docs/WEBSITE-PRESENTATION-REVIEW.md`).
+
+| Item | Standalone (GitHub Pages) | Embedded (website) | Why |
+|---|---|---|---|
+| Brand | Brand bar: logo, name, subtitle | None; the website header and booking heading | The website supplies its own |
+| Always-available contact | Quiet "שאלה? וואטסאפ" link in the brand bar, every step | None; the website footer has WhatsApp, phone, email | Standalone has no footer |
+| Address | Block with "מפה ופרטי הגעה" on the **first screen only**; centred address on the summary | Centred address on the summary; the website's address band above the frame | Where before choosing; later steps stay compact |
+| Directions link | `MAP_URL` (Google Maps place link) | Website `/contact.html#arrival` (outside the widget) | Standalone must not depend on the website (pre-launch it answers 401) |
+| Privacy | In-form line + policy link (`PRIVACY_URL`, website) | Same | One legal text; the website copy is canonical |
+| Exit intent | Own `mouseleave`, modal | Parent's `exitIntent` message, inline | Iframe `mouseleave` is unreliable |
+| Scroll on step | Widget scrolls itself | Parent scrolls on `step` | The parent owns the page |
+| Webhook `source` | `standalone` | `embed` | Attribution in ClickUp and the Event Log |
+| Same in both | Summary with payment + callback, "הזמנת שיעור נוסף", idle help (floating), privacy line | | |
