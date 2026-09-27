@@ -1,0 +1,179 @@
+{
+  "journey": "trial3-selfbook",
+  "events": [
+    {
+      "event": "lead_started",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-16-37",
+      "categoryLabel": "בוגרים 16-37",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-10T21:00:00.000Z",
+        "2026-10-13T21:00:00.000Z",
+        "2026-10-17T21:00:00.000Z"
+      ],
+      "classTime": "19:00",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-11",
+        "2026-10-14",
+        "2026-10-18"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-11",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-11T19:00:00+03:00",
+          "endIso": "2026-10-11T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-14",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-14T19:00:00+03:00",
+          "endIso": "2026-10-14T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-18",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-18T19:00:00+03:00",
+          "endIso": "2026-10-18T21:00:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "checkout_reached",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-16-37",
+      "categoryLabel": "בוגרים 16-37",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-10T21:00:00.000Z",
+        "2026-10-13T21:00:00.000Z",
+        "2026-10-17T21:00:00.000Z"
+      ],
+      "classTime": "19:00",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-11",
+        "2026-10-14",
+        "2026-10-18"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-11",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-11T19:00:00+03:00",
+          "endIso": "2026-10-11T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-14",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-14T19:00:00+03:00",
+          "endIso": "2026-10-14T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-18",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-18T19:00:00+03:00",
+          "endIso": "2026-10-18T21:00:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    },
+    {
+      "event": "booking_selfbook",
+      "name": "בדיקה אוטומטית",
+      "phone": "050-0000000",
+      "audience": "self",
+      "categoryId": "adults-16-37",
+      "categoryLabel": "בוגרים 16-37",
+      "branchTitle": "אומנויות לחימה",
+      "packageLabel": "3 שיעורי היכרות",
+      "price": 99,
+      "dates": [
+        "2026-10-10T21:00:00.000Z",
+        "2026-10-13T21:00:00.000Z",
+        "2026-10-17T21:00:00.000Z"
+      ],
+      "classTime": "19:00",
+      "medical": "הכל תקין",
+      "device": "desktop",
+      "utm": "pipeline-test",
+      "schema": 2,
+      "widgetVersion": "2.1.0",
+      "source": "standalone",
+      "host": "TEST-HOST",
+      "submissionId": "sub-1",
+      "key": "ebw_44a128a7b4274164851f2a8e",
+      "offerId": "trial3",
+      "phoneE164": "+972500000000",
+      "datesLocal": [
+        "2026-10-11",
+        "2026-10-14",
+        "2026-10-18"
+      ],
+      "slots": [
+        {
+          "date": "2026-10-11",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-11T19:00:00+03:00",
+          "endIso": "2026-10-11T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-14",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-14T19:00:00+03:00",
+          "endIso": "2026-10-14T21:00:00+03:00"
+        },
+        {
+          "date": "2026-10-18",
+          "start": "19:00",
+          "end": "21:00",
+          "startIso": "2026-10-18T19:00:00+03:00",
+          "endIso": "2026-10-18T21:00:00+03:00"
+        }
+      ],
+      "datesSkipped": false,
+      "utm_source": "pipeline-test"
+    }
+  ]
+}

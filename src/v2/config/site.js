@@ -1,5 +1,5 @@
 // Site-wide constants for the v2 widget.
-export const VERSION = '2.0.1';
+export const VERSION = '2.1.0';
 export const TZ = 'Asia/Jerusalem';
 export const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJ0CjKQq8jM0i_Mg1qgCkwbLeY2Gb9f5iX2kF6CC-4PQz8keR9O7CWNW3os8ch2bt00A/exec';
 // Public channel key for the Apps Script request gate (Script Property WEBHOOK_KEY_WIDGET). It is public
