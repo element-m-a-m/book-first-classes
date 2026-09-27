@@ -1,6 +1,6 @@
 import { PRIVACY_LINE, PRIVACY_URL } from '../config/site.js';
 import { isValidName, isValidPhone } from '../lib/phone.js';
-import { Button, BackButton, Choice, Field, Icon } from '../ui/primitives.jsx';
+import { Button, Choice, Field, Icon } from '../ui/primitives.jsx';
 
 export const ERR_NAME = '* נא להזין שם מלא';
 export const ERR_PHONE = '* נא להזין מספר טלפון תקין';
@@ -56,7 +56,6 @@ export function Contact({ state, dispatch, submit, back, Heading }) {
   const show = (k) => state.touched.submit && err[k];
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>פרטי קשר לשמירת מקום</Heading>
       <form className="eb-form" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }}>
         <NameField state={state} dispatch={dispatch} error={show('name')} />
@@ -66,13 +65,13 @@ export function Contact({ state, dispatch, submit, back, Heading }) {
           <p className="eb-meta">נשמח לדעת על מגבלות רפואיות או פציעות חשובות כדי להתאים לך את הפעילות.</p>
           <div className="eb-segment eb-segment--tight">
             <Choice name="med" value="no" checked={state.medHas === false} className="eb-segment__item" title="הכל תקין"
-              onChange={() => dispatch({ type: 'field', field: 'medHas', value: false })} />
+              onChange={(value) => dispatch({ type: 'field', field: 'medHas', value: value === null ? null : false })} />
             <Choice name="med" value="yes" checked={state.medHas === true} className="eb-segment__item" title="יש מה לדעת"
-              onChange={() => dispatch({ type: 'field', field: 'medHas', value: true })} />
+              onChange={(value) => dispatch({ type: 'field', field: 'medHas', value: value === null ? null : true })} />
           </div>
           {show('med') && <p id="eb-med-err" className="eb-field__error">{err.med}</p>}
           {state.medHas === true && (
-            <Field id="eb-med" label="פרטים (לא חובה)">
+            <Field id="eb-med" label="פרטים">
               {(a) => (
                 <textarea id="eb-med" className="eb-input eb-textarea" value={state.medText} placeholder="פרטו בקצרה: פציעות עבר, מגבלות..."
                   onChange={(e) => dispatch({ type: 'field', field: 'medText', value: e.target.value })} {...a} />

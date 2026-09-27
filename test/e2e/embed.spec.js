@@ -1,6 +1,7 @@
 // Embed contract (plan §3.5): v2 messages, URL params, parent context, exit intent, origin checks, no PII,
 // and the v1 messages the current website's booking.js depends on.
 import { test, expect } from '@playwright/test';
+import { VERSION } from '../../src/v2/config/site.js';
 import { openWidget, TEST_LEAD } from './harness.js';
 import { GROUPS_V2, press, choose, pickDays, fillContact, waitEvents } from './v2-driver.js';
 
@@ -14,7 +15,7 @@ test('v2: ready/resize carry height, the iframe fits the content, no internal sc
   await expect(frame.locator('h2')).toHaveText('איך תרצו להתחיל?');
   await expect.poll(async () => v2(await msgs(page), 'ready').length).toBe(1);
   const ready = v2(await msgs(page), 'ready')[0];
-  expect(ready.version).toBe('2.0.0');
+  expect(ready.version).toBe(VERSION);
   expect(ready.height).toBeGreaterThan(300);
   // legacy v1 messages are sent too, for the current website
   expect((await msgs(page)).some((d) => d && d.type === 'element:booking:ready' && d.version === 1)).toBeTruthy();
@@ -40,7 +41,7 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   await frame.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
   await frame.locator('label.eb-choice', { has: frame.getByRole('radio', { name: 'הכל תקין' }) }).click();
   await frame.getByRole('button', { name: 'המשך לסיכום' }).click();
-  await frame.getByRole('button', { name: 'מעבר למערכת ההזמנה' }).click();
+  await frame.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click();
   await waitEvents(page, rec, 3);
   const p = rec.events[1];
   expect(p.source).toBe('embed');
@@ -50,7 +51,7 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   expect(p.utm_campaign).toBe('autumn');
   const all = await msgs(page);
   const steps = v2(all, 'step').map((d) => d.step);
-  expect(steps).toEqual(['group', 'dates', 'contact', 'summary', 'done']);
+  expect(steps).toEqual(['group', 'dates', 'contact', 'summary']);
   expect(v2(all, 'complete')).toEqual([{ ns: 'element:booking', v: 2, type: 'complete', outcome: 'selfbook' }]);
   const text = JSON.stringify(all);
   for (const pii of [TEST_LEAD.name, '0500000000', '050-0000000', '+972500000000', '500000000']) expect(text).not.toContain(pii);
@@ -63,11 +64,14 @@ test('v2: parent setContext applies before interaction, is ignored after it', as
   await page.evaluate(() => window.sendToChild({ ns: 'element:booking', v: 2, type: 'setContext', offer: 'single', group: 'forty' }));
   await expect(frame.locator('h2')).toHaveText('עבור מי השיעור?');
   await expect(frame.getByRole('radio', { name: 'כושר ולחימה לגילאי 40+' })).toBeChecked();
-  await expect(frame.locator('.eb-group', { hasText: 'כושר ולחימה' }).locator('.eb-price')).toContainText('70');
+  await expect(frame.locator('.eb-group .eb-price')).toHaveCount(0);
   await frame.locator('label.eb-choice', { has: frame.getByRole('radio', { name: 'מובמנט', exact: true }) }).click();
   await page.evaluate(() => window.sendToChild({ ns: 'element:booking', v: 2, type: 'setContext', offer: 'trial3', group: 'kids-6-8' }));
   await expect.poll(async () => v2(await msgs(page), 'contextIgnored').length).toBe(1);
   await expect(frame.getByRole('radio', { name: 'מובמנט', exact: true })).toBeChecked();
+  await frame.getByRole('button', { name: 'המשך לבחירת מועדים' }).click();
+  await expect(frame.locator('.eb-bar')).toHaveCount(0);
+  await expect(frame.locator('h2')).toHaveText('בחרו מועדים');
 });
 
 test('v2: exitIntent from the parent shows the WhatsApp prompt inline, once', async ({ page }) => {
@@ -120,7 +124,9 @@ test('website v2 parent script (handoff): carries the carousel choice, sizes, ha
   // visitor flips the carousel to 3 שיעורים before touching the widget -> setContext applies
   await page.getByRole('button', { name: '3 שיעורים' }).click();
   const h1 = await page.locator('iframe').evaluate((f) => f.getBoundingClientRect().height);
-  expect(h1).toBeGreaterThan(300);
+  expect(h1).toBeGreaterThan(100);
+  const contentHeight = await frame.locator('.eb').evaluate(el => Math.ceil(el.getBoundingClientRect().height));
+  expect(Math.abs(h1 - contentHeight)).toBeLessThanOrEqual(2);
   await frame.getByRole('button', { name: 'חזרה' }).click(); // first interaction inside the widget
   await expect(frame.getByRole('radio', { name: '3 שיעורי היכרות' })).toBeChecked();
   // after the visitor starts using the widget, the carousel no longer changes it

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { WEBHOOK_URL } from './config/site.js';
 import { groupById } from './config/groups.js';
 import { slotOn } from './config/timetable.js';
-import { OFFERS, priceFor } from './config/offers.js';
+import { OFFERS } from './config/offers.js';
 import { dowOf } from './lib/civil-date.js';
 import { buildPayload, createSender, newSubmissionId, selectionHash } from './lib/events.js';
 import { createEmbed } from './lib/embed.js';
@@ -10,19 +10,19 @@ import { resolveGroup } from './lib/params.js';
 import { waLink, groupWA } from './lib/messages.js';
 import { toE164 } from './lib/phone.js';
 import { reducer, initialState, withContext, stepsOf, pathOf, STEP_NAMES, DONE_STEPS } from './state/flow.js';
-import { Stepper, T, Price } from './ui/primitives.jsx';
+import { Stepper } from './ui/primitives.jsx';
 import { ExitIntent, IdleNudge } from './ui/Popups.jsx';
 import { Offer } from './steps/Offer.jsx';
-import { Group } from './steps/Group.jsx';
+import { Group, Location } from './steps/Group.jsx';
 import { Dates } from './steps/Dates.jsx';
 import { Contact, contactErrors } from './steps/Contact.jsx';
 import { Summary } from './steps/Summary.jsx';
-import { Done, DoneCallback } from './steps/Done.jsx';
+import { DoneCallback } from './steps/Done.jsx';
 import { PrivateGoal, PrivateContact, PrivateDone } from './steps/Private.jsx';
 import logoUrl from './assets/logo-96.webp';
 
 const ANALYTICS = { offer: 'Viewed_Offer', group: 'Viewed_Category_Select', dates: 'Viewed_Dates_Select', contact: 'Viewed_Contact',
-  summary: 'Viewed_Checkout', done: 'Pending_Payment_Gateway', 'done-callback': 'Completed_Booking_WA', pgoal: 'Viewed_Private_Goal',
+  summary: 'Viewed_Checkout', 'done-callback': 'Completed_Booking_WA', pgoal: 'Viewed_Private_Goal',
   pcontact: 'Viewed_Private_Form', pdone: 'Completed_Private_Lead' };
 const ABANDON_MS = 90000;
 const IDLE_MS = 60000;
@@ -40,6 +40,7 @@ export function App({ params, embedded }) {
   const stateRef = useRef(state);
   stateRef.current = state;
   const subIds = useRef(new Map());
+  const paymentChoices = useRef(new Set());
 
   // Local previews never reach the production webhook: on localhost the sender records payloads in
   // window.__ebDryRun instead. The e2e harness opts in (window.__EB_ALLOW_WEBHOOK__) and intercepts every request.
@@ -55,7 +56,7 @@ export function App({ params, embedded }) {
   const embed = useMemo(() => createEmbed({
     hasInteracted: () => stateRef.current.interacted,
     onContext: ({ offer, group }) => dispatch({ type: 'context', offer: OFFERS[offer] ? offer : null, group: resolveGroup(group), user: false }),
-    onExitIntent: () => { if (!seen.current.exit && !DONE_STEPS.includes(stateRef.current.step) && stateRef.current.step !== 'offer') { seen.current.exit = true; setExitOpen(true); } },
+    onExitIntent: () => { if (!seen.current.exit && !DONE_STEPS.includes(stateRef.current.step) && stateRef.current.step !== 'offer' && !paymentChoices.current.has(snapshot().submissionId)) { seen.current.exit = true; setExitOpen(true); } },
   }), []);
 
   useEffect(() => { embed.observe(rootRef.current); }, []);
@@ -110,8 +111,12 @@ export function App({ params, embedded }) {
     embed.complete('private');
   };
   const pay = () => {
-    fire('booking_selfbook', snapshot());
-    dispatch({ type: 'go', step: 'done', outcome: 'selfbook' });
+    const snap = snapshot();
+    if (paymentChoices.current.has(snap.submissionId)) return;
+    paymentChoices.current.add(snap.submissionId);
+    setExitOpen(false);
+    fire('booking_selfbook', snap);
+    if (window.dataLayer) window.dataLayer.push({ event: 'Pending_Payment_Gateway', category: group.label, package: state.offer });
     embed.complete('selfbook');
   };
   const callback = () => {
@@ -127,7 +132,10 @@ export function App({ params, embedded }) {
   // ── abandoned checkout: 90 s on the summary without choosing ──
   useEffect(() => {
     if (state.step !== 'summary') return undefined;
-    const id = setTimeout(() => fire('abandoned_checkout', snapshot()), ABANDON_MS);
+    const id = setTimeout(() => {
+      const snap = snapshot();
+      if (!paymentChoices.current.has(snap.submissionId)) fire('abandoned_checkout', snap);
+    }, ABANDON_MS);
     return () => clearTimeout(id);
   }, [state.step]);
 
@@ -136,7 +144,7 @@ export function App({ params, embedded }) {
     if (embedded) return undefined;
     const h = (e) => {
       const s = stateRef.current;
-      if (e.clientY <= 0 && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.exit) { seen.current.exit = true; setExitOpen(true); }
+      if (e.clientY <= 0 && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.exit && !paymentChoices.current.has(snapshot().submissionId)) { seen.current.exit = true; setExitOpen(true); }
     };
     document.addEventListener('mouseleave', h);
     return () => document.removeEventListener('mouseleave', h);
@@ -150,34 +158,45 @@ export function App({ params, embedded }) {
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
     const id = setInterval(() => {
       const s = stateRef.current;
-      if (Date.now() - last > IDLE_MS && s.step !== 'offer' && !DONE_STEPS.includes(s.step) && !seen.current.idle) { seen.current.idle = true; setIdleOpen(true); }
+      if (Date.now() - last > IDLE_MS && s.step !== 'offer' && s.step !== 'summary' && !DONE_STEPS.includes(s.step) && !seen.current.idle) { seen.current.idle = true; setIdleOpen(true); }
     }, 5000);
     return () => { evs.forEach((e) => window.removeEventListener(e, touch)); clearInterval(id); };
   }, []);
 
   const go = (step) => dispatch({ type: 'go', step });
-  const restart = () => { subIds.current.clear(); dispatch({ type: 'reset' }); };
+  const restart = () => { subIds.current.clear(); paymentChoices.current.clear(); dispatch({ type: 'reset' }); };
   const Heading = useCallback(({ children }) => <h2 className="eb-h2" tabIndex={-1} ref={headingRef}>{children}</h2>, []);
   const common = { state, dispatch, Heading };
+
+  const stepIndex = steps.indexOf(state.step);
+  const backStep = stepIndex > 0 ? steps[stepIndex - 1] : null;
+
+  // Top navigation shares the same validation/submission handlers as the bottom actions.
+  // Final decision screens keep their explicit booking or send-inquiry actions below the content.
+  const forward = {
+    offer: { action: () => go(state.offer === 'private' ? 'pgoal' : 'group'), disabled: !state.offer },
+    group: { action: () => go('dates'), disabled: !state.groupId },
+    dates: { action: () => go('contact'), disabled: state.dates.length < 1 },
+    contact: { action: submitContact, label: 'לסיכום' },
+    pgoal: { action: () => go('pcontact'), disabled: !state.goal || !state.format },
+  }[state.step];
 
   let body;
   switch (state.step) {
     case 'offer': body = <Offer {...common} next={() => go(state.offer === 'private' ? 'pgoal' : 'group')} />; break;
-    case 'group': body = <Group {...common} back={() => go('offer')} next={() => go('dates')} />; break;
-    case 'dates': body = <Dates {...common} nowMs={Date.now()} back={() => go('group')} next={() => go('contact')} />; break;
-    case 'contact': body = <Contact {...common} back={() => go(state.datesSkipped ? 'dates' : 'dates')} submit={submitContact} />; break;
-    case 'summary': body = <Summary {...common} group={group} slots={slots} back={() => go('contact')} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
-    case 'done': body = <Done {...common} group={group} slots={slots} restart={restart} />; break;
+    case 'group': body = <Group {...common} next={() => go('dates')} />; break;
+    case 'dates': body = <Dates {...common} nowMs={Date.now()} next={() => go('contact')} />; break;
+    case 'contact': body = <Contact {...common} submit={submitContact} />; break;
+    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} failed={failed} retry={() => sender.retryFailed()} />; break;
     case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} />; break;
-    case 'pgoal': body = <PrivateGoal {...common} back={() => go('offer')} next={() => go('pcontact')} />; break;
-    case 'pcontact': body = <PrivateContact {...common} back={() => go('pgoal')} submit={submitPrivate} />; break;
+    case 'pgoal': body = <PrivateGoal {...common} next={() => go('pcontact')} />; break;
+    case 'pcontact': body = <PrivateContact {...common} submit={submitPrivate} />; break;
     case 'pdone': body = <PrivateDone {...common} restart={restart} />; break;
     default: body = null;
   }
 
-  const showBar = path === 'group' && group && ['dates', 'contact'].includes(state.step);
   return (
-    <div className={`eb ${embedded ? 'eb--embed' : 'eb--standalone'}${idleOpen && !embedded ? ' eb--sheet-open' : ''}`} ref={rootRef} lang="he" dir="rtl">
+    <div className={`eb ${embedded ? 'eb--embed' : 'eb--standalone'}`} ref={rootRef} lang="he" dir="rtl">
       {!embedded && (
         <header className="eb-brand">
           <img src={logoUrl} alt="" width="40" height="40" />
@@ -187,22 +206,21 @@ export function App({ params, embedded }) {
           </div>
         </header>
       )}
+      {!embedded && (
+        <section className="eb-standalone-location" aria-labelledby="eb-location-title">
+          <h2 id="eb-location-title" className="eb-location-title">כתובת — כאן מתאמנים</h2>
+          <Location compact />
+          <a className="eb-link" href="https://element-m-a-m.co.il/contact.html#arrival" target="_blank" rel="noopener noreferrer">מפה ופרטי הגעה ↗</a>
+        </section>
+      )}
       <main className="eb-main">
-        {!isDone && <Stepper steps={steps} names={STEP_NAMES} current={state.step} />}
-        {showBar && (
-          <div className="eb-bar">
-            <span><T>{group.label}</T> · {OFFERS[state.offer].title}</span>
-            <span className="eb-bar__end"><Price value={priceFor(state.offer, group.id)} />
-              <button type="button" className="eb-link" onClick={() => go('offer')}>שינוי</button></span>
-          </div>
-        )}
+        {!isDone && <Stepper steps={steps} current={state.step} back={backStep ? () => go(backStep) : undefined} forward={forward?.action} forwardDisabled={forward?.disabled} forwardLabel={forward?.label} />}
         {exitOpen && embedded && <ExitIntent inline onClose={() => setExitOpen(false)} />}
-        {idleOpen && embedded && <IdleNudge inline groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
-        {body}
+        <div className="eb-transition" key={state.step}>{body}</div>
       </main>
       <p className="eb-sr" aria-live="polite" ref={liveRef} />
       {exitOpen && !embedded && <ExitIntent onClose={() => setExitOpen(false)} />}
-      {idleOpen && !embedded && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
+      {idleOpen && !isDone && state.step !== 'summary' && <IdleNudge groupLabel={group && group.label} onClose={() => setIdleOpen(false)} />}
     </div>
   );
 }

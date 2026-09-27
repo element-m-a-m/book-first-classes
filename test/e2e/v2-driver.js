@@ -16,7 +16,10 @@ export const GROUPS_V2 = [
 
 export const heading = (page) => page.locator('h2.eb-h2');
 // Pick a card by its radio's accessible name (the card title), exactly - the way a screen reader user would.
-export const choose = (page, text) => page.locator('label.eb-choice', { has: page.getByRole('radio', { name: text, exact: true }) }).click();
+export const choose = async (page, text) => {
+  const radio = page.getByRole('radio', { name: text, exact: true });
+  if (!await radio.isChecked()) await page.locator('label.eb-choice', { has: radio }).click();
+};
 export const press = (page, name) => page.getByRole('button', { name, exact: true }).click();
 
 export async function openDays(page) {
@@ -42,7 +45,7 @@ export async function toGroup(page, offerText, g) {
 export async function fillContact(page, { medical = null } = {}) {
   await page.getByLabel('שם מלא').fill(TEST_LEAD.name);
   await page.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
-  if (medical) { await choose(page, 'יש מה לדעת'); await page.getByLabel('פרטים (לא חובה)').fill(medical); } else await choose(page, 'הכל תקין');
+  if (medical) { await choose(page, 'יש מה לדעת'); await page.getByLabel('פרטים', { exact: true }).fill(medical); } else await choose(page, 'הכל תקין');
 }
 
 export async function groupJourney(page, g, { offer = 'trial3', dates = offer === 'single' ? 1 : 3, finish = 'selfbook', medical = null } = {}) {
@@ -53,7 +56,7 @@ export async function groupJourney(page, g, { offer = 'trial3', dates = offer ==
   await fillContact(page, { medical });
   await press(page, 'המשך לסיכום');
   await expect(heading(page)).toHaveText('סיכום והרשמה');
-  if (finish === 'selfbook') { await press(page, 'מעבר למערכת ההזמנה'); await expect(heading(page)).toHaveText('ההזמנה שלכם מוכנה!'); }
+  if (finish === 'selfbook') { await page.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click(); await expect(heading(page)).toHaveText('סיכום והרשמה'); }
   if (finish === 'callback') { await page.getByRole('button', { name: /בקשת שיחה חוזרת/ }).click(); await expect(heading(page)).toHaveText('הפנייה נשלחה בהצלחה!'); }
 }
 

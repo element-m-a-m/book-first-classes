@@ -18,7 +18,17 @@ const UMD = {
 };
 
 export async function openWidget(page, url, { now = FIXED_NOW, host = false } = {}) {
-  const rec = { events: [], opened: [], blocked: [], steps: [] };
+  const rec = { events: [], opened: [], payments: [], blocked: [], steps: [] };
+  // Native target=_blank payment links create a new page; its first request needs a context route.
+  await page.context().route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, async (route) => {
+    const url = route.request().url();
+    if (url.startsWith('https://letts.co.il/payment/') || url.startsWith('https://1pa.co/')) {
+      rec.payments.push(url);
+      return route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Offline payment destination</title>' });
+    }
+    rec.blocked.push(url);
+    return route.abort();
+  });
   await page.clock.install({ time: now });
   await page.addInitScript(() => {
     window.__EB_ALLOW_WEBHOOK__ = true; // v2 runs dry on 127.0.0.1 unless told otherwise; every request is intercepted here

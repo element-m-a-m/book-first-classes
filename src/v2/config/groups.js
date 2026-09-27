@@ -1,5 +1,5 @@
 // The seven trial groups (decision 16: only these are offered).
-// ids are ClickUp INTEREST_MAP keys - never rename them. `desc` strings are the legacy widget copy, unchanged.
+// ids are ClickUp INTEREST_MAP keys - never rename them. Descriptions are owner-approved display copy.
 // Public labels follow the website's group names; adults-38-58 is shown as "כושר ולחימה לגילאי 40+".
 export const TRACKS = {
   martial: { title: 'אומנויות לחימה', accent: 'ma' },
@@ -18,9 +18,9 @@ export const GROUPS = [
   { id: 'adults-38-58', label: 'כושר ולחימה לגילאי 40+', audience: 'self', track: 'martial', tag: 'ייחודי',
     desc: 'שילוב ייחודי של כושר, בריאות ואומנויות לחימה', coach: 'מנדי סטנדר' },
   { id: 'movement-class', label: 'מובמנט', audience: 'self', track: 'movement', tag: 'פופולרי',
-    desc: 'גמישות, שליטה וחופש בגוף. בהנחיית ליאור ורדי', coach: 'ליאור ורדי' },
+    desc: 'חופש בגוף, אינטליגנציה תנועתית, מודעות ומשחק דרך תנועה', coach: 'ליאור ורדי' },
   { id: 'strength', label: 'כוח וגמישות', audience: 'self', track: 'movement', accent: 'sc',
-    desc: 'חיזוק ושיפור טווחי תנועה', coach: 'ליאור ורדי' },
+    desc: 'אימון גופני, חיזוק, שיפור טווחי תנועה והגנה מפציעות', coach: 'ליאור ורדי' },
 ];
 
 export const GROUP_ALIASES = {

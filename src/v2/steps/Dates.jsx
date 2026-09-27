@@ -4,9 +4,8 @@ import { slotOn, slotsOf, durationOf } from '../config/timetable.js';
 import { OFFERS } from '../config/offers.js';
 import { civilOf, addDays, dowOf, parts, weekStart, instantOf, HDAYS, HDAYS_S, HMONTHS, fmtLong } from '../lib/civil-date.js';
 import { closureFor } from '../lib/closures.js';
-import { waLink, daysWA } from '../lib/messages.js';
 import { maxDatesOf } from '../state/flow.js';
-import { Button, BackButton, Time, T, Icon, Notice, Price } from '../ui/primitives.jsx';
+import { Button, Time, T, Icon, Notice, Price } from '../ui/primitives.jsx';
 
 export const WEEKS_PER_PAGE = 4;
 export const PAGES = 3;
@@ -35,7 +34,7 @@ export function buildWeeks(groupId, nowMs, pages = PAGES) {
   return weeks;
 }
 
-export function Dates({ state, dispatch, next, back, Heading, nowMs }) {
+export function Dates({ state, dispatch, next, Heading, nowMs }) {
   const group = groupById(state.groupId);
   const [page, setPage] = useState(0);
   const weeks = useMemo(() => buildWeeks(group.id, nowMs), [group.id, nowMs]);
@@ -50,9 +49,7 @@ export function Dates({ state, dispatch, next, back, Heading, nowMs }) {
 
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>בחרו מועדים</Heading>
-      <p className="eb-lead">{state.offer === 'single' ? 'בחרו תאריך לשיעור' : 'סמנו עד 3 תאריכים'}</p>
       <p className="eb-meta"><Icon name="clock" size={14} /> משך השיעור: <T>{minutes.join('/')}</T> דק׳</p>
       <Notice onDismiss={() => dispatch({ type: 'field', field: 'notice', value: null })}>{state.notice}</Notice>
 
@@ -105,10 +102,7 @@ export function Dates({ state, dispatch, next, back, Heading, nowMs }) {
 
       <Button onClick={next} disabled={state.dates.length < 1}>המשך</Button>
       <div className="eb-alt">
-        <button type="button" className="eb-link" onClick={() => dispatch({ type: 'skipDates' })}>לא מצאתי תאריך מתאים, אדלג ואתאם בהמשך</button>
-        <a className="eb-link eb-link--wa" href={waLink(daysWA(group.label))} target="_blank" rel="noopener noreferrer">
-          <Icon name="wa" size={16} /> מתלבטים לגבי הימים? התייעצו איתנו בוואטסאפ
-        </a>
+        <Button variant="outline" onClick={() => dispatch({ type: 'skipDates' })}>לא מצאתי תאריך מתאים, אדלג ואתאם בהמשך</Button>
       </div>
     </section>
   );

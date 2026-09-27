@@ -1,37 +1,34 @@
 // Private path (decision 2): goal x format with prices -> name/phone/note -> private_inquiry ->
 // confirmation with one optional WhatsApp button (never opened automatically).
-import { GOALS, FORMATS, pricesFor, goalById, SERIES_NOTE, FIRST_NOTE, PRICES } from '../config/private.js';
+import { GOALS, FORMATS, pricesFor, goalById, SERIES_NOTE, FIRST_NOTE } from '../config/private.js';
 import { waLink, privateWA } from '../lib/messages.js';
 import { toE164 } from '../lib/phone.js';
-import { Button, LinkButton, BackButton, Choice, Field, Price, Icon, T } from '../ui/primitives.jsx';
+import { Button, LinkButton, Choice, Field, Price, Icon, T } from '../ui/primitives.jsx';
 import { NameField, PhoneField, Privacy, contactErrors } from './Contact.jsx';
 
-export function PrivateGoal({ state, dispatch, next, back, Heading }) {
-  const p = state.goal ? pricesFor(state.goal, state.format) : null;
+export function PrivateGoal({ state, dispatch, next, Heading }) {
+  const p = state.goal && state.format ? pricesFor(state.goal, state.format) : null;
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>איזה אימון מתאים לכם?</Heading>
       <p className="eb-lead">מתחילים בהיכרות ובהערכה, ומגדירים יחד את הכיוון.</p>
-      <fieldset className="eb-choices">
-        <legend className="eb-subhead">מה תרצו לפתח?</legend>
-        {GOALS.map((g) => {
-          const first = pricesFor(g.id, 'individual').first;
-          return (
-            <Choice key={g.id} name="goal" value={g.id} checked={state.goal === g.id} onChange={(goal) => dispatch({ type: 'goal', goal })} className="eb-group" title={g.label}>
-              <span className="eb-group__desc">{g.desc}</span>
-              <span className="eb-group__foot"><span className="eb-price"><Price value={first.price} /> <span className="eb-price__was">למפגש ראשון אישי</span></span></span>
-            </Choice>
-          );
-        })}
-      </fieldset>
-      <fieldset className="eb-segment">
-        <legend className="eb-subhead">אישי או זוגי?</legend>
+      <fieldset className="eb-segment eb-private-formats">
+        <legend className="eb-subhead">באיזה הרכב תרצו להתאמן?</legend>
         {FORMATS.map((f) => (
           <Choice key={f.id} name="format" value={f.id} checked={state.format === f.id} onChange={(format) => dispatch({ type: 'format', format })} className="eb-segment__item" title={f.label}>
             <span className="eb-segment__sub">{f.desc}</span>
           </Choice>
         ))}
+      </fieldset>
+      <fieldset className="eb-choices">
+        <legend className="eb-subhead">מה תרצו לפתח?</legend>
+        {GOALS.map((g) => {
+          return (
+            <Choice key={g.id} name="goal" value={g.id} checked={state.goal === g.id} onChange={(goal) => dispatch({ type: 'goal', goal })} className="eb-group" title={g.label}>
+              <span className="eb-group__desc">{g.desc}</span>
+            </Choice>
+          );
+        })}
       </fieldset>
       {p && (
         <div className="eb-card" aria-live="polite">
@@ -43,8 +40,8 @@ export function PrivateGoal({ state, dispatch, next, back, Heading }) {
           <p className="eb-meta">{state.format === 'duo' ? 'המחיר הוא למפגש זוגי, לשני המתאמנים יחד. ' : ''}{FIRST_NOTE} {SERIES_NOTE}</p>
         </div>
       )}
-      <Button onClick={next} disabled={!state.goal}>המשך</Button>
-      {!state.goal && <p className="eb-hint">מפגש זוגי ראשון: <Price value={PRICES.duo.first.price} /> לשניים.</p>}
+      <Button onClick={next} disabled={!state.goal || !state.format}>המשך</Button>
+      {!state.goal && <p className="eb-hint">בחרו תחום כדי לראות את המחיר והמשך התיאום.</p>}
     </section>
   );
 }
@@ -56,7 +53,6 @@ export function PrivateContact({ state, dispatch, submit, back, Heading }) {
   const show = (k) => state.touched.submit && err[k];
   return (
     <section className="eb-step">
-      <BackButton onClick={back} />
       <Heading>פרטים ליצירת קשר</Heading>
       <p className="eb-lead">נחזור אליכם לתיאום המפגש הראשון.</p>
       <form className="eb-form" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }}>
