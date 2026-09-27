@@ -73,7 +73,6 @@ export function Summary({ state, group, slots, pay, callback, Heading, failed, r
       </div>
       <div className="eb-option">
         <p className="eb-option__title">נציג יחזור אליי (לתיאום והרשמה)</p>
-        <p className="eb-meta">נפתח שיחת וואטסאפ עם הפרטים שמילאתם.</p>
         <Button variant="wa-outline" onClick={(e) => { if (e.detail < 2) callback(); }}><Icon name="wa" size={18} /> בקשת שיחה חוזרת בוואטסאפ</Button>
       </div>
       <OrderCard group={group} offer={state.offer} slots={slots} />
