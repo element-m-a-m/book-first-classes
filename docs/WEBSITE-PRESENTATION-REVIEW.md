@@ -86,7 +86,7 @@ Matched Back and top Continue with equal target sizes, muted regular-weight text
 Validation: two existing group/private top-navigation checks passed; three actual website iframe checks passed at 320/383/1280px for centered progress, spacing, target size and keyboard Back with preserved selections. Inspected selected-date mobile screenshot. Isolated preview rebuilt on :8853; no release, payment, backend or deployment changes.
 
 
-### Integrated into the canonical widget as 2.1.0 — 27 September 2026
+### Integrated into the canonical widget as 2.1.0 - 27 September 2026
 This review (branch `codex/widget-presentation-2026-09-26` @ `f122b88`) was merged into the canonical checkout on branch `widget-presentation-sync-27-sep-2026`. This entry closes the log; the final source and `docs/EMBED-CONTRACT.md` §3 and §8 are the current state.
 Four late commits were not described above: the security line now names the provider (`... דרך מערכת Boostapp`, 9b0149a, superseding "keeps only תשלום מאובטח ומוצפן"); the line `נפתח שיחת וואטסאפ עם הפרטים שמילאתם.` was removed (41bfa8b); new Movement and Strength descriptions without a trailing period (76b317a, f122b88).
 Standalone decisions (Lior): address block on the standalone first screen only, directions via the Google Maps place link, a quiet WhatsApp link in the standalone brand bar, and "הזמנת שיעור נוסף" on the summary in both modes. Also added: middle-click on the payment link is the same payment intent, once per submission.
