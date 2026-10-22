@@ -57,8 +57,8 @@ link posts `complete {outcome:'selfbook'}` and the page stays on `summary`. The 
 `complete` is intent, never proof of payment. It can repeat: once per submission for `selfbook` (an edited
 submission gets a fresh id and may pay again), and a `callback` can follow a `selfbook` on the same screen.
 
-Allowlisted parent origins: the widget's own origin, `https://element-m-a-m.co.il`, `https://www.element-m-a-m.co.il`,
-`https://element-website.pages.dev` and its preview subdomains.
+Allowlisted parent origins: the widget's own origin, `https://element-m-a-m.co.il` and `https://www.element-m-a-m.co.il`.
+(2.2 dropped `https://element-website.pages.dev` and its preview subdomains: that host serves another business now.)
 
 **Legacy v1 (kept; decision S9, 26-Sep-2026: they cost nothing and protect a parent still on the old script):** the widget also posts
 `{ type: 'element:booking:ready' | 'element:booking:resize' | 'element:booking:error', version: 1, height }` to its own

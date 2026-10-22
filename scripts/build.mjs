@@ -1,7 +1,7 @@
 // Build a widget tree into a self-contained, hash-named release folder.
 //
-//   node scripts/build.mjs <tree> [--out <dir>]
-//     tree = v1 (modularised legacy, S2) | v2 (redesign, S4)
+//   node scripts/build.mjs v2 [--out <dir>]
+// The v1 and legacy trees were retired in 2.2; they stay readable at the public repo's tag v2.1.0.
 //
 // Output: <out>/index.html + hashed app JS/CSS/assets, and manifest.json listing every file's sha256.
 // Every URL is relative, so the same folder works at /book-first-classes/ and at the website's /booking/.
@@ -16,8 +16,7 @@ const tree = args[0];
 const outIdx = args.indexOf('--out');
 const out = outIdx > -1 ? args[outIdx + 1] : `.cache/build-${tree}`;
 const TREES = {
-  v1: { entry: 'src/v1/main.jsx', shell: 'src/v1/shell.html' },
-  v2: { entry: 'src/v2/main.jsx', shell: 'src/v2/shell.html', version: siteVersion('src/v2/config/site.js'), embedContract: 2, payloadSchema: 2 },
+  v2: { entry: 'src/v2/main.jsx', shell: 'src/v2/shell.html', version: siteVersion('src/v2/config/site.js'), embedContract: 2, payloadSchema: 3 },
 };
 // Single source of truth for the version: the VERSION constant the app itself sends as widgetVersion.
 function siteVersion(file) {

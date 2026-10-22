@@ -1,7 +1,7 @@
 // S4 e2e: every path of the v2 widget, offline, webhook captured (plan §4).
 import { test, expect } from '@playwright/test';
 import { openWidget, collectOpened, TEST_LEAD } from './harness.js';
-import { V2_URL, GROUPS_V2, heading, choose, press, pickDays, groupJourney, privateJourney, toGroup, fillContact, waitEvents } from './v2-driver.js';
+import { V2_URL, GROUPS_V2, CHILD_AUD, heading, choose, press, pickDays, groupJourney, privateJourney, toGroup, fillContact, waitEvents } from './v2-driver.js';
 
 const TIMETABLE_START = { 'movement-class': { 2: '19:45', 5: '14:30' }, strength: { 2: '18:30', 5: '15:45' } };
 const dowOf = (civil) => new Date(civil + 'T00:00:00Z').getUTCDay();
@@ -17,7 +17,8 @@ function checkGroupPayload(p, g, offer) {
   expect(p.categoryLabel).toBe(g.label);
   expect(p.price).toBe(offer === 'trial3' ? 99 : g.kids ? 60 : 70);
   expect(p.packageLabel).toBe(offer === 'trial3' ? '3 שיעורי היכרות' : 'שיעור בודד');
-  expect(p.schema).toBe(2);
+  expect(p.schema).toBe(3);
+  if (g.aud === CHILD_AUD) expect(p.parentName).toBe(TEST_LEAD.parentName); else expect('parentName' in p).toBe(false);
   expect(p.phoneE164).toBe('+972500000000');
   expect([...p.datesLocal].sort()).toEqual(p.datesLocal);
   expect(p.dates).toEqual(p.datesLocal.map(jerusalemMidnightISO));
@@ -155,7 +156,7 @@ test.describe('changes, validation, failures', () => {
     await toGroup(page, '3 שיעורי היכרות', GROUPS_V2[3]);
     await pickDays(page, 2);
     await press(page, 'חזרה');
-    await expect(page.locator('label.eb-choice.is-checked', { hasText: 'בוגרים 16-37' })).toHaveCount(1);
+    await expect(page.locator('label.eb-choice.is-checked', { hasText: 'בוגרים 16-40' })).toHaveCount(1);
     await choose(page, 'כושר ולחימה לגילאי 40+');
     await expect(page.getByRole('status')).toContainText('המועדים שבחרתם נוקו');
     await press(page, 'המשך לבחירת מועדים');
@@ -197,20 +198,17 @@ test.describe('changes, validation, failures', () => {
     expect(rec.events[3].medical).toBe('כן, לא פורט');
   });
 
-  test('webhook failure: retried, then a visible retry that recovers', async ({ page }) => {
+  test('webhook failure: resent automatically with the same submissionId until it is taken', async ({ page }) => {
     let failures = 0;
-    const rec = await openWidget(page, V2_URL);
-    await page.route('https://script.google.com/**', async (route) => {
-      if (failures < 6) { failures++; return route.abort('failed'); }
-      rec.events.push(JSON.parse(route.request().postData()));
-      return route.fulfill({ status: 200, body: 'ok' });
-    });
-    await groupJourney(page, GROUPS_V2[0], { finish: null });
-    await expect.poll(() => failures, { timeout: 15000 }).toBe(6); // both events exhausted their retries
-    await expect(page.getByText('לא הצלחנו לשמור את הפרטים אצלנו')).toBeVisible({ timeout: 10000 });
-    await page.getByRole('button', { name: 'ניסיון נוסף' }).click();
-    await waitEvents(page, rec, 2);
-    expect(rec.events.map((e) => e.event)).toEqual(['lead_started', 'checkout_reached']);
+    const rec = await openWidget(page, V2_URL, { answer: () => (failures < 3 ? (failures++, { abort: true }) : null) });
+    await groupJourney(page, GROUPS_V2[3], { finish: null });
+    for (let i = 0; i < 10 && rec.events.filter((e) => e.event === 'checkout_reached').length < 1; i++) {
+      await page.clock.fastForward(20_000);
+      await page.waitForTimeout(150);
+    }
+    expect(failures).toBe(3);
+    expect([...new Set(rec.events.map((e) => e.event))]).toEqual(['lead_started', 'checkout_reached']);
+    expect(new Set(rec.events.map((e) => e.submissionId)).size).toBe(1);
     await expect(page.getByText('לא הצלחנו לשמור את הפרטים אצלנו')).toHaveCount(0);
   });
 });

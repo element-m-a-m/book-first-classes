@@ -1,5 +1,5 @@
 // Site-wide constants for the v2 widget.
-export const VERSION = '2.1.0';
+export const VERSION = '2.2.0';
 export const TZ = 'Asia/Jerusalem';
 export const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyJ0CjKQq8jM0i_Mg1qgCkwbLeY2Gb9f5iX2kF6CC-4PQz8keR9O7CWNW3os8ch2bt00A/exec';
 // Public channel key for the Apps Script request gate (Script Property WEBHOOK_KEY_WIDGET). It is public
@@ -20,8 +20,7 @@ export const ICS_LOCATION = 'אולם הספורט של בית הספר היסו
 // Legacy strings, unchanged.
 export const WHAT_TO_BRING = ['👕 בגדי ספורט נוחים (בשיעורי הלחימה - מכנס ארוך)', '💧 בקבוק מים', '⏰ להגיע 15 דקות לפני', '👟 נעלי ספורט'];
 
-// Parent origins allowed to talk to an embedded widget (plus the widget's own origin).
-export const EMBED_ORIGINS = [
-  'https://element-m-a-m.co.il', 'https://www.element-m-a-m.co.il', 'https://element-website.pages.dev',
-];
-export const EMBED_ORIGIN_PATTERNS = [/^https:\/\/[a-z0-9-]+\.element-website\.pages\.dev$/];
+// Parent origins allowed to talk to an embedded widget (plus the widget's own origin). 2.2 dropped element-website.pages.dev
+// and its subdomains: that host serves another business now (read 15-OCT-2026).
+export const EMBED_ORIGINS = ['https://element-m-a-m.co.il', 'https://www.element-m-a-m.co.il'];
+export const EMBED_ORIGIN_PATTERNS = [];

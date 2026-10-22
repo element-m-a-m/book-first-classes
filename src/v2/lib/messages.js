@@ -4,13 +4,14 @@ import { HDAYS, dowOf, fmtDots } from './civil-date.js';
 
 export const waLink = (text, phone = WA_PHONE) => 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
 
-export function groupWA({ name, e164, groupLabel, isChild, medical, slots, offerId }) {
+export function groupWA({ name, parentName, e164, groupLabel, isChild, medical, slots, offerId }) {
   const ds = slots.map((s, i) => (i + 1) + '. יום ' + HDAYS[dowOf(s.date)] + ', ' + fmtDots(s.date) + ' – ' + s.start).join('\n');
   const datesStr = ds ? '\nמועדים:\n' + ds : '\nמועדים: יתואמו טלפונית בהמשך';
   const pl = offerId === 'single' ? 'שיעור בודד' : '3 שיעורי היכרות';
   const childLine = isChild ? '\n👶 רישום עבור ילד/ה' : '';
   const medLine = medical ? '\n⚠️ מגבלות רפואיות: ' + medical : '';
-  return '🎯 בקשת חזרה - ' + pl + ' באלמנט\n\nשם: ' + name.trim() + '\nטלפון: ' + e164 + '\nקבוצה: ' + groupLabel + childLine + medLine + '\n' + datesStr;
+  const who = isChild && parentName ? 'שם הילד/ה: ' + name.trim() + '\nשם ההורה: ' + parentName.trim() : 'שם: ' + name.trim();
+  return '🎯 בקשת חזרה - ' + pl + ' באלמנט\n\n' + who + '\nטלפון: ' + e164 + '\nקבוצה: ' + groupLabel + childLine + medLine + '\n' + datesStr;
 }
 
 export function privateWA({ name, e164, goalLabel, formatLabel, note }) {

@@ -2,13 +2,16 @@
 import { expect } from '@playwright/test';
 import { TEST_LEAD } from './harness.js';
 
-export const V2_URL = '/.cache/build-v2/index.html';
+// EB_V2_URL points the specs at another build, e.g. the pinned root /index.html, or an older build for a red run
+// (2.1.0's page retired with 2.2.0's release; its bytes stay readable at the public repo's tag v2.1.0).
+export const V2_URL = process.env.EB_V2_URL || '/.cache/build-v2/index.html';
+export const CHILD_AUD = 'עבור הילד/ה שלי';
 
 export const GROUPS_V2 = [
   { id: 'kids-6-8', label: 'ילדים 6-8', aud: 'עבור הילד/ה שלי', kids: true, dows: [0, 3], start: '17:00', end: '17:45' },
   { id: 'kids-9-11', label: 'ילדים 9-11', aud: 'עבור הילד/ה שלי', kids: true, dows: [0, 3], start: '17:45', end: '18:45' },
   { id: 'youth-12-15', label: 'נוער 12-15', aud: 'עבור הילד/ה שלי', dows: [0, 3], start: '17:15', end: '18:45' },
-  { id: 'adults-16-37', label: 'בוגרים 16-37', aud: 'עבורי', dows: [0, 3], start: '19:00', end: '21:00' },
+  { id: 'adults-16-37', label: 'בוגרים 16-40', aud: 'עבורי', dows: [0, 3], start: '19:00', end: '21:00' },
   { id: 'adults-38-58', label: 'כושר ולחימה לגילאי 40+', aud: 'עבורי', dows: [1, 4], start: '18:15', end: '19:45' },
   { id: 'movement-class', label: 'מובמנט', aud: 'עבורי', dows: [2, 5] },
   { id: 'strength', label: 'כוח וגמישות', aud: 'עבורי', dows: [2, 5] },
@@ -42,8 +45,11 @@ export async function toGroup(page, offerText, g) {
   await expect(heading(page)).toHaveText('בחרו מועדים');
 }
 
-export async function fillContact(page, { medical = null } = {}) {
-  await page.getByLabel('שם מלא').fill(TEST_LEAD.name);
+export async function fillContact(page, { medical = null, child = false } = {}) {
+  if (child) {
+    await page.getByLabel('שם מלא של הילד/ה').fill(TEST_LEAD.name);
+    await page.getByLabel('שם מלא של ההורה').fill(TEST_LEAD.parentName);
+  } else await page.getByLabel('שם מלא').fill(TEST_LEAD.name);
   await page.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
   if (medical) { await choose(page, 'יש מה לדעת'); await page.getByLabel('פרטים', { exact: true }).fill(medical); } else await choose(page, 'הכל תקין');
 }
@@ -53,7 +59,7 @@ export async function groupJourney(page, g, { offer = 'trial3', dates = offer ==
   if (dates === 'skip') await page.getByRole('button', { name: 'לא מצאתי תאריך מתאים, אדלג ואתאם בהמשך' }).click();
   else { await pickDays(page, dates); await press(page, 'המשך'); }
   await expect(heading(page)).toHaveText('פרטי קשר לשמירת מקום');
-  await fillContact(page, { medical });
+  await fillContact(page, { medical, child: g.aud === CHILD_AUD });
   await press(page, 'המשך לסיכום');
   await expect(heading(page)).toHaveText('סיכום והרשמה');
   if (finish === 'selfbook') { await page.getByRole('link', { name: 'לחצו כאן לתשלום מאובטח' }).click(); await expect(heading(page)).toHaveText('סיכום והרשמה'); }

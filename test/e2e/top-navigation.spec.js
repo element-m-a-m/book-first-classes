@@ -8,7 +8,7 @@ test('top navigation validates and preserves the group flow without skipping dec
  await expect(next).toBeDisabled();
  await choose(page,'3 שיעורי היכרות');await next.click();
  await expect(next).toBeDisabled();
- await choose(page,'עבורי');await choose(page,'בוגרים 16-37');await next.click();
+ await choose(page,'עבורי');await choose(page,'בוגרים 16-40');await next.click();
  await expect(next).toBeDisabled();
  await pickDays(page,1);await next.click();
  await next.click();

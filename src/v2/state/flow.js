@@ -11,7 +11,7 @@ export const DONE_STEPS = ['done-callback', 'pdone'];
 
 export const initialState = {
   step: 'offer', offer: null, audience: null, groupId: null, dates: [], datesSkipped: false,
-  name: '', phone: '', medHas: null, medText: '', goal: null, format: 'individual', note: '',
+  name: '', parentName: '', phone: '', medHas: null, medText: '', goal: null, format: 'individual', note: '',
   notice: null, interacted: false, touched: {}, outcome: null,
 };
 
@@ -85,6 +85,11 @@ export function reducer(state, a) {
     case 'goal': s.goal = a.goal; return s;
     case 'format': s.format = a.format; return s;
     case 'reset': return { ...initialState, interacted: true };
+    // "Book another": a parent booking a second child keeps the parent's name and phone; everything else clears.
+    case 'another': {
+      const keep = state.offer !== 'private' && state.audience === 'child' ? { parentName: state.parentName, phone: state.phone } : {};
+      return { ...initialState, interacted: true, ...keep };
+    }
     default: return state;
   }
 }

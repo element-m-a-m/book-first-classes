@@ -4,7 +4,12 @@
 //   node scripts/release.mjs 2.0.0 --root [dir]    also publish that release to the site root (default: repo root,
 //                                                  i.e. what GitHub Pages serves) - S6, only with approval
 //   node scripts/release.mjs --verify [dir]        verify the root against releases/<version>/manifest.json
+//   node scripts/release.mjs --retire 2.0.0        retire an old release: its index.html becomes a redirect to the
+//                                                  current page (query and hash kept); refuses the current version
 //
+// A retired release keeps its app files and its manifest.json, the record of the bytes it shipped; only its page is
+// replaced, so an old ad, bio or QR link lands on the current page and never goes dark. The original page stays
+// readable at the release's tag in the public repo.
 // The root keeps a small release.json { version, files } so the next publish removes exactly the old app files.
 import fs from 'fs';
 import path from 'path';
@@ -29,6 +34,32 @@ function verify(rootDir) {
 }
 
 if (args[0] === '--verify') { verify(argAfter('--verify') || '.'); process.exit(0); }
+
+export const RETIRED_PAGE = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <title>Element | אומנויות לחימה ותנועה</title>
+  <script>location.replace('../../' + location.search + location.hash);</script>
+  <meta http-equiv="refresh" content="0; url=../../">
+</head>
+<body><noscript><a href="../../">Element | אומנויות לחימה ותנועה</a></noscript></body>
+</html>
+`;
+
+if (args[0] === '--retire') {
+  const v = args[1];
+  if (!/^\d+\.\d+\.\d+(-[a-z]+)?$/.test(v || '')) { console.error('usage: release.mjs --retire <x.y.z[-suffix]>'); process.exit(1); }
+  const page = `releases/v${v}/index.html`;
+  if (!fs.existsSync(page)) { console.error(`${page} does not exist`); process.exit(1); }
+  const current = JSON.parse(fs.readFileSync('release.json', 'utf8')).version;
+  if (v === current) { console.error(`v${v} is the release the site serves now: retire it only after a newer release is at the root`); process.exit(1); }
+  if (fs.readFileSync(page, 'utf8') === RETIRED_PAGE) { console.log(`v${v} is already retired`); process.exit(0); }
+  fs.writeFileSync(page, RETIRED_PAGE);
+  console.log(`retired v${v}: ${page} now redirects to the current page`);
+  process.exit(0);
+}
 
 const version = args[0];
 if (!/^\d+\.\d+\.\d+$/.test(version || '')) { console.error('usage: release.mjs <x.y.z> [--root [dir]] | --verify [dir]'); process.exit(1); }

@@ -4,7 +4,8 @@ import { groupById } from './config/groups.js';
 import { slotOn } from './config/timetable.js';
 import { OFFERS } from './config/offers.js';
 import { dowOf } from './lib/civil-date.js';
-import { buildPayload, createSender, newSubmissionId, selectionHash } from './lib/events.js';
+import { buildPayload, newSubmissionId, selectionHash } from './lib/events.js';
+import { createOutbox } from './lib/outbox.js';
 import { createEmbed } from './lib/embed.js';
 import { resolveGroup } from './lib/params.js';
 import { waLink, groupWA, QUESTION_WA } from './lib/messages.js';
@@ -29,7 +30,8 @@ const IDLE_MS = 60000;
 
 export function App({ params, embedded }) {
   const [state, dispatch] = useReducer(reducer, initialState, (s) => withContext(s, { offer: params.offer, group: params.group }));
-  const [failed, setFailed] = useState(0);
+  const [, deliveryChanged] = useReducer((n) => n + 1, 0);
+  const doneKey = useRef(null);
   const [exitOpen, setExitOpen] = useState(false);
   const [idleOpen, setIdleOpen] = useState(false);
   const seen = useRef({ exit: false, idle: false });
@@ -42,12 +44,15 @@ export function App({ params, embedded }) {
   const subIds = useRef(new Map());
   const paymentChoices = useRef(new Set());
 
-  // Local previews never reach the production webhook: on localhost the sender records payloads in
-  // window.__ebDryRun instead. The e2e harness opts in (window.__EB_ALLOW_WEBHOOK__) and intercepts every request.
+  // Local previews never reach the production webhook: on localhost the outbox records payloads in
+  // window.__ebDryRun and answers ok itself. The e2e harness opts in (window.__EB_ALLOW_WEBHOOK__) and intercepts every request.
   const dryRun = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && !window.__EB_ALLOW_WEBHOOK__;
-  const sender = useMemo(() => createSender({
-    url: WEBHOOK_URL, onFailChange: setFailed,
-    fetchImpl: dryRun ? async (u, o) => { (window.__ebDryRun = window.__ebDryRun || []).push(JSON.parse(o.body)); } : undefined,
+  const sender = useMemo(() => createOutbox({
+    url: WEBHOOK_URL, onChange: deliveryChanged,
+    fetchImpl: dryRun ? async (u, o) => {
+      (window.__ebDryRun = window.__ebDryRun || []).push(JSON.parse(o.body));
+      return { status: 200, text: async () => JSON.stringify({ ok: true, key: 'dry-run', pending: false }) };
+    } : undefined,
   }), []);
   const ctx = useMemo(() => ({
     source: embedded ? 'embed' : 'standalone', host: location.hostname, utm: params.utm,
@@ -87,17 +92,18 @@ export function App({ params, embedded }) {
     if (!subIds.current.has(h)) subIds.current.set(h, newSubmissionId());
     return { ...base, submissionId: subIds.current.get(h), hash: h };
   }, []);
+  // Returns the event's outbox key, so a done screen can follow its own event.
   const fire = (event, snap) => sender.send(`${event}|${snap.submissionId}|${snap.hash}`, buildPayload(event, snap, ctx));
 
   const focusFirstError = (errs) => {
-    const id = errs.name ? 'eb-name' : errs.phone ? 'eb-phone' : null;
+    const id = errs.name ? 'eb-name' : errs.parentName ? 'eb-parent-name' : errs.phone ? 'eb-phone' : null;
     if (id) document.getElementById(id).focus();
     else if (errs.med) document.querySelector('input[name="med"]').focus();
   };
 
   const submitContact = () => {
-    const errs = contactErrors(state);
-    if (errs.name || errs.phone || errs.med) { dispatch({ type: 'touch', fields: { submit: true } }); setTimeout(() => focusFirstError(errs)); return; }
+    const errs = contactErrors(state, { child: state.audience === 'child' });
+    if (errs.name || errs.parentName || errs.phone || errs.med) { dispatch({ type: 'touch', fields: { submit: true } }); setTimeout(() => focusFirstError(errs)); return; }
     const snap = snapshot();
     fire('lead_started', snap);
     fire('checkout_reached', snap);
@@ -106,7 +112,7 @@ export function App({ params, embedded }) {
   const submitPrivate = () => {
     const errs = contactErrors(state, { medical: false });
     if (errs.name || errs.phone) { dispatch({ type: 'touch', fields: { submit: true } }); setTimeout(() => focusFirstError(errs)); return; }
-    fire('private_inquiry', snapshot());
+    doneKey.current = fire('private_inquiry', snapshot());
     dispatch({ type: 'go', step: 'pdone', outcome: 'private' });
     embed.complete('private');
   };
@@ -121,8 +127,8 @@ export function App({ params, embedded }) {
   };
   const callback = () => {
     const snap = snapshot();
-    fire('booking_callback', snap);
-    const text = groupWA({ name: state.name, e164: toE164(state.phone), groupLabel: group.label, isChild: state.audience === 'child',
+    doneKey.current = fire('booking_callback', snap);
+    const text = groupWA({ name: state.name, parentName: state.parentName, e164: toE164(state.phone), groupLabel: group.label, isChild: state.audience === 'child',
       medical: state.medHas ? (state.medText.trim() || 'לא פורט') : '', slots, offerId: state.offer });
     window.open(waLink(text), '_blank', 'noopener');   // synchronously inside the click, or popup blockers win
     dispatch({ type: 'go', step: 'done-callback', outcome: 'callback' });
@@ -164,7 +170,7 @@ export function App({ params, embedded }) {
   }, []);
 
   const go = (step) => dispatch({ type: 'go', step });
-  const restart = () => { subIds.current.clear(); paymentChoices.current.clear(); dispatch({ type: 'reset' }); };
+  const restart = () => { subIds.current.clear(); paymentChoices.current.clear(); dispatch({ type: 'another' }); };
   const Heading = useCallback(({ children }) => <h2 className="eb-h2" tabIndex={-1} ref={headingRef}>{children}</h2>, []);
   const common = { state, dispatch, Heading };
 
@@ -187,11 +193,11 @@ export function App({ params, embedded }) {
     case 'group': body = <Group {...common} next={() => go('dates')} />; break;
     case 'dates': body = <Dates {...common} nowMs={Date.now()} next={() => go('contact')} />; break;
     case 'contact': body = <Contact {...common} submit={submitContact} />; break;
-    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} restart={restart} failed={failed} retry={() => sender.retryFailed()} />; break;
-    case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} />; break;
+    case 'summary': body = <Summary {...common} group={group} slots={slots} pay={pay} callback={callback} restart={restart} failed={sender.failedCount()} retry={() => sender.retryFailed()} />; break;
+    case 'done-callback': body = <DoneCallback {...common} group={group} slots={slots} restart={restart} back={() => go('summary')} delivery={sender.statusOf(doneKey.current)} retry={() => sender.retryFailed()} />; break;
     case 'pgoal': body = <PrivateGoal {...common} next={() => go('pcontact')} />; break;
     case 'pcontact': body = <PrivateContact {...common} submit={submitPrivate} />; break;
-    case 'pdone': body = <PrivateDone {...common} restart={restart} />; break;
+    case 'pdone': body = <PrivateDone {...common} restart={restart} delivery={sender.statusOf(doneKey.current)} retry={() => sender.retryFailed()} />; break;
     default: body = null;
   }
 

@@ -5,6 +5,7 @@ import { waLink, privateWA } from '../lib/messages.js';
 import { toE164 } from '../lib/phone.js';
 import { Button, LinkButton, Choice, Field, Price, Icon, T } from '../ui/primitives.jsx';
 import { NameField, PhoneField, Privacy, contactErrors } from './Contact.jsx';
+import { DeliveryNote, deliveryHeading } from './Done.jsx';
 
 export function PrivateGoal({ state, dispatch, next, Heading }) {
   const p = state.goal && state.format ? pricesFor(state.goal, state.format) : null;
@@ -72,15 +73,17 @@ export function PrivateContact({ state, dispatch, submit, back, Heading }) {
   );
 }
 
-export function PrivateDone({ state, restart, Heading }) {
+export function PrivateDone({ state, restart, Heading, delivery, retry }) {
   const goal = goalById(state.goal);
   const fmt = FORMATS.find((f) => f.id === state.format);
   const text = privateWA({ name: state.name, e164: toE164(state.phone), goalLabel: goal ? goal.label : '', formatLabel: fmt ? fmt.label : '', note: state.note.trim() });
+  const sent = delivery === 'sent';
   return (
     <section className="eb-step eb-done">
-      <span className="eb-done__icon" aria-hidden="true"><Icon name="check" size={26} /></span>
-      <Heading>הפנייה נשלחה</Heading>
-      <p className="eb-lead">נחזור אליכם לתיאום.</p>
+      {sent && <span className="eb-done__icon" aria-hidden="true"><Icon name="check" size={26} /></span>}
+      <Heading>{deliveryHeading(delivery, 'הפנייה נשלחה')}</Heading>
+      <DeliveryNote delivery={delivery} retry={retry} />
+      {sent && <p className="eb-lead">נחזור אליכם לתיאום.</p>}
       <p className="eb-meta">רוצים להתחיל כבר עכשיו? אפשר גם לכתוב לנו בוואטסאפ.</p>
       <div className="eb-footer">
         <LinkButton variant="wa" href={waLink(text)}><Icon name="wa" size={16} /> המשך בוואטסאפ</LinkButton>

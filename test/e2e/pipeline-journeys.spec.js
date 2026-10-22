@@ -1,11 +1,13 @@
 // Records the webhook payloads the v2 widget really sends in each merged-checkout journey, driven through
 // the real UI. The Apps Script repo replays these goldens through the real Code.gs
 // (apps-script/test/merged-checkout.test.mjs), so the backend is tested with the widget's own bytes.
+// 2.2 records into golden/v2.2-pipeline/ (schema 3). golden/v2-pipeline/ stays frozen as 2.1.0's schema-2 record, which
+// the backend tests read, and which the website's copy still sends.
 // UPDATE_GOLDEN=1 re-records. Submission IDs and the test host are normalised; everything else is exact.
 import fs from 'fs';
 import path from 'path';
 import { test, expect } from '@playwright/test';
-import { openWidget, goldenPath } from './harness.js';
+import { openWidget, goldenPath, TEST_LEAD } from './harness.js';
 import { V2_URL, GROUPS_V2, groupJourney, heading, choose, press, waitEvents } from './v2-driver.js';
 
 function normalise(events) {
@@ -17,6 +19,7 @@ function normalise(events) {
 }
 
 const PAY = 'לחצו כאן לתשלום מאובטח';
+const GOLDEN_TREE = 'v2.2-pipeline';
 
 const JOURNEYS = {
   // Standalone, 3 classes: summary viewed, then the payment link.
@@ -87,7 +90,7 @@ for (const [name, run] of Object.entries(JOURNEYS)) {
     await page.waitForTimeout(300);
     expect(rec.blocked).toEqual([]);
     const events = normalise(rec.events);
-    const gp = goldenPath('v2-pipeline', name);
+    const gp = goldenPath(GOLDEN_TREE, name);
     if (process.env.UPDATE_GOLDEN) {
       fs.mkdirSync(path.dirname(gp), { recursive: true });
       fs.writeFileSync(gp, JSON.stringify({ journey: name, events }, null, 2) + '\n');
@@ -95,3 +98,16 @@ for (const [name, run] of Object.entries(JOURNEYS)) {
     expect(events).toEqual(JSON.parse(fs.readFileSync(gp, 'utf8')).events);
   });
 }
+
+// Schema 3 on the recorded bytes: a child booking carries the child's full name in `name` and the parent's in
+// `parentName`. The same check run over 2.1.0's frozen golden must fail, or it proves nothing.
+export function isSchema3Child(golden) {
+  const kids = golden.events.filter((e) => e.audience === 'child');
+  return kids.length > 0 && kids.every((e) => e.schema === 3 && e.name === TEST_LEAD.name && e.parentName === TEST_LEAD.parentName);
+}
+
+test('the recorded child golden is schema 3 with both names; 2.1.0\'s frozen golden fails the same check', () => {
+  const read = (tree) => JSON.parse(fs.readFileSync(goldenPath(tree, 'book-another-second-child'), 'utf8'));
+  expect(isSchema3Child(read(GOLDEN_TREE))).toBe(true);
+  expect(isSchema3Child(read('v2-pipeline'))).toBe(false);
+});

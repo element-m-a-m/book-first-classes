@@ -13,7 +13,7 @@ export const GROUPS = [
     desc: 'פיתוח טכניקה, כוח גופני וחוסן נפשי', coach: 'שי אלמסי' },
   { id: 'youth-12-15', label: 'נוער 12-15', audience: 'child', track: 'martial',
     desc: 'אתגר, משמעת, ביטחון עצמי וכושר גופני', coach: 'ליאור ורדי' },
-  { id: 'adults-16-37', label: 'בוגרים 16-37', audience: 'self', track: 'martial',
+  { id: 'adults-16-37', label: 'בוגרים 16-40', audience: 'self', track: 'martial',
     desc: 'טכניקה, כוח, התמדה ומיינדסט לחימתי', coach: 'ליאור ורדי' },
   { id: 'adults-38-58', label: 'כושר ולחימה לגילאי 40+', audience: 'self', track: 'martial', tag: 'ייחודי',
     desc: 'שילוב ייחודי של כושר, בריאות ואומנויות לחימה', coach: 'מנדי סטנדר' },

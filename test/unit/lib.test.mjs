@@ -81,26 +81,6 @@ test('payload: private inquiry carries goal, format and note; never dates', () =
   assert.ok(!('dates' in p) && !('slots' in p));
 });
 
-test('sender: serial order, retry on network failure, dedup by key', async () => {
-  const seen = [];
-  let failOnce = true;
-  const s = ev.createSender({ url: 'u', backoffMs: 1, fetchImpl: async (u, o) => {
-    const e = JSON.parse(o.body).event;
-    if (e === 'a' && failOnce) { failOnce = false; throw new TypeError('network'); }
-    await new Promise((r) => setTimeout(r, e === 'a' ? 20 : 0));
-    seen.push(e);
-  } });
-  s.send('k1', { event: 'a' });
-  s.send('k2', { event: 'b' });
-  s.send('k1', { event: 'a' });
-  await s.idle();
-  assert.deepEqual(seen, ['a', 'b']);
-  const dead = ev.createSender({ url: 'u', backoffMs: 1, retries: 1, fetchImpl: async () => { throw new TypeError('down'); } });
-  dead.send('x', { event: 'x' });
-  await dead.idle();
-  assert.equal(dead.failedCount(), 1);
-});
-
 test('flow: changing group clears dates with a notice; audience change clears a mismatched group', () => {
   let s = fl.withContext(fl.initialState, { offer: 'trial3', group: 'kids-6-8' });
   assert.equal(s.step, 'group');

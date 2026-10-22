@@ -92,7 +92,7 @@ bdi { unicode-bidi: isolate; }
 .eb-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 /* choice cards (native radios) */
-.eb-choices, .eb-segment, .eb-health { border: 0; margin: 0; padding: 0; min-inline-size: 0; display: grid; gap: 8px; }
+.eb-choices, .eb-segment, .eb-health, .eb-person { border: 0; margin: 0; padding: 0; min-inline-size: 0; display: grid; gap: 8px; }
 .eb-choice { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--surface);
   border: 1.5px solid var(--line); border-radius: var(--radius-card); cursor: pointer; transition: border-color .15s, background .15s; }
 .eb-choice:hover { border-color: var(--line-strong); }

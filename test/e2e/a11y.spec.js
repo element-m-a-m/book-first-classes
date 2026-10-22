@@ -40,7 +40,7 @@ for (const [w, h] of VIEWPORTS) {
     await press(page, 'המשך');
     await press(page, 'המשך לסיכום');
     await audit(page, '04-contact-errors', w, 'standalone');
-    await fillContact(page);
+    await fillContact(page, { child: true });
     await press(page, 'המשך לסיכום');
     await expect(heading(page)).toHaveText('סיכום והרשמה');
     await audit(page, '05-summary', w, 'standalone');

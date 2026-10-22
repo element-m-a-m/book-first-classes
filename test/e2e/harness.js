@@ -10,15 +10,20 @@ import fs from 'fs';
 import path from 'path';
 
 export const FIXED_NOW = new Date('2026-10-05T10:00:00+03:00'); // Monday
-export const TEST_LEAD = { name: 'בדיקה אוטומטית', phone: '050-0000000' };
+export const TEST_LEAD = { name: 'בדיקה אוטומטית', parentName: 'הורה בדיקה', phone: '050-0000000' };
 
 const UMD = {
   'https://unpkg.com/react@18/umd/react.production.min.js': 'node_modules/react/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js': 'node_modules/react-dom/umd/react-dom.production.min.js',
 };
 
-export async function openWidget(page, url, { now = FIXED_NOW, host = false } = {}) {
-  const rec = { events: [], opened: [], payments: [], blocked: [], steps: [] };
+// The backend's answer (v17 onward). A test passes `answer(event, attempt, rec)`, sync or
+// async, returning {status, body, contentType} or {abort: true}; returning a promise holds the request open until it
+// settles. The answer carries Access-Control-Allow-Origin, as Apps Script's does, so the page can read it.
+export const OK_ANSWER = (ev) => ({ body: { ok: true, key: `${ev.submissionId}|${ev.event}`, pending: false } });
+
+export async function openWidget(page, url, { now = FIXED_NOW, host = false, answer = OK_ANSWER } = {}) {
+  const rec = { events: [], opened: [], payments: [], blocked: [], steps: [], attempts: {} };
   // Native target=_blank payment links create a new page; its first request needs a context route.
   await page.context().route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, async (route) => {
     const url = route.request().url();
@@ -38,8 +43,17 @@ export async function openWidget(page, url, { now = FIXED_NOW, host = false } = 
   await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, async (route) => {
     const req = route.request(), u = req.url();
     if (u.startsWith('https://script.google.com/')) {
-      rec.events.push(JSON.parse(req.postData() || '{}'));
-      return route.fulfill({ status: 200, contentType: 'text/plain', body: 'ok' });
+      const ev = JSON.parse(req.postData() || '{}');
+      rec.events.push(ev);
+      const k = `${ev.submissionId}|${ev.event}`;
+      rec.attempts[k] = (rec.attempts[k] || 0) + 1;
+      const a = (await answer(ev, rec.attempts[k], rec)) || OK_ANSWER(ev);
+      try {
+        if (a.abort) return await route.abort('failed');
+        const body = typeof a.body === 'string' ? a.body : JSON.stringify(a.body);
+        return await route.fulfill({ status: a.status || 200, contentType: a.contentType || 'application/json',
+          headers: { 'access-control-allow-origin': '*' }, body });
+      } catch (e) { return undefined; } // the page gave up on this request (its timeout) before the answer came
     }
     if (UMD[u]) return route.fulfill({ status: 200, contentType: 'text/javascript', body: fs.readFileSync(UMD[u]) });
     if (u.startsWith('https://fonts.googleapis.com/')) return route.fulfill({ status: 200, contentType: 'text/css', body: '' });
@@ -100,4 +114,5 @@ export async function pickDays(page, n) {
   }
 }
 
+// golden/legacy/ was recorded by the retired parity suite (v1); it stays as the backend's frozen fixtures.
 export function goldenPath(tree, name) { return path.join('test', 'e2e', 'golden', tree, `${name}.json`); }

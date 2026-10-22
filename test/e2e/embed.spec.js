@@ -38,7 +38,8 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   await frame.getByRole('button', { name: 'המשך לבחירת מועדים' }).click();
   for (let i = 0; i < 2; i++) await frame.locator('button.eb-cal__day.is-open:not(.is-selected)').nth(1).click();
   await frame.getByRole('button', { name: 'המשך', exact: true }).click();
-  await frame.getByLabel('שם מלא').fill(TEST_LEAD.name);
+  await frame.getByLabel('שם מלא של הילד/ה').fill(TEST_LEAD.name);
+  await frame.getByLabel('שם מלא של ההורה').fill(TEST_LEAD.parentName);
   await frame.getByLabel('טלפון נייד').fill(TEST_LEAD.phone);
   await frame.locator('label.eb-choice', { has: frame.getByRole('radio', { name: 'הכל תקין' }) }).click();
   await frame.getByRole('button', { name: 'המשך לסיכום' }).click();
@@ -55,7 +56,7 @@ test('v2: URL params preselect offer and group (not skip); utm travels; messages
   expect(steps).toEqual(['group', 'dates', 'contact', 'summary']);
   expect(v2(all, 'complete')).toEqual([{ ns: 'element:booking', v: 2, type: 'complete', outcome: 'selfbook' }]);
   const text = JSON.stringify(all);
-  for (const pii of [TEST_LEAD.name, '0500000000', '050-0000000', '+972500000000', '500000000']) expect(text).not.toContain(pii);
+  for (const pii of [TEST_LEAD.name, TEST_LEAD.parentName, '0500000000', '050-0000000', '+972500000000', '500000000']) expect(text).not.toContain(pii);
 });
 
 test('v2: parent setContext applies before interaction, is ignored after it', async ({ page }) => {
